@@ -14,7 +14,7 @@ from copy import copy, deepcopy
 
 
 
-script_dir = r'E:\Documents\05.PYTHON\Projects\san_report_automation\san_tmp_scipts'
+script_dir = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts'
 # Change the current working directory
 os.chdir(script_dir)
 
@@ -157,11 +157,11 @@ gauge_license = Gauge('licenses', 'Licenses installed on the switch', ['license_
 
 # sw_telemetry = ost_6510_07_f1
 # sw_telemetry = copy(o3_g630_003_vc01_f1)
-# sw_telemetry = copy(san03_nord)
+sw_telemetry = copy(san03_nord)
 # sw_telemetry = copy(n3_g620_005_vc5_f1)
 # sw_telemetry = o3_g620_107_vc01_f1
 # sw_telemetry = san49_nord
-sw_telemetry = san23_ost
+# sw_telemetry = san23_ost
 
 
 ch_parser = BrocadeChassisParser(sw_telemetry)

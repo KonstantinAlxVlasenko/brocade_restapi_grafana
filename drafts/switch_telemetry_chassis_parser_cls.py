@@ -37,8 +37,11 @@ class BrocadeChassisParser:
         self._chassis = self._get_chassis_value()
         if self.chassis:
             self._get_switch_value()
-            self._get_vf_mode()
-            self._get_timezone_value()
+            self._set_vf_mode()
+            self._set_date_time()
+            self._set_timezone()
+            self._set_switch_sn()
+            self._set_switch_model()
         self._ntp_server = self._get_ntp_server_value()
         self._sw_license = self._get_license_value()
         
@@ -56,23 +59,47 @@ class BrocadeChassisParser:
         if self.sw_telemetry.chassis.get('Response'):
             container = self.sw_telemetry.chassis['Response']['chassis']
             chassis_dct = {key: container[key] for key in BrocadeChassisParser.CHASSIS_LEAFS}
-            # leading 'Brocade' is added to the switch model  
-            if chassis_dct.get('product-name'):
-                chassis_dct['product-name'] = 'Brocade ' + chassis_dct['product-name'].capitalize()
-            # date is splitted to date and time
-            if chassis_dct.get('date'):
-                chassis_dct['date'], chassis_dct['time'] = chassis_dct['date'].split('-')
-            else:
-                chassis_dct['time'] = None
-            # switch serial number is OEM serial number otherwise Brocade serial number 
-            chassis_dct['switch-serial-number'] = \
-                chassis_dct['vendor-serial-number'] if chassis_dct.get('vendor-serial-number') else chassis_dct.get('serial-number')
+            # # leading 'Brocade' is added to the switch model  
+            # if chassis_dct.get('product-name'):
+            #     chassis_dct['product-name'] = 'Brocade ' + chassis_dct['product-name'].capitalize()
+            # # date is splitted to date and time
+            # if chassis_dct.get('date'):
+            #     chassis_dct['date'], chassis_dct['time'] = chassis_dct['date'].split('-')
+            # else:
+            #     chassis_dct['time'] = None
+            
+            # # switch serial number is OEM serial number otherwise Brocade serial number 
+            # chassis_dct['switch-serial-number'] = \
+            #     chassis_dct['vendor-serial-number'] if chassis_dct.get('vendor-serial-number') else chassis_dct.get('serial-number')
         else:
             chassis_dct = {}
         return chassis_dct
 
 
-    def _get_vf_mode(self) -> None:
+    def _set_switch_sn(self) -> None:
+        
+        # switch serial number is OEM serial number otherwise Brocade serial number 
+        self.chassis['switch-serial-number'] = \
+            self.chassis['vendor-serial-number'] if self.chassis.get('vendor-serial-number') else self.chassis.get('serial-number')
+
+
+    def _set_switch_model(self) -> None:
+        
+        # leading 'Brocade' is added to the switch model  
+        if self.chassis.get('product-name'):
+            self.chassis['product-name'] = 'Brocade ' + self.chassis['product-name'].capitalize()
+
+    
+    def _set_date_time(self) -> None:
+
+        # date is splitted to date and time
+        if self.chassis.get('date'):
+            self.chassis['date'], self.chassis['time'] = self.chassis['date'].split('-')
+        else:
+            self.chassis['time'] = None
+
+
+    def _set_vf_mode(self) -> None:
         """
         Method adds virtual fabrics mode and logical switch number
         to the chassis parameters attribute.
@@ -118,11 +145,11 @@ class BrocadeChassisParser:
                     # switchType
                     self.chassis['model'] = fc_sw['model']
         # logical switch number
-        # if vf is disabled 'ls-number' is redefined as 0 in '_get_vf_mode' method
+        # if vf is disabled 'ls-number' is redefined as 0 in '_set_vf_mode' method
         self.chassis['ls-number'] = len(self.sw_telemetry.fc_switch.items())
                     
 
-    def _get_timezone_value(self) -> None:
+    def _set_timezone(self) -> None:
         """
         Method adds timezone to the chassis parameters attribute.
         If timezone is not defined hourOffset and minuteOffset are added as timezone.
