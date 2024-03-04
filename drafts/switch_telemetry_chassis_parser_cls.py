@@ -11,7 +11,7 @@ from typing import List, Dict, Union
 
 class BrocadeChassisParser:
     """
-    Class to create chassis level parameters dictionaries.
+    Class to create chassis level parameters dictionaries and license list.
 
 
     Attributes:
@@ -27,14 +27,14 @@ class BrocadeChassisParser:
                      'vf-supported', 'max-blades-supported']
     
     
-    def __init__(self, sw_telemetry):
+    def __init__(self, sw_telemetry: dict):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry = sw_telemetry
-        self._chassis = self._get_chassis_value()
+        self._sw_telemetry: dict = sw_telemetry
+        self._chassis: dict = self._get_chassis_value()
         if self.chassis:
             self._get_switch_value()
             self._set_vf_mode()
@@ -42,8 +42,8 @@ class BrocadeChassisParser:
             self._set_timezone()
             self._set_switch_sn()
             self._set_switch_model()
-        self._ntp_server = self._get_ntp_server_value()
-        self._sw_license = self._get_license_value()
+        self._ntp_server: dict = self._get_ntp_server_value()
+        self._sw_license: list = self._get_license_value()
         
 
     def _get_chassis_value(self) -> Dict[str, Union[str, int, bool]]:
@@ -55,42 +55,47 @@ class BrocadeChassisParser:
             Dictionary keys are CHASSIS_LEAFS. 
         """
         
-        
         if self.sw_telemetry.chassis.get('Response'):
             container = self.sw_telemetry.chassis['Response']['chassis']
             chassis_dct = {key: container[key] for key in BrocadeChassisParser.CHASSIS_LEAFS}
-            # # leading 'Brocade' is added to the switch model  
-            # if chassis_dct.get('product-name'):
-            #     chassis_dct['product-name'] = 'Brocade ' + chassis_dct['product-name'].capitalize()
-            # # date is splitted to date and time
-            # if chassis_dct.get('date'):
-            #     chassis_dct['date'], chassis_dct['time'] = chassis_dct['date'].split('-')
-            # else:
-            #     chassis_dct['time'] = None
-            
-            # # switch serial number is OEM serial number otherwise Brocade serial number 
-            # chassis_dct['switch-serial-number'] = \
-            #     chassis_dct['vendor-serial-number'] if chassis_dct.get('vendor-serial-number') else chassis_dct.get('serial-number')
         else:
             chassis_dct = {}
         return chassis_dct
 
 
     def _set_switch_sn(self) -> None:
+        """"
+        Method sets switch serial number.
+        Switch serial number is OEM serial number otherwise Brocade serial number.
         
-        # switch serial number is OEM serial number otherwise Brocade serial number 
+        Returns:
+            None
+        """
+        
         self.chassis['switch-serial-number'] = \
             self.chassis['vendor-serial-number'] if self.chassis.get('vendor-serial-number') else self.chassis.get('serial-number')
 
 
     def _set_switch_model(self) -> None:
+        """"
+        Method updates product name parameter by adding leading 'Brocade' to the switch model.
         
-        # leading 'Brocade' is added to the switch model  
+        Returns:
+            None
+        """
+         
         if self.chassis.get('product-name'):
             self.chassis['product-name'] = 'Brocade ' + self.chassis['product-name'].capitalize()
 
     
     def _set_date_time(self) -> None:
+        """"
+        Method sets date and time parameters telemetry was retrieved 
+        by splitting date parameter to date and time.
+        
+        Returns:
+            None
+        """
 
         # date is splitted to date and time
         if self.chassis.get('date'):
@@ -101,7 +106,7 @@ class BrocadeChassisParser:
 
     def _set_vf_mode(self) -> None:
         """
-        Method adds virtual fabrics mode and logical switch number
+        Method sets virtual fabrics mode and logical switch quantity
         to the chassis parameters attribute.
         
         Returns:
@@ -113,7 +118,7 @@ class BrocadeChassisParser:
             self.chassis['virtual-fabrics'] = 'Not Applicable'
             self.chassis['ls-number'] = 0
         else: 
-            # if virtual mode is enabled ls number is calculated by '_get_switch_value' method
+            # if virtual mode is enabled ls qunatity is calculated by '_get_switch_value' method
             if self.chassis['vf-enabled'] is True:
                 self.chassis['virtual-fabrics'] = 'Enabled'
             # if virtual mode is disabled ls number is 0
@@ -129,7 +134,7 @@ class BrocadeChassisParser:
     def _get_switch_value(self) -> None:
         """
         Method adds firmware version, swith type (model) and
-        logical switch number to the chassis parameters attribute.
+        logical switch quantity to the chassis parameters attribute from fc_switch atrribute of sw_telemetry.
         
         Returns:
             None. 
@@ -137,10 +142,10 @@ class BrocadeChassisParser:
 
         for fc_switch_telemetry in self.sw_telemetry.fc_switch.values():
             if fc_switch_telemetry.get('Response'):
-                
+                # list if switches
                 fc_sw_container_lst = fc_switch_telemetry['Response']['fibrechannel-switch']
-                
                 for fc_sw in fc_sw_container_lst:
+                    # fos
                     self.chassis['firmware-version'] = fc_sw['firmware-version']
                     # switchType
                     self.chassis['model'] = fc_sw['model']

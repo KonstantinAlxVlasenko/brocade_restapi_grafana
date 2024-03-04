@@ -6,15 +6,6 @@ Created on Mon Feb 12 16:57:29 2024
 """
 
 
-# import os
-
-# script_dir = r'C:\Users\kavlasenko\Documents\05.PYTHON\Projects\san_report_automation\san_tmp_scipts'
-# # Change the current working directory
-# os.chdir(script_dir)
-# from switch_telemetry_cls import BrocadeSwitchTelemetry
-
-
-
 from typing import List, Dict, Union
 from datetime import datetime
 
