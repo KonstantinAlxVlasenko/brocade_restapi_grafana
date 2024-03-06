@@ -6,8 +6,10 @@ Created on Wed Jan 31 17:35:13 2024
 """
 
 import re
-from typing import List, Dict, Union, Optional
 from collections import defaultdict
+from typing import Dict, List, Optional, Union
+
+from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
 class BrocadeMAPSParser:
@@ -43,13 +45,13 @@ class BrocadeMAPSParser:
     DB_RULE_IGNORE = ['CLEAR', 'UNQUAR', 'STATE_IN', 'STATE_ON', 'STATE_UP', 'BALANCED']
 
     
-    def __init__(self, sw_telemetry: dict):
+    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry: dict = sw_telemetry
+        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._maps_config: dict = self._get_maps_policy_value()
         self._get_maps_actions_value()
         self._ssp_report: list = self._get_ssp_report_value()

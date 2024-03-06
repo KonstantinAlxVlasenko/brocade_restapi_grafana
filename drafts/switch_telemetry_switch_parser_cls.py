@@ -6,8 +6,10 @@ Created on Tue Feb  6 13:36:35 2024
 """
 
 import re
-from typing import List, Dict, Union, Tuple
 from collections import defaultdict
+from typing import Dict, List, Tuple, Union
+
+from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
 class BrocadeSwitchParser:
@@ -35,13 +37,13 @@ class BrocadeSwitchParser:
                           'switch-user-friendly-name', 'path-count', 'firmware-version']
 
     
-    def __init__(self, sw_telemetry: dict):
+    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry: dict = sw_telemetry
+        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         # self._fc_switch, self._vfid_name = self._get_fc_switch_value()
         self._fc_switch: dict = self._get_fc_switch_value()
         if self.fc_switch:
@@ -174,8 +176,11 @@ class BrocadeSwitchParser:
             for sw_mode_bin in sw_modes_bin:
                 # drop 'enabled' or 'status' endings from the switch mode title
                 sw_mode_hrf = re.search(r'(.+?)(?:-enabled|-status)', sw_mode_bin).group(1)
-                # repplace binary value to the 'Enabled' or 'Disabled' string
-                sw_params_dct[sw_mode_hrf] = state_dct.get(sw_params_dct[sw_mode_bin], 'Unknown')
+                # replace binary value to the 'Enabled' or 'Disabled' string
+                if sw_params_dct[sw_mode_bin] is None:
+                    sw_params_dct[sw_mode_hrf] = None
+                else:
+                    sw_params_dct[sw_mode_hrf] = state_dct.get(sw_params_dct[sw_mode_bin], 'Unknown')
 
 
     def _set_switch_state(self) -> None:

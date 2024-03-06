@@ -30,6 +30,7 @@ from switch_telemetry_sensor_parser_cls import BrocadeFRUParser
 from switch_telemetry_maps_parser_cls import BrocadeMAPSParser
 from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
 from switch_telemetry_heartbeat_cls import BrocadeRequestStatus
+from brocade_switchshow_cls import BrocadeFCPortParametersParser
     
     
     
@@ -170,6 +171,10 @@ maps_config = BrocadeMAPSParser(sw_telemetry)
 maps_config2 = BrocadeMAPSParser(sw_telemetry)
 sw_parser = BrocadeSwitchParser(sw_telemetry)
 heartbeat = BrocadeRequestStatus(sw_telemetry)
+
+switchshow = BrocadeFCPortParametersParser(sw_telemetry, sw_parser)
+
+print(switchshow.port_status[128]['0/0']['nodevice-enabled-port'] )
 
 heartbeat.request_status
 

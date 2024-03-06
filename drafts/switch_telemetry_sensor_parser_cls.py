@@ -4,7 +4,9 @@ Created on Tue Jan 30 17:45:30 2024
 
 @author: kavlasenko
 """
-from typing import List, Dict, Union, Tuple
+from typing import Dict, List, Tuple, Union
+
+from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
 class BrocadeFRUParser:
@@ -36,13 +38,13 @@ class BrocadeFRUParser:
                  'faulty': 6}
     
 
-    def __init__(self, sw_telemetry: dict):
+    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry: dict = sw_telemetry
+        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._fru_ps: list = self._get_ps_value()
         self._fru_fan: list = self._get_fan_value()
         

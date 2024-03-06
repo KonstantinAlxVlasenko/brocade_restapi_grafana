@@ -5,8 +5,10 @@ Created on Tue Feb 20 15:19:38 2024
 @author: kavlasenko
 """
 
-from datetime import datetime, date
-from typing import List, Dict, Union
+from datetime import date, datetime
+from typing import Dict, List, Union
+
+from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
 class BrocadeChassisParser:
@@ -27,13 +29,13 @@ class BrocadeChassisParser:
                      'vf-supported', 'max-blades-supported']
     
     
-    def __init__(self, sw_telemetry: dict):
+    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry: dict = sw_telemetry
+        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._chassis: dict = self._get_chassis_value()
         if self.chassis:
             self._get_switch_value()

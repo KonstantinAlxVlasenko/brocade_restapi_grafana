@@ -6,10 +6,11 @@ Created on Mon Feb 12 16:57:29 2024
 """
 
 
-from typing import List, Dict, Union
 from datetime import datetime
+from typing import Dict, List, Union
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+
 
 class BrocadeRequestStatus:
     """
@@ -39,10 +40,10 @@ class BrocadeRequestStatus:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry = sw_telemetry
-        self._date = datetime.now().strftime("%d/%m/%Y")
-        self._time = datetime.now().strftime("%H:%M:%S")
-        self._request_status = self._get_request_status()
+        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        self._date: datetime = datetime.now().strftime("%d/%m/%Y")
+        self._time: datetime = datetime.now().strftime("%H:%M:%S")
+        self._request_status: dict = self._get_request_status()
         
         
     def _get_request_status(self) -> List[Dict[str, Union[str, int]]]:
@@ -137,7 +138,6 @@ class BrocadeRequestStatus:
         
     def __repr__(self):
         return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
-    
     
 
     @property
