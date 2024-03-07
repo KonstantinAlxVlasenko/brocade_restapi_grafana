@@ -31,6 +31,7 @@ from switch_telemetry_maps_parser_cls import BrocadeMAPSParser
 from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
 from switch_telemetry_heartbeat_cls import BrocadeRequestStatus
 from brocade_switchshow_cls import BrocadeFCPortParametersParser
+from brocade_sfp_media_parser_cls import BrocadeSFPMediaParser
     
     
     
@@ -157,8 +158,8 @@ gauge_license = Gauge('licenses', 'Licenses installed on the switch', ['license_
 
 
 # sw_telemetry = ost_6510_07_f1
-# sw_telemetry = copy(o3_g630_003_vc01_f1)
-sw_telemetry = copy(san03_nord)
+sw_telemetry = copy(o3_g630_003_vc01_f1)
+# sw_telemetry = copy(san03_nord)
 # sw_telemetry = copy(n3_g620_005_vc5_f1)
 # sw_telemetry = o3_g620_107_vc01_f1
 # sw_telemetry = san49_nord
@@ -171,12 +172,9 @@ maps_config = BrocadeMAPSParser(sw_telemetry)
 maps_config2 = BrocadeMAPSParser(sw_telemetry)
 sw_parser = BrocadeSwitchParser(sw_telemetry)
 heartbeat = BrocadeRequestStatus(sw_telemetry)
+fcport_params_parser = BrocadeFCPortParametersParser(sw_telemetry, sw_parser)
+sfp_media_parser = BrocadeSFPMediaParser(sw_telemetry, fcport_params_parser)
 
-switchshow = BrocadeFCPortParametersParser(sw_telemetry, sw_parser)
-
-print(switchshow.port_status[128]['0/0']['nodevice-enabled-port'] )
-
-heartbeat.request_status
 
 
 ch_parser.ch_name

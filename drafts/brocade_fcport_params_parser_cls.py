@@ -54,7 +54,7 @@ class BrocadeFCPortParametersParser:
         self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._sw_parser: BrocadeSwitchParser = sw_parser
         self._port_owner = self._get_ports_owner()
-        self._port_status = self. _get_portstatus_value()
+        self._fcport_params = self. _get_port_params_values()
 
 
     def _get_ports_owner(self) -> Dict[str, Union[int, str]]:
@@ -62,7 +62,7 @@ class BrocadeFCPortParametersParser:
         Method creates ports owner (switchname) dictionary.
         
         Returns:
-            Dictonary with port name as key and switchname to which port belongs to as value.
+            dict: Dictonary with port name as key and switchname to which port belongs to as value.
         """
 
         port_owner_dct = {}
@@ -75,24 +75,24 @@ class BrocadeFCPortParametersParser:
         return port_owner_dct
     
     
-    def _get_portstatus_value(self) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
+    def _get_port_params_values(self) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
         """
         Method retrieves each fc port parameters and status.
         
         Returns:
-            FC port parameters. Dictionary of dictionaries of dictionaries.
-            External dictionary keys are vf_ids (if vf mode is disabled then vf-id is -1).
-            First level nested dictionary keys are slot_port_numbers.
-            Second level nested dictionary keys are fc port parameters names.
+            dict: FC port parameters. Dictionary of dictionaries of dictionaries.
+                External dictionary keys are vf_ids (if vf mode is disabled then vf-id is -1).
+                First level nested dictionary keys are slot_port_numbers.
+                Second level nested dictionary keys are fc port parameters names.
         """
         
-        port_status_dct = {}
+        fcport_params_dct = {}
 
         for vf_id, fc_interface_telemetry in self.sw_telemetry.fc_interface.items():
             if fc_interface_telemetry.get('Response'):
                 # list with fc_interface containers for the each port in the vf_id switch
                 fc_interface_container_lst = fc_interface_telemetry['Response']['fibrechannel']
-                port_status_dct[vf_id] = {}
+                fcport_params_dct[vf_id] = {}
                 
                 for fc_interface_container in fc_interface_container_lst:
                     # slot_port_number in the format 'slot_number/port_number' (e.g. '0/1')
@@ -121,7 +121,7 @@ class BrocadeFCPortParametersParser:
                     nodevice_enabled_port_flag = BrocadeFCPortParametersParser._get_nodevice_enabled_port_flag(fc_interface_container)
 
                     # create dictionary with current port parameters 
-                    port_status_current_dct = {
+                    fcport_params_current_dct = {
                         'swicth-name': sw_name,
                         'vf-id': vf_id,
                         'port-index': fc_interface_container['default-index'],
@@ -129,7 +129,7 @@ class BrocadeFCPortParametersParser:
                         'port-number': int(port_number),
                         'port-name': port_name,
                         'port-id': port_fcid, 
-                        'port-speed-hrf': port_speed,
+                        'link-speed': port_speed,
                         'port-max-speed-gbps': port_max_speed,
                         'physical-state': physical_state,
                         'port-type': BrocadeFCPortParametersParser.PORT_TYPE_ID.get(fc_interface_container['port-type'], fc_interface_container['port-type']),
@@ -138,11 +138,11 @@ class BrocadeFCPortParametersParser:
                         'nodevice-enabled-port': nodevice_enabled_port_flag
                         }
                     # dictionary with unchanged values from fc_interface_container
-                    port_status_current_default_dct = {leaf: fc_interface_container.get(leaf) for leaf in BrocadeFCPortParametersParser.FC_INTERFACE_LEAFS}
-                    port_status_current_dct.update(port_status_current_default_dct)
+                    fcport_params_current_default_dct = {leaf: fc_interface_container.get(leaf) for leaf in BrocadeFCPortParametersParser.FC_INTERFACE_LEAFS}
+                    fcport_params_current_dct.update(fcport_params_current_default_dct)
                     # add current port status dictionary to the summary port status dictionary with vf_id and slot_port as consecutive keys
-                    port_status_dct[vf_id][fc_interface_container['name']] = port_status_current_dct
-        return port_status_dct
+                    fcport_params_dct[vf_id][fc_interface_container['name']] = fcport_params_current_dct
+        return fcport_params_dct
 
 
     @staticmethod
@@ -151,11 +151,11 @@ class BrocadeFCPortParametersParser:
         Method to check if fc port is enabled but has no device connected. 
         
         Args:
-            fc_interface_container: container with fc port parameters leafs.
+            fc_interface_container {dict}: container with fc port parameters leafs.
         
         Returns:
-            1 if fc port is enabled but has no device connected.
-            0 in all other cases.
+            int: 1 if fc port is enabled but has no device connected.
+                0 in all other cases.
         """
 
         if fc_interface_container['is-enabled-state'] and not fc_interface_container['neighbor']:
@@ -171,11 +171,11 @@ class BrocadeFCPortParametersParser:
         (online, offline, ,faulty, no_module, laser_flt, no_light, no_sync, in_sync, mod_inv, mod_val etc). 
         
         Args:
-            fc_interface_container: container with fc port parameters leafs.
+            fc_interface_container {dict}: container with fc port parameters leafs.
         
         Returns:
-            Physical state of the port 
-            (online, offline, ,faulty, no_module, laser_flt, no_light, no_sync, in_sync, mod_inv, mod_val etc).
+            str: Physical state of the port 
+                (online, offline, ,faulty, no_module, laser_flt, no_light, no_sync, in_sync, mod_inv, mod_val etc).
         """  
 
         if fc_interface_container.get('physical-state'):
@@ -192,10 +192,10 @@ class BrocadeFCPortParametersParser:
         Method to get port enable status ('Enabled', 'Disabled', 'Disabled (Persistent)'). 
         
         Args:
-            fc_interface_container: container with fc port parameters leafs.
+            fc_interface_container {dict}: container with fc port parameters leafs.
         
         Returns:
-            Port enable status ('Enabled', 'Disabled', 'Disabled (Persistent)')
+            str: Port enable status ('Enabled', 'Disabled', 'Disabled (Persistent)')
         """        
 
         if fc_interface_container['is-enabled-state'] is None:
@@ -214,11 +214,11 @@ class BrocadeFCPortParametersParser:
         Method to get slot_port_number switchname owner.
         
         Args:
-            slot_port_number: slot and port number in the format'slot/port' (e.g. '0/1').
-            vf_id: switch vf_id.
+            slot_port_number {str}: slot and port number in the format'slot/port' (e.g. '0/1').
+                                    vf_id: switch vf_id.
         
         Returns:
-            Switchname to which port belongs to.
+            str: Switchname to which port belongs to.
         """
 
         if self.port_owner:
@@ -236,11 +236,11 @@ class BrocadeFCPortParametersParser:
         Method to label the port_speed value with leading 'N' or closing 'G' based on the auto-negotiate mode.
         
         Args:
-            port_speed: port speed value in gbps.
-            auto_negotiate_mode: auto-negotiate mode off(0), on (1).
+            port_speed {int}: port speed value in gbps.
+            auto_negotiate_mode {int}: auto-negotiate mode off(0), on (1).
         
         Returns:
-            String in format 'Nx' or 'xG'.
+            str: String in format 'Nx' or 'xG'.
         """
 
         if port_speed is None:
@@ -269,5 +269,5 @@ class BrocadeFCPortParametersParser:
     
 
     @property
-    def port_status(self):
-        return self._port_status
+    def fcport_params(self):
+        return self._fcport_params
