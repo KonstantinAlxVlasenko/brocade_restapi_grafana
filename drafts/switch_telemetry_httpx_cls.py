@@ -218,6 +218,9 @@ class BrocadeSwitchTelemetry:
     def _get_sw_telemetry(self, client, module_name: str, module_type: str, vf_id: int=None):
 
         url = self._create_restapi_url(module_name, module_type)
+
+        # print(url)
+
         params = {'vf-id': vf_id} if vf_id else {}
         
         try:
@@ -233,7 +236,7 @@ class BrocadeSwitchTelemetry:
             current_telemetry['date'] = datetime.now().strftime("%d/%m/%Y")
             current_telemetry['time'] = datetime.now().strftime("%H:%M:%S")
             
-            print(response.status_code)
+            print(module_name, module_type, response.status_code)
             return current_telemetry
         
         except (Exception) as error:

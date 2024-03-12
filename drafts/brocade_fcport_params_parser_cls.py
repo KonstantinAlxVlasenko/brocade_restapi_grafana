@@ -13,14 +13,14 @@ from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
 
 class BrocadeFCPortParametersParser:
     """
-    Class to create fc port parameters dictionaries to imitate port status from switchshow output.
+    Class to create fc port parameters dictionaries.
 
 
     Attributes:
         sw_telemetry: set of switch telemetry retrieved from the switch.
         sw_parser: switch parameters retrieved from the sw_telemetry.
         port_owner: dictonary with port name as key and switchname to which port belongs to as value.
-        port_status: fc port parameters dictionary.
+        fcport_params: fc port parameters dictionary ({vf_id:{slot_port_id:{param1: value1, param2: valuue2}}}).
     """
 
     FC_INTERFACE_LEAFS = ['wwn', 'name', 'pod-license-status', 'is-enabled-state', 'persistent-disable', 

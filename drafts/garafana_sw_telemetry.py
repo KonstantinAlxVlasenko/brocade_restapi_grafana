@@ -30,7 +30,7 @@ from switch_telemetry_sensor_parser_cls import BrocadeFRUParser
 from switch_telemetry_maps_parser_cls import BrocadeMAPSParser
 from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
 from switch_telemetry_heartbeat_cls import BrocadeRequestStatus
-from brocade_switchshow_cls import BrocadeFCPortParametersParser
+from brocade_fcport_params_parser_cls import BrocadeFCPortParametersParser
 from brocade_sfp_media_parser_cls import BrocadeSFPMediaParser
     
     
@@ -79,7 +79,7 @@ print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
 print('\n')  
 st = time.time()
-san47_ost = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.20')
+o1_g620_009_vc5_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.20')
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
@@ -116,7 +116,7 @@ print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
 print('\n')  
 st = time.time()
-o1_g620_003_vc5_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.90', secure_login=False)
+o1_g620_003_vc5_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.90', secure_login=True)
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
@@ -158,12 +158,13 @@ gauge_license = Gauge('licenses', 'Licenses installed on the switch', ['license_
 
 
 # sw_telemetry = ost_6510_07_f1
-sw_telemetry = copy(o3_g630_003_vc01_f1)
+# sw_telemetry = copy(o3_g630_003_vc01_f1)
 # sw_telemetry = copy(san03_nord)
 # sw_telemetry = copy(n3_g620_005_vc5_f1)
 # sw_telemetry = o3_g620_107_vc01_f1
 # sw_telemetry = san49_nord
 # sw_telemetry = san23_ost
+sw_telemetry = o1_g620_009_vc5_f1
 
 
 ch_parser = BrocadeChassisParser(sw_telemetry)
@@ -174,6 +175,7 @@ sw_parser = BrocadeSwitchParser(sw_telemetry)
 heartbeat = BrocadeRequestStatus(sw_telemetry)
 fcport_params_parser = BrocadeFCPortParametersParser(sw_telemetry, sw_parser)
 sfp_media_parser = BrocadeSFPMediaParser(sw_telemetry, fcport_params_parser)
+
 
 
 

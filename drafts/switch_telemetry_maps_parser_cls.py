@@ -166,7 +166,9 @@ class BrocadeMAPSParser:
             system_resources_dct = self.sw_telemetry.system_resources['Response']['system-resources'].copy()
             missing_resources_dct = {resource: None for resource in resources if resource not in system_resources_dct}
             system_resources_dct.update(missing_resources_dct)
-        return system_resources_dct
+            return system_resources_dct
+        else:
+            return dict()
                 
              
     def _get_dashboard_rule_value(self) -> Dict[int, List[Dict[str, Optional[Union[str, int]]]]]:
