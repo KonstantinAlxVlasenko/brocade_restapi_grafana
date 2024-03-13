@@ -79,7 +79,7 @@ print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
 print('\n')  
 st = time.time()
-o1_g620_009_vc5_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.20')
+o1_g620_009_vc5_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.20', secure_login=True)
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
 
