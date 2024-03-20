@@ -24,7 +24,7 @@ class BrocadeFCPortParametersParser:
     """
 
     FC_INTERFACE_LEAFS = ['wwn', 'name', 'pod-license-status', 'is-enabled-state', 'persistent-disable', 
-                          'auto-negotiate', 'speed', 'max-speed', 'neighbor-node-wwn']
+                          'auto-negotiate', 'speed', 'max-speed', 'neighbor-node-wwn', 'long-distance', 'edge-fabric-id']
     
     PORT_TYPE_ID = {0: 'Unknown',
                     7: 'E-Port',
@@ -43,6 +43,16 @@ class BrocadeFCPortParametersParser:
                     29: 'Flex Port',
                     30: 'N-Port',
                     32768: 'LB-Port'}
+    
+
+    LONG_DISTANCE_LEVEL = {0: 'LD Disabled',
+                            1: 'L0',
+                            2: 'L1',
+                            3: 'L2',
+                            4: 'LE',
+                            5: 'L0.5',
+                            6: 'LD',
+                            7: 'LS'}
     
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser):
@@ -135,7 +145,8 @@ class BrocadeFCPortParametersParser:
                         'port-type': BrocadeFCPortParametersParser.PORT_TYPE_ID.get(fc_interface_container['port-type'], fc_interface_container['port-type']),
                         'neighbor-port-wwn': neighbor_port_wwn,
                         'port-enable-status': port_enable_status,
-                        'nodevice-enabled-port': nodevice_enabled_port_flag
+                        'nodevice-enabled-port': nodevice_enabled_port_flag,
+                        'long-distance-level': BrocadeFCPortParametersParser.LONG_DISTANCE_LEVEL.get(fc_interface_container['long-distance']),
                         }
                     # dictionary with unchanged values from fc_interface_container
                     fcport_params_current_default_dct = {leaf: fc_interface_container.get(leaf) for leaf in BrocadeFCPortParametersParser.FC_INTERFACE_LEAFS}
@@ -143,6 +154,11 @@ class BrocadeFCPortParametersParser:
                     # add current port status dictionary to the summary port status dictionary with vf_id and slot_port as consecutive keys
                     fcport_params_dct[vf_id][fc_interface_container['name']] = fcport_params_current_dct
         return fcport_params_dct
+
+
+    def __repr__(self):
+        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
+
 
 
     @staticmethod
