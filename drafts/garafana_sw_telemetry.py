@@ -33,34 +33,17 @@ from switch_telemetry_heartbeat_cls import BrocadeRequestStatus
 from brocade_fcport_params_parser_cls import BrocadeFCPortParametersParser
 from brocade_sfp_media_parser_cls import BrocadeSFPMediaParser
 from brocade_fcport_stats_parser_cls import BrocadeFCPortStatisticsParser
+from brocade_telemetry_parser_cls import BrocadeTelemetryParser
+from general_module import save_object, load_object
     
     
-    
-def get_error_message(sw_telemetry_dct: dict):
-    if 'errors' in sw_telemetry_dct:
-        errors_lst = sw_telemetry_dct['errors']['error']
-        errors_msg_lst = [error.get('error-message') for error in errors_lst if error.get('error-message')]
-        return ', '.join(errors_msg_lst)
-    else:
-        return None
-    
-
-
-# load_dotenv()
-
-# config_dev = dotenv_values(".env")
-
-
-# USERNAME = os.getenv("SW_USERNAME")
-# PASSWORD = os.getenv("SW_PASSWORD")
-
-# print(USERNAME, PASSWORD)
 
 print('\n')    
 st = time.time()
 san03_nord = BrocadeSwitchTelemetry(sw_ipaddress='10.202.18.120')
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(san03_nord, dirname=storage_directory, filename='san03_nord')
 
 
 print('\n')  
@@ -68,6 +51,8 @@ st = time.time()
 san23_ost = BrocadeSwitchTelemetry(sw_ipaddress='10.221.5.178')
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(san23_ost, dirname=storage_directory, filename='san23_ost')
+
 
 
 print('\n')  
@@ -75,6 +60,7 @@ st = time.time()
 san49_nord = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.22')
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(san49_nord, dirname=storage_directory, filename='san49_nord')
 
 
 
@@ -83,6 +69,7 @@ st = time.time()
 o1_g620_009_vc5_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.20', secure_login=True)
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(o1_g620_009_vc5_f1, dirname=storage_directory, filename='o1_g620_009_vc5_f1')
 
 
 
@@ -91,6 +78,7 @@ st = time.time()
 o3_g630_003_vc01_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.231.4.103')
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(o3_g630_003_vc01_f1, dirname=storage_directory, filename='o3_g630_003_vc01_f1_a')
 
 
 print('\n')  
@@ -98,6 +86,7 @@ st = time.time()
 o3_g630_003_vc01_f1_b = BrocadeSwitchTelemetry(sw_ipaddress='10.231.4.103')
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(o3_g630_003_vc01_f1_b, dirname=storage_directory, filename='o3_g630_003_vc01_f1_b')
 
 
 print('\n')  
@@ -105,6 +94,8 @@ st = time.time()
 n3_g620_005_vc5_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.50', secure_login=True)
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(n3_g620_005_vc5_f1, dirname=storage_directory, filename='n3_g620_005_vc5_f1_a')
+
 
 
 print('\n')  
@@ -112,18 +103,23 @@ st = time.time()
 n3_g620_005_vc5_f1_b = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.50', secure_login=True)
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(n3_g620_005_vc5_f1_b, dirname=storage_directory, filename='n3_g620_005_vc5_f1_b')
+
 
 print('\n')  
 st = time.time()
 ost_6510_07_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.221.5.200')
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(ost_6510_07_f1, dirname=storage_directory, filename='ost_6510_07_f1_a')
+
 
 print('\n')  
 st = time.time()
 ost_6510_07_f1_b = BrocadeSwitchTelemetry(sw_ipaddress='10.221.5.200')
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(ost_6510_07_f1_b, dirname=storage_directory, filename='ost_6510_07_f1_b')
 
 
 
@@ -131,12 +127,14 @@ st = time.time()
 o3_g620_107_vc01_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.231.4.100', secure_login=True)
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(o3_g620_107_vc01_f1, dirname=storage_directory, filename='o3_g620_107_vc01_f1_a')
 
 
 st = time.time()
 o3_g620_107_vc01_f1_b = BrocadeSwitchTelemetry(sw_ipaddress='10.231.4.100', secure_login=True)
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(o3_g620_107_vc01_f1_b, dirname=storage_directory, filename='o3_g620_107_vc01_f1_b')
 
 
 print('\n')  
@@ -144,10 +142,37 @@ st = time.time()
 o1_g620_003_vc5_f1 = BrocadeSwitchTelemetry(sw_ipaddress='10.213.16.90', secure_login=False)
 elapsed_time = time.time() - st
 print('Execution time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
+# save_object(o1_g620_003_vc5_f1, dirname=storage_directory, filename='o1_g620_003_vc5_f1')
 
 
-get_error_message(san23_ost.dashboard_rule)
-get_error_message(san03_nord.fdmi_hba)
+
+
+save_object(o1_g620_009_vc5_f1, dirname=storage_directory, filename='o1_g620_009_vc5_f1')
+save_object(o3_g630_003_vc01_f1, dirname=storage_directory, filename='o3_g630_003_vc01_f1_a')
+save_object(o3_g630_003_vc01_f1_b, dirname=storage_directory, filename='o3_g630_003_vc01_f1_b')
+save_object(n3_g620_005_vc5_f1, dirname=storage_directory, filename='n3_g620_005_vc5_f1_a')
+save_object(n3_g620_005_vc5_f1_b, dirname=storage_directory, filename='n3_g620_005_vc5_f1_b')
+save_object(ost_6510_07_f1, dirname=storage_directory, filename='ost_6510_07_f1_a')
+save_object(ost_6510_07_f1_b, dirname=storage_directory, filename='ost_6510_07_f1_b')
+save_object(o3_g620_107_vc01_f1, dirname=storage_directory, filename='o3_g620_107_vc01_f1_a')
+save_object(o3_g620_107_vc01_f1_b, dirname=storage_directory, filename='o3_g620_107_vc01_f1_b')
+save_object(o1_g620_003_vc5_f1, dirname=storage_directory, filename='o1_g620_003_vc5_f1')
+
+
+storage_directory = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts\storage'
+
+o1_g620_009_vc5_f1 = load_object(dirname=storage_directory, filename='o1_g620_009_vc5_f1')
+o3_g630_003_vc01_f1_a = load_object(dirname=storage_directory, filename='o3_g630_003_vc01_f1_a')
+o3_g630_003_vc01_f1_b = load_object(dirname=storage_directory, filename='o3_g630_003_vc01_f1_b')
+n3_g620_005_vc5_f1_a = load_object(dirname=storage_directory, filename='n3_g620_005_vc5_f1_a')
+n3_g620_005_vc5_f1_b = load_object(dirname=storage_directory, filename='n3_g620_005_vc5_f1_b')
+ost_6510_07_f1_a = load_object(dirname=storage_directory, filename='ost_6510_07_f1_a')
+ost_6510_07_f1_b = load_object(dirname=storage_directory, filename='ost_6510_07_f1_b')
+o3_g620_107_vc01_f1_a = load_object(dirname=storage_directory, filename='o3_g620_107_vc01_f1_a')
+o3_g620_107_vc01_f1_b = load_object(dirname=storage_directory, filename='o3_g620_107_vc01_f1_b')
+o1_g620_003_vc5_f1 = load_object(dirname=storage_directory, filename='o1_g620_003_vc5_f1')
+
+
 
 
 severity_level = {'OK': 0, 
@@ -155,31 +180,31 @@ severity_level = {'OK': 0,
                   'CRITICAL': 2}
 
 
-gauge_ch_name = Gauge('chassis_name', 'Chassis name', ['chassis_name'])
-gauge_sw_sn = Gauge('switch_sn', 'Switch serial number', ['switch_sn'])
-gauge_sw_datetime = Gauge('switch_datetime', 'Swicth datetime', ['switch_datetime'])
-gauge_sw_model = Gauge('switch_model', 'Switch model', ['switch_model'])
-gauge_vf_mode = Gauge('vf_mode', 'Virtual Fabrics', ['chassis_name', 'vfmode'])
-gauge_tz = Gauge('switch_tz', 'Time zone', ['switch_tz'])
+# gauge_ch_name = Gauge('chassis_name', 'Chassis name', ['chassis_name'])
+# gauge_sw_sn = Gauge('switch_sn', 'Switch serial number', ['switch_sn'])
+# gauge_sw_datetime = Gauge('switch_datetime', 'Swicth datetime', ['switch_datetime'])
+# gauge_sw_model = Gauge('switch_model', 'Switch model', ['switch_model'])
+# gauge_vf_mode = Gauge('vf_mode', 'Virtual Fabrics', ['chassis_name', 'vfmode'])
+# gauge_tz = Gauge('switch_tz', 'Time zone', ['switch_tz'])
 
-gauge_ps_state = Gauge('ps_status', 'The operational state of the power supply', ['ps_id'])
-gauge_ps_severity = Gauge('ps_severity', 'Severity level to a specified value of the power supply', ['ps_id'])
+# gauge_ps_state = Gauge('ps_status', 'The operational state of the power supply', ['ps_id'])
+# gauge_ps_severity = Gauge('ps_severity', 'Severity level to a specified value of the power supply', ['ps_id'])
 
-gauge_fan_speed = Gauge('fan_status', 'The current operational state of the fan', ['fan_id'])
-gauge_fan_state = Gauge('fan_speed', 'The fan speed in RPM', ['fan_id'])
-gauge_fan_severity = Gauge('fan_severity', 'The severity level to a specified value of the fan', ['fan_id'])
+# gauge_fan_speed = Gauge('fan_status', 'The current operational state of the fan', ['fan_id'])
+# gauge_fan_state = Gauge('fan_speed', 'The fan speed in RPM', ['fan_id'])
+# gauge_fan_severity = Gauge('fan_severity', 'The severity level to a specified value of the fan', ['fan_id'])
 
-gauge_maps_policy = Gauge('maps_policy', 'Active MAPS policy', ['maps_policy'])
-gauge_maps_actions = Gauge('maps_actions', 'MAPS actions', ['maps_actions'])
-gauge_db_rule = Gauge('dashboard_rule', 'Triggered rules list for the last 7 days', ['category', 'name', 'triggered_count', 'time_stamp', 'repetition_count', 'element', 'value'])
+# gauge_maps_policy = Gauge('maps_policy', 'Active MAPS policy', ['maps_policy'])
+# gauge_maps_actions = Gauge('maps_actions', 'MAPS actions', ['maps_actions'])
+# gauge_db_rule = Gauge('dashboard_rule', 'Triggered rules list for the last 7 days', ['category', 'name', 'triggered_count', 'time_stamp', 'repetition_count', 'element', 'value'])
 
-gauge_cpu_usage = Gauge('cpu_usage', 'The percentage of CPU usage', ['cpu_usage'])
-gauge_memory_usage = Gauge('memory_usage', 'The percentage of memory usage', ['memory_usage'])
-gauge_total_memory_usage = Gauge('total_memory_usage', 'The total memory usage in kilobytes', ['total_memory_usage'])
-gauge_flash_usage = Gauge('flash_usage', 'The percentage of flash usage', ['flash_usage'])
+# gauge_cpu_usage = Gauge('cpu_usage', 'The percentage of CPU usage', ['cpu_usage'])
+# gauge_memory_usage = Gauge('memory_usage', 'The percentage of memory usage', ['memory_usage'])
+# gauge_total_memory_usage = Gauge('total_memory_usage', 'The total memory usage in kilobytes', ['total_memory_usage'])
+# gauge_flash_usage = Gauge('flash_usage', 'The percentage of flash usage', ['flash_usage'])
 
-gauge_ssp_state = Gauge('ssp_state', 'Switch Status Policy report', ['ssp_state_type'])
-gauge_license = Gauge('licenses', 'Licenses installed on the switch', ['license_feature'])
+# gauge_ssp_state = Gauge('ssp_state', 'Switch Status Policy report', ['ssp_state_type'])
+# gauge_license = Gauge('licenses', 'Licenses installed on the switch', ['license_feature'])
 
 
 # sw_telemetry = ost_6510_07_f1
@@ -193,6 +218,8 @@ gauge_license = Gauge('licenses', 'Licenses installed on the switch', ['license_
 sw_telemetry = o1_g620_003_vc5_f1
 
 
+
+
 ch_parser = BrocadeChassisParser(sw_telemetry)
 fru_parser = BrocadeFRUParser(sw_telemetry)
 maps_config = BrocadeMAPSParser(sw_telemetry)
@@ -204,7 +231,26 @@ fcport_stats_parser = BrocadeFCPortStatisticsParser(sw_telemetry, fcport_params_
 
 
 
-sw_telemetry_1 = o3_g630_003_vc01_f1
+sw_telemetry_1 = o3_g630_003_vc01_f1_a
+# switch_parser_1 = BrocadeTelemetryParser(sw_telemetry_1)
+# print(switch_parser_1)
+
+print(sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-link-resets'])
+print(sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-offline-sequences'])
+
+print(sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-offline-sequences'])
+print(sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-link-resets'])
+
+# def get_port_lr_ols(sw_telemetry, vf_id: int, port_nim: int):
+
+lr_out_1 = sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-link-resets']
+ofl_in_1 = sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-offline-sequences']
+
+ofl_out_1 = sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-offline-sequences']
+lr_in_1 = sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-link-resets']
+
+
+print(f'{lr_out_1=}, {ofl_in_1=}\n{lr_in_1=}, {ofl_out_1=}')
 
 ch_parser_1 = BrocadeChassisParser(sw_telemetry_1)
 fru_parser_1 = BrocadeFRUParser(sw_telemetry_1)
@@ -215,17 +261,64 @@ fcport_params_parser_1 = BrocadeFCPortParametersParser(sw_telemetry_1, sw_parser
 sfp_media_parser_1 = BrocadeSFPMediaParser(sw_telemetry_1, fcport_params_parser_1)
 fcport_stats_parser_1 = BrocadeFCPortStatisticsParser(sw_telemetry_1, fcport_params_parser_1)
 
-isinstance(fcport_stats_parser_1, BrocadeFCPortStatisticsParser)
+
+# fcport_stats_parser_1 = BrocadeFCPortStatisticsParser(sw_telemetry_1)
+# print(fcport_stats_parser_1)
+# print(fcport_stats_parser_1.ch_wwn)
+
+# print(fcport_stats_parser_1._telemetry_date)
+# print(fcport_stats_parser_1.sw_telemetry)
+
+
+# isinstance(fcport_stats_parser_1, BrocadeFCPortStatisticsParser)
+
+o3_g630_003_vc01_f1_b = load_object(dirname=storage_directory, filename='o3_g630_003_vc01_f1_b')
 
 sw_telemetry_2 = o3_g630_003_vc01_f1_b
+
+
+lr_out_2 = sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-link-resets']
+ofl_in_2 = sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-offline-sequences']
+
+ofl_out_2 = sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-offline-sequences']
+lr_in_2 = sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-link-resets']
+
+print(f'{lr_out_2=}, {ofl_in_2=}\n{lr_in_2=}, {ofl_out_2=}')
+
+
+
+sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-link-resets'] = lr_out_2
+sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-offline-sequences'] = ofl_in_2
+
+sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-offline-sequences'] = ofl_out_2 +10
+sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-link-resets'] = lr_in_2 + 40
+
+
+print(sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-link-resets'])
+print(sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-offline-sequences'])
+
+print(sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-offline-sequences'])
+print(sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-link-resets'])
+
+
+sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['user-friendly-name'] = 'FAKE REFS'
+sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['physical-state'] = 'offline'
+sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['speed'] = 32000000000
+sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['neighbor'] = None
+sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['neighbor-node-wwn'] = None
+
+
+sw_telemetry_2.media_rdp[-1]['Response']['media-rdp'][0]['serial-number'] = 'HOO252209160183'
+
+
 
 ch_parser_2 = BrocadeChassisParser(sw_telemetry_2)
 fru_parser_2 = BrocadeFRUParser(sw_telemetry_2)
 maps_config_2 = BrocadeMAPSParser(sw_telemetry_2)
 sw_parser_2 = BrocadeSwitchParser(sw_telemetry_2)
 heartbeat_2 = BrocadeRequestStatus(sw_telemetry_2)
-fcport_params_parser_2 = BrocadeFCPortParametersParser(sw_telemetry_2, sw_parser_2)
-sfp_media_parser_2 = BrocadeSFPMediaParser(sw_telemetry_2, fcport_params_parser_2)
+fcport_params_parser_2 = BrocadeFCPortParametersParser(sw_telemetry_2, sw_parser_2, fcport_params_parser_1)
+sfp_media_parser_2 = BrocadeSFPMediaParser(sw_telemetry_2, fcport_params_parser_2, sfp_media_parser_1)
 fcport_stats_parser_2 = BrocadeFCPortStatisticsParser(sw_telemetry_2, fcport_params_parser_2, fcport_stats_parser_1)
 
 print(str(type(fcport_stats_parser_1)) == str(type(fcport_stats_parser_2)))
@@ -615,7 +708,18 @@ gauge_tz.labels(sw_tz).set(1)
 san03_nord.fc_switch
 san03_nord.fс_switch
 
-
+def get_error_message(sw_telemetry_dct: dict):
+    if 'errors' in sw_telemetry_dct:
+        errors_lst = sw_telemetry_dct['errors']['error']
+        errors_msg_lst = [error.get('error-message') for error in errors_lst if error.get('error-message')]
+        return ', '.join(errors_msg_lst)
+    else:
+        return None
+    
+    
+def calculate_total_credits(shared_credits: int):
+    total_credits = 4 + 2*4 + shared_credits + 1 + 1 + 7*2 + shared_credits
+    return total_credits
 
 
 

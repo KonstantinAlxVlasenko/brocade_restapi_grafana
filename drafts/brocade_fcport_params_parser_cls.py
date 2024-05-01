@@ -6,12 +6,14 @@ Created on Tue Mar  5 13:01:32 2024
 """
 
 import re
-from typing import Dict, List, Tuple, Union, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
+from brocade_telemetry_parser_cls import BrocadeTelemetryParser
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
 
-class BrocadeFCPortParametersParser:
+
+class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
     """
     Class to create fc port parameters dictionaries.
 
@@ -20,7 +22,8 @@ class BrocadeFCPortParametersParser:
         sw_telemetry: set of switch telemetry retrieved from the switch.
         sw_parser: switch parameters retrieved from the sw_telemetry.
         port_owner: dictonary with port name as key and switchname to which port belongs to as value.
-        fcport_params: fc port parameters dictionary ({vf_id:{slot_port_id:{param1: value1, param2: valuue2}}}).
+        fcport_params: fc port parameters dictionary ({vf_id:{slot_port_id:{param1: value1, param2: value2}}}).
+        fcport_params_parser: fc port parameters class instance retrieved from the sw_telemetry (current class instance to find delta).
     """
 
     FC_INTERFACE_LEAFS = ['wwn', 'name', 'pod-license-status', 'is-enabled-state', 'persistent-disable', 
@@ -53,23 +56,34 @@ class BrocadeFCPortParametersParser:
                             5: 'L0.5',
                             6: 'LD',
                             7: 'LS'}
+
+
+    FC_PORT_PARAMS_CHANGED = ['link-speed', 'long-distance-level', 'neighbor-node-wwn', 'neighbor-port-wwn',
+                              'physical-state', 'port-enable-status', 'port-name', 'port-type', 'speed']
     
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser):
+    
+    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser, fcport_params_parser=None):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        super().__init__(sw_telemetry)
+        # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._sw_parser: BrocadeSwitchParser = sw_parser
         self._port_owner = self._get_ports_owner()
         self._fcport_params = self. _get_port_params_values()
+        if self.fcport_params:
+            self._fcport_params_change = self._get_switch_ports_params_change(fcport_params_parser)
+        else:
+            self._fcport_params_change = {}
 
 
     def _get_ports_owner(self) -> Dict[str, Union[int, str]]:
         """
-        Method creates ports owner (switchname) dictionary.
+        Method creates ports owner (switchname) dictionary for switches in VF mode.
+        If VF is disabled method returns empty dictionary.
         
         Returns:
             dict: Dictonary with port name as key and switchname to which port belongs to as value.
@@ -156,9 +170,93 @@ class BrocadeFCPortParametersParser:
         return fcport_params_dct
 
 
-    def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
+    def _get_switch_ports_params_change(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
+        """
+        Method detects if port paramters from the FC_PORT_PARAMS_CHANGED list have been changed for each switch port.
+        It compares port parameters of two instances of BrocadeFCPortParametersParser class.
+        All changed parameters are added to to the dictionatry including current and previous values.
+        
+        Args:
+            other {BrocadeFCPortParametersParser}: fc port parameters class instance retrieved from the previous sw_telemetry.
+        
+        Returns:
+            dict: FC ports parameters change dictionary. Any port with changed parameters are in this dictionary.
+        """
 
+        # switch ports with changed parameters
+        fcport_params_change_dct = {}
+
+        # other is not exist (for examle 1st iteration)
+        # other is not BrocadeFCPortParametersParser type
+        # other's fcport_params atrribute is empty
+        if other is None or str(type(self)) != str(type(other)) or not other.fcport_params:
+            return fcport_params_change_dct
+        
+        # check if other is for the same switch
+        elif self.same_chassis(other):
+            for vf_id, fcport_params_vfid_now_dct in self.fcport_params.items():
+
+                fcport_params_change_dct[vf_id] = {}
+
+                # if there is no vf_id in other check next vf_id 
+                if vf_id not in other.fcport_params:
+                    continue
+
+                # fcport parameters of the vf_id switch for the previous telemetry    
+                fcport_params_vfid_prev_dct = other.fcport_params[vf_id]
+                for slot_port, fcport_params_port_now_dct in fcport_params_vfid_now_dct.items():
+                    # if there is no port number in other check next slot_port
+                    if slot_port not in fcport_params_vfid_prev_dct:
+                        continue
+                    
+                    # current fc port statistics from the other
+                    fcport_params_port_prev_dct = fcport_params_vfid_prev_dct[slot_port]
+                    # find changed parameters
+                    # fcport_params_change_port_dct = self._get_port_params_change(fcport_params_port_now_dct, fcport_params_port_prev_dct)
+                    fcport_params_change_port_dct = BrocadeFCPortParametersParser.get_changed_values(fcport_params_port_now_dct, fcport_params_port_prev_dct, 
+                                                                                                     BrocadeFCPortParametersParser.FC_PORT_PARAMS_CHANGED)
+                    BrocadeFCPortParametersParser.copy_dict_values(fcport_params_change_port_dct, fcport_params_port_now_dct, 
+                                                                   keys=['swicth-name', 'name', 'slot-number', 'port-number'])                    
+
+                    if fcport_params_change_port_dct:
+                        # add time stamps
+                        fcport_params_change_port_dct['time-generated-hrf'] = self.telemetry_date + ' ' + self.telemetry_time
+                        fcport_params_change_port_dct['time-generated-prev-hrf'] = other.telemetry_date + ' ' + other.telemetry_time
+                        # add current port changed parameters to the switch dictionary
+                        fcport_params_change_dct[vf_id][slot_port] = fcport_params_change_port_dct
+        return fcport_params_change_dct    
+
+
+
+
+
+
+    # def _get_port_params_change(self, fcport_params_port_now_dct: dict, fcport_params_port_prev_dct: dict) -> dict:
+    #     """
+    #     Method detects if port paramters from the FC_PORT_PARAMS_CHANGED list have been changed for the current port.
+    #     It compares port parameters of the current and previous fc port parameters dicts.
+    #     All changed parameters are added to to the dictionatry including current and previous values.
+        
+    #     Args:
+    #         fcport_params_port_now_dct {dict}: current fc port parameters dictionary.
+    #         fcport_params_port_prev_dct {dict}: previous fc port parameters dictionary to find changes with. 
+        
+    #     Returns:
+    #         dict: dictionary with changed port parameters.
+    #     """
+
+    #     # dictionary with with changed port parameters 
+    #     fcport_params_change_port_dct = {}
+        
+    #     for param in BrocadeFCPortParametersParser.FC_PORT_PARAMS_CHANGED:
+    #         if fcport_params_port_prev_dct[param] != fcport_params_port_now_dct[param]:
+    #             fcport_params_change_port_dct[param] = fcport_params_port_now_dct[param]
+    #             fcport_params_change_port_dct[param + '-prev'] =  fcport_params_port_prev_dct[param]
+    #     # add switch and port information
+    #     if fcport_params_change_port_dct:
+    #         for param in ['swicth-name', 'slot-number', 'port-number']:
+    #             fcport_params_change_port_dct[param] = fcport_params_port_now_dct[param]
+    #     return fcport_params_change_port_dct
 
 
     @staticmethod
@@ -287,3 +385,8 @@ class BrocadeFCPortParametersParser:
     @property
     def fcport_params(self):
         return self._fcport_params
+    
+    @property
+    def fcport_params_change(self):
+        return self._fcport_params_change
+                

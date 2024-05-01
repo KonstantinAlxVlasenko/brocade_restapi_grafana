@@ -10,9 +10,10 @@ from typing import Dict, List, Optional, Tuple, Union
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
+from brocade_telemetry_parser_cls import BrocadeTelemetryParser
 
 
-class BrocadeSFPMediaParser:
+class BrocadeSFPMediaParser(BrocadeTelemetryParser):
     """
     Class to create sfp media parameters dictionaries.
 
@@ -39,15 +40,26 @@ class BrocadeSFPMediaParser:
     REMOTE_OPTICAL_PRODUCT_LEAFS = ['part-number', 'serial-number', 'vendor-name']
 
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, fcport_params_parser: BrocadeSwitchParser):
+    MEDIA_RDP_CHANGED = ['vendor-name', 'part-number', 'serial-number', 
+                         'wavelength', 'media-distance', 'media-speed-capability',
+                         'remote-vendor-name', 'remote-part-number', 'remote-serial-number',
+                         'remote-media-speed-capability']
+
+    
+    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, fcport_params_parser: BrocadeSwitchParser, sfp_media_parser=None):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        super().__init__(sw_telemetry)
+        # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._fcport_params_parser: BrocadeSwitchParser = fcport_params_parser
         self._sfp_media = self._get_sfp_media_values()
+        if self.sfp_media:
+            self._sfp_media_changed = self._get_sfpmedia_changed_ports(sfp_media_parser)
+        else:
+            self._sfp_media_changed = {}
 
     
     def _get_sfp_media_values(self) -> Dict[str, Union[str, int]]:
@@ -210,8 +222,50 @@ class BrocadeSFPMediaParser:
         return hrf_str
 
 
-    def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
+
+    def _get_sfpmedia_changed_ports(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
+        """
+        Method detects if port paramters from the FC_PORT_PARAMS_CHANGED list have been changed for each switch port.
+        It compares port parameters of two instances of BrocadeFCPortParametersParser class.
+        All changed parameters are added to to the dictionatry including current and previous values.
+        
+        Args:
+            other {BrocadeFCPortParametersParser}: fc port parameters class instance retrieved from the previous sw_telemetry.
+        
+        Returns:
+            dict: FC ports parameters change dictionary. Any port with changed parameters are in this dictionary.
+        """
+
+        # switch ports with changed parameters
+        sfp_media_changed_dct = {}
+
+        # other is not exist (for examle 1st iteration)
+        # other is not BrocadeFCPortParametersParser type
+        # other's fcport_params atrribute is empty
+        if other is None or str(type(self)) != str(type(other)) or not other.sfp_media:
+            return None
+        
+        # check if other is for the same switch
+        elif self.same_chassis(other):
+            for vf_id, sfp_media_vfid_now_dct in self.sfp_media.items():
+
+                sfp_media_changed_dct[vf_id] = {}
+
+                # if there is no vf_id in other check next vf_id 
+                if vf_id not in other.sfp_media:
+                    continue
+
+                # sfp_media of the vf_id switch for the previous telemetry    
+                sfp_media_vfid_prev_dct = other.sfp_media[vf_id]
+                # timestamps
+                time_now = self.telemetry_date + ' ' + self.telemetry_time
+                time_prev = other.telemetry_date + ' ' + other.telemetry_time
+                # add changed sfp_media ports for the current vf_id
+                sfp_media_changed_dct[vf_id] = BrocadeSFPMediaParser.get_changed_ports(sfp_media_vfid_now_dct, sfp_media_vfid_prev_dct, 
+                                                                                        changed_keys=BrocadeSFPMediaParser.MEDIA_RDP_CHANGED, 
+                                                                                        const_keys=['swicth-name', 'name', 'port-protocol', 'slot-number', 'port-number'], 
+                                                                                        time_now=time_now, time_prev=time_prev)
+        return sfp_media_changed_dct
 
 
     @property
@@ -227,3 +281,7 @@ class BrocadeSFPMediaParser:
     @property
     def sfp_media(self):
         return self._sfp_media
+    
+    @property
+    def sfp_media_changed(self):
+        return self._sfp_media_changed

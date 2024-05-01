@@ -220,7 +220,7 @@ class BrocadeSwitchParser:
     
     def _set_switch_role(self) -> None:
         """
-        Method sets switch role based on switch pareametrs.
+        Method sets switch role based on switch parameters.
         switch disabled: 'Disabled',
         principal on: 'Principal',
         ag mode on: None,

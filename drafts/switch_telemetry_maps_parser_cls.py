@@ -44,6 +44,9 @@ class BrocadeMAPSParser:
                      'repetition-count', 'object-element', 'object-value', 'severity']
     DB_RULE_IGNORE = ['CLEAR', 'UNQUAR', 'STATE_IN', 'STATE_ON', 'STATE_UP', 'BALANCED']
 
+
+    SYSTEM_RESOURCE_THRESHOLDS = {'cpu-usage': 80, 'flash-usage': 90, 'memory-usage': 75}
+
     
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
