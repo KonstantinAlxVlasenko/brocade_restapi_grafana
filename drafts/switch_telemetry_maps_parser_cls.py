@@ -141,7 +141,7 @@ class BrocadeMAPSParser:
                     continue
                 state = container[ssp_leaf]
                 ssp_report_lst.append({'name': ssp_leaf,
-                                       'operationa-state': state.upper(),
+                                       'operational-state': state.upper(),
                                        'operational-state-id': BrocadeMAPSParser.SSP_STATE[state]})
         # elif self.sw_telemetry.ssp_report.get('status-code'):
         #     for ssp_leaf in BrocadeMAPSParser.SSP_LEAFS:

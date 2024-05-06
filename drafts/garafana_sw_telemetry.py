@@ -215,19 +215,17 @@ severity_level = {'OK': 0,
 # sw_telemetry = san49_nord
 # sw_telemetry = san23_ost
 # sw_telemetry = o1_g620_009_vc5_f1
-sw_telemetry = o1_g620_003_vc5_f1
+# sw_telemetry = o1_g620_003_vc5_f1
 
 
-
-
-ch_parser = BrocadeChassisParser(sw_telemetry)
-fru_parser = BrocadeFRUParser(sw_telemetry)
-maps_config = BrocadeMAPSParser(sw_telemetry)
-sw_parser = BrocadeSwitchParser(sw_telemetry)
-heartbeat = BrocadeRequestStatus(sw_telemetry)
-fcport_params_parser = BrocadeFCPortParametersParser(sw_telemetry, sw_parser)
-sfp_media_parser = BrocadeSFPMediaParser(sw_telemetry, fcport_params_parser)
-fcport_stats_parser = BrocadeFCPortStatisticsParser(sw_telemetry, fcport_params_parser)
+# ch_parser = BrocadeChassisParser(sw_telemetry)
+# fru_parser = BrocadeFRUParser(sw_telemetry)
+# maps_config = BrocadeMAPSParser(sw_telemetry)
+# sw_parser = BrocadeSwitchParser(sw_telemetry)
+# heartbeat = BrocadeRequestStatus(sw_telemetry)
+# fcport_params_parser = BrocadeFCPortParametersParser(sw_telemetry, sw_parser)
+# sfp_media_parser = BrocadeSFPMediaParser(sw_telemetry, fcport_params_parser)
+# fcport_stats_parser = BrocadeFCPortStatisticsParser(sw_telemetry, fcport_params_parser)
 
 
 
@@ -250,7 +248,7 @@ ofl_out_1 = sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistic
 lr_in_1 = sw_telemetry_1.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-link-resets']
 
 
-print(f'{lr_out_1=}, {ofl_in_1=}\n{lr_in_1=}, {ofl_out_1=}')
+# print(f'{lr_out_1=}, {ofl_in_1=}\n{lr_in_1=}, {ofl_out_1=}')
 
 ch_parser_1 = BrocadeChassisParser(sw_telemetry_1)
 fru_parser_1 = BrocadeFRUParser(sw_telemetry_1)
@@ -302,14 +300,15 @@ print(sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]
 
 
 sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['user-friendly-name'] = 'FAKE REFS'
-sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['physical-state'] = 'offline'
+# sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['physical-state'] = 'offline'
 sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['speed'] = 32000000000
 sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['neighbor'] = None
 sw_telemetry_2.fc_interface[-1]['Response']['fibrechannel'][0]['neighbor-node-wwn'] = None
 
 
 sw_telemetry_2.media_rdp[-1]['Response']['media-rdp'][0]['serial-number'] = 'HOO252209160183'
-
+sw_telemetry_2.media_rdp[-1]['Response']['media-rdp'][0]['tx-power'] = 130
+sw_telemetry_2.media_rdp[-1]['Response']['media-rdp'][1]['part-number'] = None
 
 
 ch_parser_2 = BrocadeChassisParser(sw_telemetry_2)
@@ -320,6 +319,11 @@ heartbeat_2 = BrocadeRequestStatus(sw_telemetry_2)
 fcport_params_parser_2 = BrocadeFCPortParametersParser(sw_telemetry_2, sw_parser_2, fcport_params_parser_1)
 sfp_media_parser_2 = BrocadeSFPMediaParser(sw_telemetry_2, fcport_params_parser_2, sfp_media_parser_1)
 fcport_stats_parser_2 = BrocadeFCPortStatisticsParser(sw_telemetry_2, fcport_params_parser_2, fcport_stats_parser_1)
+
+
+
+
+
 
 print(str(type(fcport_stats_parser_1)) == str(type(fcport_stats_parser_2)))
 print(str(type(fcport_stats_parser_1)))

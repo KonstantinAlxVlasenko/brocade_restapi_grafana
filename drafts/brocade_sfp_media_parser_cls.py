@@ -5,12 +5,12 @@ Created on Thu Mar  7 12:17:39 2024
 @author: kavlasenko
 """
 
-
+import math
 from typing import Dict, List, Optional, Tuple, Union
 
+from brocade_telemetry_parser_cls import BrocadeTelemetryParser
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
-from brocade_telemetry_parser_cls import BrocadeTelemetryParser
 
 
 class BrocadeSFPMediaParser(BrocadeTelemetryParser):
@@ -44,8 +44,24 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                          'wavelength', 'media-distance', 'media-speed-capability',
                          'remote-vendor-name', 'remote-part-number', 'remote-serial-number',
                          'remote-media-speed-capability']
-
     
+    MEDIA_POWER_CHANGED = ['rx-power', 'tx-power', 'remote-media-rx-power', 'remote-media-tx-power',
+                           'rx-power-dbm', 'tx-power-dbm', 'remote-media-rx-power-dbm', 'remote-media-tx-power-dbm']
+    
+    MEDIA_POWER_STATUS_CHANGED = ['rx-power-status', 'tx-power-status', 'remote-rx-power-status', 'remote-tx-power-status']
+    
+
+    SFP_LW_TX_POWER_ALERT = {'high-alarm': 2500, 'low-alarm': 1000, 'high-warning': 2300, 'low-warning': 1200}
+
+    SFP_LW_RX_POWER_ALERT = {'high-alarm': 630, 'low-alarm': 50, 'high-warning': 580, 'low-warning': 100}
+
+    SFP_SW_TX_POWER_ALERT = {'high-alarm': 1500, 'low-alarm': 150, 'high-warning': 1400, 'low-warning': 200}
+
+    SFP_SW_RX_POWER_ALERT = {'high-alarm': 1500, 'low-alarm': 150, 'high-warning': 1400, 'low-warning': 200}
+
+    SFP_TEMPERATURE_ALERT = {'high-alarm': 75, 'low-alarm': -5, 'high-warning': 70, 'low-warning': 0}
+    
+
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, fcport_params_parser: BrocadeSwitchParser, sfp_media_parser=None):
         """
         Args:
@@ -84,7 +100,8 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                 for sfp_media_container in sfp_media_container_lst:
                     # get sfp media parameters from the container
                     sfp_media_current_dct = {leaf: sfp_media_container.get(leaf) for leaf in BrocadeSFPMediaParser.MEDIA_RDP_LEAFS}
-                    
+                    # convert uW values to the dBm
+                    self._add_sfp_dbm_power(sfp_media_current_dct)
                     # slot_port_number in the format 'protocol/slot_number/port_number' (e.g. 'fc/0/1')
                     slot_port_number = sfp_media_container['name']
                     # split protocol slot and port number
@@ -93,22 +110,20 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                     sfp_media_current_dct['slot-number'] = int(slot_number)
                     sfp_media_current_dct['port-number'] = int(port_number)
                     sfp_media_current_dct['port-protocol'] = protocol
-
                     # convert parameters presented as list to a single string
                     sfp_media_current_dct['media-distance'] = BrocadeSFPMediaParser._convert_list_to_string(sfp_media_current_dct['media-distance'], 'distance')
                     sfp_media_current_dct['media-speed-capability'] = BrocadeSFPMediaParser._convert_list_to_string(sfp_media_current_dct['media-speed-capability'], 'speed')
                     sfp_media_current_dct['remote-media-speed-capability'] = BrocadeSFPMediaParser._convert_list_to_string(sfp_media_current_dct['remote-media-speed-capability'], 'speed')
-
                     # add remote sfp parameters presented as nested dictionary to the outer sfp dictionary
                     remote_optical_product_dct = BrocadeSFPMediaParser._get_remote_optical_product_data(sfp_media_container)
                     sfp_media_current_dct.update(remote_optical_product_dct)
-
                     # present sfp module power-on-time in human readable format
                     BrocadeSFPMediaParser._set_poweron_time_hrf(sfp_media_current_dct)
                     # add port parameters to the sfp media dictionary
                     fcport_params_dct = self._get_port_params(vf_id, protocol, slot_port_number)
                     sfp_media_current_dct.update(fcport_params_dct)
-                    
+                    # add power status ('ok', ''warning', 'critical) for the power parameters
+                    self._add_power_status(sfp_media_current_dct)
                     # add current sfp media dictionary to the summary sfp media dictionary with vf_id and slot_port as consecutive keys
                     sfp_media_dct[vf_id][sfp_media_container['name']] = sfp_media_current_dct
         return sfp_media_dct
@@ -222,26 +237,130 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
         return hrf_str
 
 
+    def _add_power_status(self, sfp_media_dct) -> None:
+        """
+        Method adds power status ('ok', 'warning', 'critical') to the sfp media dictionary for the 
+        'rx-power', 'tx-power', 'remote-media-rx-power', 'remote-media-tx-power'
+        depending on power value for Online ports.
+                
+        Args: 
+            sfp_media_dct (dict): sfp parameters dictionary for a single port
+        
+        Returns:
+            None
+        """
+        
+        # check longwave or shortwave transceiver installed
+        sfp_distance = None
+        if sfp_media_dct.get('media-distance'):
+            if 'short' in sfp_media_dct['media-distance']:
+                sfp_distance = 'sw'
+            elif 'long' in sfp_media_dct['media-distance']:
+                sfp_distance = 'lw'
+
+        # check power value for Online ports only
+        if sfp_media_dct.get('physical-state') == 'Online':
+            if sfp_media_dct.get('rx-power'):
+                if sfp_distance == 'sw':
+                    sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_SW_RX_POWER_ALERT)
+                elif sfp_distance == 'lw':
+                    sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_LW_RX_POWER_ALERT)                                                             
+            if sfp_media_dct.get('tx-power'):
+                if sfp_distance == 'sw':
+                    sfp_media_dct['tx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                        sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_SW_TX_POWER_ALERT)
+                elif sfp_distance == 'lw':
+                    sfp_media_dct['tx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                        sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_LW_TX_POWER_ALERT)
+            if sfp_media_dct.get('remote-media-rx-power'):
+                sfp_media_dct['remote-rx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                        sfp_media_dct['remote-media-rx-power'], BrocadeSFPMediaParser.SFP_SW_RX_POWER_ALERT)
+            if sfp_media_dct.get('remote-media-tx-power'):
+                sfp_media_dct['remote-tx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                        sfp_media_dct['remote-media-tx-power'], BrocadeSFPMediaParser.SFP_SW_TX_POWER_ALERT)
+                
+
+    @staticmethod
+    def get_alert_status(value: float, status_intervals_dct: dict) -> str:
+        """
+        Method checks to which interval value belongs to and returns corresponding status.
+        '--------low-alarm--------low-warning--------high-warning--------high-alarm--------'
+        'critical----------warning---------------ok---------------warning----------critical'
+        
+        Args:
+            value {float}: value checked to which interval it belongs to.
+            status_intervals_dct {dict}: dictionary with intervals 
+            {'high-alarm': x, 'low-alarm': y, 'high-warning': z, 'low-warning': w}
+        
+        Returns:
+            str: 'ok', 'warning', 'critical'
+        """
+
+        status = 'unknown'
+        if value >= status_intervals_dct['low-warning'] and value < status_intervals_dct['high-warning']:
+            status = 'ok'
+        elif value >= status_intervals_dct['high-alarm'] or value < status_intervals_dct['low-alarm']:
+            status = 'critical'
+        else:
+            status = 'warning'
+        return status
+
+
+    def _add_sfp_dbm_power(self, sfp_media_dct):
+        """Method converts uW power parameters to dBm and adds it to the sfp parameters dictionary.
+        Power paramters 'rx-power', 'tx-power',  'remote-media-rx-power', 'remote-media-tx-power'.
+                
+        Args:
+            sfp_media_dct (dict): single sfp parameters dictionary
+        """
+        
+        sfp_dbm_power_dct = {}
+
+        for sfp_param in sfp_media_dct:
+            if 'x-power' in sfp_param and sfp_media_dct[sfp_param] is not None:
+                sfp_dbm_power_dct[sfp_param + '-dbm'] = BrocadeSFPMediaParser.uW_to_dBm(sfp_media_dct[sfp_param])
+
+        if sfp_dbm_power_dct:
+            sfp_media_dct.update(sfp_dbm_power_dct)
+
+
+    @staticmethod
+    def uW_to_dBm(uW: float) -> float:
+        """
+        Method converts uwatt value to the dBm value.
+        
+        Args:
+            uwatt {int}: uwatt value to convert
+        
+        Returns:
+            dBm value
+        """
+                
+        mW = uW/1000
+        return round(10 * math.log10(mW / 1), 1)
+
 
     def _get_sfpmedia_changed_ports(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
         """
-        Method detects if port paramters from the FC_PORT_PARAMS_CHANGED list have been changed for each switch port.
-        It compares port parameters of two instances of BrocadeFCPortParametersParser class.
-        All changed parameters are added to to the dictionatry including current and previous values.
+        Method detects if sfp paramters from the MEDIA_RDP_CHANGED and MEDIA_POWER_CHANGED lists have been changed for each switch port.
+        It compares sfp parameters of two instances of BrocadeSFPMediaParser class.
+        All changed sfp parameters are added to to the dictionatry including current and previous values.
         
         Args:
-            other {BrocadeFCPortParametersParser}: fc port parameters class instance retrieved from the previous sw_telemetry.
+            other {BrocadeSFPMediaParser}: sfp media parameters class instance retrieved from the previous sw_telemetry.
         
         Returns:
-            dict: FC ports parameters change dictionary. Any port with changed parameters are in this dictionary.
+            dict: SFP ports changed parameters dictionary. Any port with changed parameters are in this dictionary.
         """
 
         # switch ports with changed parameters
         sfp_media_changed_dct = {}
 
         # other is not exist (for examle 1st iteration)
-        # other is not BrocadeFCPortParametersParser type
-        # other's fcport_params atrribute is empty
+        # other is not BrocadeSFPMediaParser type
+        # other's sfp_media atrribute is empty
         if other is None or str(type(self)) != str(type(other)) or not other.sfp_media:
             return None
         
@@ -261,10 +380,11 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                 time_now = self.telemetry_date + ' ' + self.telemetry_time
                 time_prev = other.telemetry_date + ' ' + other.telemetry_time
                 # add changed sfp_media ports for the current vf_id
-                sfp_media_changed_dct[vf_id] = BrocadeSFPMediaParser.get_changed_ports(sfp_media_vfid_now_dct, sfp_media_vfid_prev_dct, 
-                                                                                        changed_keys=BrocadeSFPMediaParser.MEDIA_RDP_CHANGED, 
-                                                                                        const_keys=['swicth-name', 'name', 'port-protocol', 'slot-number', 'port-number'], 
-                                                                                        time_now=time_now, time_prev=time_prev)
+                sfp_media_changed_dct[vf_id] = BrocadeSFPMediaParser.get_changed_ports(
+                    sfp_media_vfid_now_dct, sfp_media_vfid_prev_dct, 
+                    changed_keys=BrocadeSFPMediaParser.MEDIA_RDP_CHANGED + BrocadeSFPMediaParser.MEDIA_POWER_CHANGED + BrocadeSFPMediaParser.MEDIA_POWER_STATUS_CHANGED, 
+                    const_keys=['swicth-name', 'name', 'port-protocol', 'slot-number', 'port-number'], 
+                    time_now=time_now, time_prev=time_prev)
         return sfp_media_changed_dct
 
 
