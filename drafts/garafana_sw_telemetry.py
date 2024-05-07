@@ -291,6 +291,15 @@ sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-o
 sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-offline-sequences'] = ofl_out_2 +10
 sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-link-resets'] = lr_in_2 + 40
 
+# high severity
+sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['pcs-block-errors'] = sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['pcs-block-errors'] + 60
+sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['class3-in-discards'] = sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['class3-in-discards'] + 20
+sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['class3-out-discards'] = sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['class3-out-discards'] + 20
+
+# medium severity
+sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['f-rjt-frames'] = sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['f-rjt-frames'] + 35
+sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['invalid-transmission-words'] = sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][1]['invalid-transmission-words'] + 35
+
 
 print(sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-link-resets'])
 print(sw_telemetry_2.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-offline-sequences'])
@@ -321,7 +330,7 @@ sfp_media_parser_2 = BrocadeSFPMediaParser(sw_telemetry_2, fcport_params_parser_
 fcport_stats_parser_2 = BrocadeFCPortStatisticsParser(sw_telemetry_2, fcport_params_parser_2, fcport_stats_parser_1)
 
 
-
+counter_category = [severity + '-severity_' + counter_status + '-status_error' for severity in ['high', 'medium', 'low'] for counter_status in ['critical', 'warning']]
 
 
 

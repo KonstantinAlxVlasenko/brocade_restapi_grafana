@@ -60,6 +60,14 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
     SFP_SW_RX_POWER_ALERT = {'high-alarm': 1500, 'low-alarm': 150, 'high-warning': 1400, 'low-warning': 200}
 
     SFP_TEMPERATURE_ALERT = {'high-alarm': 75, 'low-alarm': -5, 'high-warning': 70, 'low-warning': 0}
+
+        
+    SFP_POWER_ALERT = {'lw_tx': {'high-alarm': 2500, 'low-alarm': 1000, 'high-warning': 2300, 'low-warning': 1200},
+                       'lw_rx': {'high-alarm': 630, 'low-alarm': 50, 'high-warning': 580, 'low-warning': 100},
+                       'sw_tx': {'high-alarm': 1500, 'low-alarm': 150, 'high-warning': 1400, 'low-warning': 200},
+                       'sw_rx': {'high-alarm': 1500, 'low-alarm': 150, 'high-warning': 1400, 'low-warning': 200}}
+
+    SFP_TEMPERATURE_ALERT = {'high-alarm': 75, 'low-alarm': -5, 'high-warning': 70, 'low-warning': 0}
     
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, fcport_params_parser: BrocadeSwitchParser, sfp_media_parser=None):
