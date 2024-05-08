@@ -330,7 +330,7 @@ sfp_media_parser_2 = BrocadeSFPMediaParser(sw_telemetry_2, fcport_params_parser_
 fcport_stats_parser_2 = BrocadeFCPortStatisticsParser(sw_telemetry_2, fcport_params_parser_2, fcport_stats_parser_1)
 
 
-counter_category = [severity + '-severity_' + counter_status + '-status_error' for severity in ['high', 'medium', 'low'] for counter_status in ['critical', 'warning']]
+# counter_category = [severity + '-severity_' + counter_status + '-status_error' for severity in ['high', 'medium', 'low'] for counter_status in ['critical', 'warning']]
 
 
 

@@ -51,15 +51,15 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
     MEDIA_POWER_STATUS_CHANGED = ['rx-power-status', 'tx-power-status', 'remote-rx-power-status', 'remote-tx-power-status']
     
 
-    SFP_LW_TX_POWER_ALERT = {'high-alarm': 2500, 'low-alarm': 1000, 'high-warning': 2300, 'low-warning': 1200}
+    # SFP_LW_TX_POWER_ALERT = {'high-alarm': 2500, 'low-alarm': 1000, 'high-warning': 2300, 'low-warning': 1200}
 
-    SFP_LW_RX_POWER_ALERT = {'high-alarm': 630, 'low-alarm': 50, 'high-warning': 580, 'low-warning': 100}
+    # SFP_LW_RX_POWER_ALERT = {'high-alarm': 630, 'low-alarm': 50, 'high-warning': 580, 'low-warning': 100}
 
-    SFP_SW_TX_POWER_ALERT = {'high-alarm': 1500, 'low-alarm': 150, 'high-warning': 1400, 'low-warning': 200}
+    # SFP_SW_TX_POWER_ALERT = {'high-alarm': 1500, 'low-alarm': 150, 'high-warning': 1400, 'low-warning': 200}
 
-    SFP_SW_RX_POWER_ALERT = {'high-alarm': 1500, 'low-alarm': 150, 'high-warning': 1400, 'low-warning': 200}
+    # SFP_SW_RX_POWER_ALERT = {'high-alarm': 1500, 'low-alarm': 150, 'high-warning': 1400, 'low-warning': 200}
 
-    SFP_TEMPERATURE_ALERT = {'high-alarm': 75, 'low-alarm': -5, 'high-warning': 70, 'low-warning': 0}
+    # SFP_TEMPERATURE_ALERT = {'high-alarm': 75, 'low-alarm': -5, 'high-warning': 70, 'low-warning': 0}
 
         
     SFP_POWER_ALERT = {'lw_tx': {'high-alarm': 2500, 'low-alarm': 1000, 'high-warning': 2300, 'low-warning': 1200},
@@ -271,23 +271,23 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
             if sfp_media_dct.get('rx-power'):
                 if sfp_distance == 'sw':
                     sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
-                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_SW_RX_POWER_ALERT)
+                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_rx'])
                 elif sfp_distance == 'lw':
                     sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
-                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_LW_RX_POWER_ALERT)                                                             
+                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['lw_rx'])                                                             
             if sfp_media_dct.get('tx-power'):
                 if sfp_distance == 'sw':
                     sfp_media_dct['tx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
-                        sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_SW_TX_POWER_ALERT)
+                        sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_tx'])
                 elif sfp_distance == 'lw':
                     sfp_media_dct['tx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
-                        sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_LW_TX_POWER_ALERT)
+                        sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['lw_tx'])
             if sfp_media_dct.get('remote-media-rx-power'):
                 sfp_media_dct['remote-rx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
-                        sfp_media_dct['remote-media-rx-power'], BrocadeSFPMediaParser.SFP_SW_RX_POWER_ALERT)
+                        sfp_media_dct['remote-media-rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_rx'])
             if sfp_media_dct.get('remote-media-tx-power'):
                 sfp_media_dct['remote-tx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
-                        sfp_media_dct['remote-media-tx-power'], BrocadeSFPMediaParser.SFP_SW_TX_POWER_ALERT)
+                        sfp_media_dct['remote-media-tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_tx'])
                 
 
     @staticmethod
