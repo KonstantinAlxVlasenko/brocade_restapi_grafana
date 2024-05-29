@@ -8,9 +8,9 @@ Created on Thu Mar  7 12:17:39 2024
 import math
 from typing import Dict, List, Optional, Tuple, Union
 
-from brocade_telemetry_parser_cls import BrocadeTelemetryParser
+from brocade_base_parser import BrocadeTelemetryParser
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
+from brocade_switch_parser import BrocadeSwitchParser
 
 
 class BrocadeSFPMediaParser(BrocadeTelemetryParser):
@@ -81,7 +81,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
         self._fcport_params_parser: BrocadeSwitchParser = fcport_params_parser
         self._sfp_media = self._get_sfp_media_values()
         if self.sfp_media:
-            self._sfp_media_changed = self._get_sfpmedia_changed_ports(sfp_media_parser)
+            self._sfp_media_changed = self._get_changed_sfpmedia(sfp_media_parser)
         else:
             self._sfp_media_changed = {}
 
@@ -350,7 +350,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
         return round(10 * math.log10(mW / 1), 1)
 
 
-    def _get_sfpmedia_changed_ports(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
+    def _get_changed_sfpmedia(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
         """
         Method detects if sfp paramters from the MEDIA_RDP_CHANGED and MEDIA_POWER_CHANGED lists have been changed for each switch port.
         It compares sfp parameters of two instances of BrocadeSFPMediaParser class.
@@ -388,7 +388,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                 time_now = self.telemetry_date + ' ' + self.telemetry_time
                 time_prev = other.telemetry_date + ' ' + other.telemetry_time
                 # add changed sfp_media ports for the current vf_id
-                sfp_media_changed_dct[vf_id] = BrocadeSFPMediaParser.get_changed_ports(
+                sfp_media_changed_dct[vf_id] = BrocadeSFPMediaParser.get_changed_vfid_ports(
                     sfp_media_vfid_now_dct, sfp_media_vfid_prev_dct, 
                     changed_keys=BrocadeSFPMediaParser.MEDIA_RDP_CHANGED + BrocadeSFPMediaParser.MEDIA_POWER_CHANGED + BrocadeSFPMediaParser.MEDIA_POWER_STATUS_CHANGED, 
                     const_keys=['swicth-name', 'name', 'port-protocol', 'slot-number', 'port-number'], 

@@ -8,9 +8,9 @@ Created on Tue Mar  5 13:01:32 2024
 import re
 from typing import Dict, List, Optional, Tuple, Union
 
-from brocade_telemetry_parser_cls import BrocadeTelemetryParser
+from brocade_base_parser import BrocadeTelemetryParser
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
+from brocade_switch_parser import BrocadeSwitchParser
 
 
 class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
@@ -76,7 +76,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
         self._fcport_params = self. _get_port_params_values()
         if self.fcport_params:
             # self._fcport_params_change = self._get_switch_ports_params_change(fcport_params_parser)
-            self._fcport_params_changed = self._get_fcport_params_changed_ports(fcport_params_parser)
+            self._fcport_params_changed = self._get_changed_fcport_params(fcport_params_parser)
         else:
             self._fcport_params_changd = {}
 
@@ -171,11 +171,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
         return fcport_params_dct
 
 
-  
-
-
-
-    def _get_fcport_params_changed_ports(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
+    def _get_changed_fcport_params(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
         """
         Method detects if port paramters from the FC_PORT_PARAMS_CHANGED list have been changed for each switch port.
         It compares port parameters of two instances of BrocadeFCPortParametersParser class.
@@ -213,7 +209,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                 time_now = self.telemetry_date + ' ' + self.telemetry_time
                 time_prev = other.telemetry_date + ' ' + other.telemetry_time
                 # add changed sfp_media ports for the current vf_id
-                fcport_params_changed_dct[vf_id] = BrocadeFCPortParametersParser.get_changed_ports(fcport_params_vfid_now_dct, fcport_params_vfid_prev_dct, 
+                fcport_params_changed_dct[vf_id] = BrocadeFCPortParametersParser.get_changed_vfid_ports(fcport_params_vfid_now_dct, fcport_params_vfid_prev_dct, 
                                                                                         changed_keys=BrocadeFCPortParametersParser.FC_PORT_PARAMS_CHANGED, 
                                                                                         const_keys=['swicth-name', 'name', 'slot-number', 'port-number'], 
                                                                                         time_now=time_now, time_prev=time_prev)

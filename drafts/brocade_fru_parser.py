@@ -126,7 +126,7 @@ class BrocadeFRUParser:
                                     'operational-state': sensor_state.upper(), 
                                     'operational-state-id': BrocadeFRUParser.SENSOR_STATE.get(sensor_state, 3), 
                                     'slot-number': sensor.get('slot-number'), 
-                                     'index': sensor.get('index')})
+                                    'index': sensor.get('index')})
         return sensor_lst    
     
 

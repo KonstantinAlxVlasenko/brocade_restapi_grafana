@@ -9,7 +9,7 @@ import re
 from typing import Dict, List, Tuple, Union, Optional
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
+from brocade_switch_parser import BrocadeSwitchParser
 
 class BrocadeMedaiParser:
     """

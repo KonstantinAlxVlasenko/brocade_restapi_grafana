@@ -24,16 +24,16 @@ from dotenv import load_dotenv, dotenv_values
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 # from switch_telemetry_httpx_async_cls import BrocadeSwitchTelemetry
 # from switch_telemetry_parser_cls import BrocadeChassisParser
-from switch_telemetry_chassis_parser_cls import BrocadeChassisParser
+from brocade_chassis_parser import BrocadeChassisParser
 
-from switch_telemetry_sensor_parser_cls import BrocadeFRUParser
-from switch_telemetry_maps_parser_cls import BrocadeMAPSParser
-from switch_telemetry_switch_parser_cls import BrocadeSwitchParser
-from switch_telemetry_heartbeat_cls import BrocadeRequestStatus
-from brocade_fcport_params_parser_cls import BrocadeFCPortParametersParser
-from brocade_sfp_media_parser_cls import BrocadeSFPMediaParser
-from brocade_fcport_stats_parser_cls import BrocadeFCPortStatisticsParser
-from brocade_telemetry_parser_cls import BrocadeTelemetryParser
+from brocade_fru_parser import BrocadeFRUParser
+from brocade_maps_parser import BrocadeMAPSParser
+from brocade_switch_parser import BrocadeSwitchParser
+from brocade_telemetry_request_status import BrocadeRequestStatus
+from brocade_fcport_params_parser import BrocadeFCPortParametersParser
+from brocade_sfp_media_parser import BrocadeSFPMediaParser
+from brocade_fcport_stats_parser import BrocadeFCPortStatisticsParser
+from brocade_base_parser import BrocadeTelemetryParser
 from general_module import save_object, load_object
     
     
@@ -330,7 +330,11 @@ sfp_media_parser_2 = BrocadeSFPMediaParser(sw_telemetry_2, fcport_params_parser_
 fcport_stats_parser_2 = BrocadeFCPortStatisticsParser(sw_telemetry_2, fcport_params_parser_2, fcport_stats_parser_1)
 
 
-# counter_category = [severity + '-severity_' + counter_status + '-status_error' for severity in ['high', 'medium', 'low'] for counter_status in ['critical', 'warning']]
+# counter_category = [severity + '-severity_' + counter_status + '-status_error' for severity in ['high', 'medium', 'low'] for counter_status in ['critical', 'warning', 'ok']]
+
+# PORT_ERROR_STATUS_KEYS = [severity + '-severity-error_port-status' for severity in ['high','medium', 'low']]
+
+
 
 
 
