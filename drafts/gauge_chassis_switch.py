@@ -182,6 +182,14 @@ fill_chassis_level_gauge_metrics(gauge_memory, gauge_data=gauge_system_resource_
 
 
 # maps ssp report gauge
+ssp_report_labels = ['name']
+gauge_ssp_report = gauge_init(name='ssp_report', description='The switch status policy report state.', label_names=ssp_report_labels)
+fill_chassis_level_gauge_metrics(gauge_ssp_report, gauge_data=ch_parser_now.sw_license, label_names=license_labels, metric_name='operational-state-id')
+
+
+
+
+# maps ssp report gauge
 
 # request status gauge
 # request_status_labels = ['module', 'container', 'vf-id', 'status-code', 'status', 'error-message', 'date', 'time']

@@ -50,7 +50,7 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
     SYSTEM_RESOURCE_THRESHOLDS = {'cpu-usage': 80, 'flash-usage': 90, 'memory-usage': 75}
 
     
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, switch_parser: BrocadeSwitchParser):
+    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
@@ -58,6 +58,7 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
         
         super().__init__(sw_telemetry)
         # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        self._sw_parser: BrocadeSwitchParser = sw_parser
         self._maps_config: dict = self._get_maps_policy_value()
         self._get_maps_actions_value()
         self._ssp_report: list = self._get_ssp_report_value()
@@ -92,8 +93,32 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
             if active_policy:
                 # add active policy or error-message dictionary to the maps configuration dictionary
                 maps_config_dct[vf_id] = {'vf-id': vf_id, 'maps-policy': active_policy}
+                # add switch details
+                sw_details = self._get_switch_details(vf_id)
+                maps_config_dct[vf_id].update(sw_details)
+                
         return maps_config_dct
     
+
+
+    def _get_switch_details(self, vf_id: int, keys=['switch-name', 'switch-wwn']) -> Dict[str, Optional[str]]:
+        """
+        Method to get switch details.
+        
+        Args:
+            vf_id {int}: switch vf_id.
+            keys {list}: extracted switch parameters titles.
+        
+        Returns:
+            Dict[str, Optional[str]]: Dictionary with switchparameters values.
+        """
+        
+        sw_details = self.sw_parser.fc_switch.get(vf_id)
+        if sw_details:
+            return {key: sw_details[key] for key in keys}
+        else:
+            return {key: None for key in keys}
+
 
     def  _get_maps_actions_value(self) -> None:
         """
@@ -118,6 +143,9 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
             if maps_actions:
                 if not vf_id in self.maps_config:
                     self.maps_config[vf_id] = {'vf-id': vf_id, 'maps-policy': None}
+                    # add switch details
+                    sw_details = self._get_switch_details(vf_id)
+                    self.maps_config[vf_id].update(sw_details)
                 # add maps configuration dictionary for the current vf-id with the its maps-actions
                 self.maps_config[vf_id]['maps-actions'] = maps_actions
 
@@ -244,6 +272,11 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
     @property
     def sw_telemetry(self):
         return self._sw_telemetry
+    
+
+    @property
+    def sw_parser(self):
+        return self._sw_parser
     
     
     @property

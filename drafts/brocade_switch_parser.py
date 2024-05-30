@@ -91,7 +91,9 @@ class BrocadeSwitchParser:
                 for fc_sw in fc_sw_container_lst:
                     sw_wwn = fc_sw['name']
                     # vfid_naming_dct[vf_id] = {'switch-name': fc_sw['user-friendly-name'], 'fabric-name': fc_sw['fabric-user-friendly-name']}
-                    current_sw_dct = {key: fc_sw[key] for key in BrocadeSwitchParser.FC_SWITCH_LEAFS}                        
+                    current_sw_dct = {key: fc_sw[key] for key in BrocadeSwitchParser.FC_SWITCH_LEAFS}
+                    current_sw_dct['switch-wwn'] = fc_sw['name']
+                    current_sw_dct['switch-name'] = fc_sw['user-friendly-name']
                     if fc_logical_sw_container_lst:
                         # find logical switch dictionary with the same switch wwn
                         for fc_logical_sw in fc_logical_sw_container_lst:
