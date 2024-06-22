@@ -94,7 +94,8 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
                 # add active policy or error-message dictionary to the maps configuration dictionary
                 maps_config_dct[vf_id] = {'vf-id': vf_id, 'maps-policy': active_policy}
                 # add switch details
-                sw_details = self._get_switch_details(vf_id)
+                # sw_details = self._get_switch_details(vf_id)
+                sw_details = self.sw_parser.get_switch_details(vf_id)
                 maps_config_dct[vf_id].update(sw_details)
                 
         return maps_config_dct
@@ -144,7 +145,8 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
                 if not vf_id in self.maps_config:
                     self.maps_config[vf_id] = {'vf-id': vf_id, 'maps-policy': None}
                     # add switch details
-                    sw_details = self._get_switch_details(vf_id)
+                    # sw_details = self._get_switch_details(vf_id)
+                    sw_details = self.sw_parser.get_switch_details(vf_id)
                     self.maps_config[vf_id].update(sw_details)
                 # add maps configuration dictionary for the current vf-id with the its maps-actions
                 self.maps_config[vf_id]['maps-actions'] = maps_actions
@@ -231,10 +233,13 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
         dashboard_rule_dct = {}
         # parsing triggered events for for each logical switch
         for vf_id, dashboard_rule_telemetry in self.sw_telemetry.dashboard_rule.items():
+            # get sw_name, sw_wwn, vf_id to add
+            sw_details = self.sw_parser.get_switch_details(vf_id)
             
             if dashboard_rule_telemetry.get('Response'):
                 # list of the triggered events for the current logical switch with vf_id
                 dashboard_rule_dct[vf_id] = []
+                
                 # list of dictionaries. each dictionary is the triggered event
                 container = dashboard_rule_telemetry['Response']['dashboard-rule']
                 # cheking each event
@@ -248,6 +253,8 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
                     # create dictionary containing triggered event details
                     current_db_rule_dct = {leaf: db_rule.get(leaf) for leaf in BrocadeMAPSParser.DB_RULE_LEAFS}
                     current_db_rule_dct['severity'] = db_rule_severity
+                    # add sw_name, sw_wwn, vf-id
+                    current_db_rule_dct.update(sw_details)
                     # triggered event might containt single or miltiple objects that violated the rule (ports for example)
                     for object_item in db_rule['objects']['object']:
                         # the object format is as follows: <element>:<value>
@@ -265,6 +272,7 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
                 current_db_rule_dct['name'] = error_msg
                 current_db_rule_dct['category'] = error_msg
                 current_db_rule_dct['severity'] = 0
+                current_db_rule_dct.update(sw_details)
                 dashboard_rule_dct[vf_id].append(current_db_rule_dct)
         return dashboard_rule_dct
 

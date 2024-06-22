@@ -7,7 +7,7 @@ Created on Tue Feb  6 13:36:35 2024
 
 import re
 from collections import defaultdict
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Optional
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
@@ -26,8 +26,8 @@ class BrocadeSwitchParser:
     
     
     FC_SWITCH_LEAFS = ['name', 'domain-id', 'user-friendly-name', 'is-enabled-state', 
-                      'up-time', 'principal', 'ip-address', 'model', 'firmware-version', 
-                      'vf-id', 'fabric-user-friendly-name', 'ag-mode']
+                      'up-time', 'principal', 'ip-address', 'subnet-mask', 'model', 'firmware-version', 
+                      'vf-id', 'fabric-user-friendly-name', 'ag-mode', 'operational-status']
     
     FC_LOGICAL_SWITCH_LEAFS = ['base-switch-enabled',  'default-switch-status',  
                               'fabric-id', 'logical-isl-enabled', 'port-member-list']
@@ -196,9 +196,13 @@ class BrocadeSwitchParser:
         for sw_params_dct in self.fc_switch.values():
             if sw_params_dct.get('is-enabled-state') is None:
                 switch_state = 'Unknown'
+                switch_state_id = None
+                sw_params_dct['switch-state-id'] = None
             else:
                 switch_state = 'Online' if sw_params_dct['is-enabled-state'] else 'Offline'
+                switch_state_id = 1 if sw_params_dct['is-enabled-state'] else 0
             sw_params_dct['switch-state'] = switch_state
+            sw_params_dct['switch-state-id'] = switch_state_id
             
 
     def _set_switch_mode(self) -> None:
@@ -237,15 +241,21 @@ class BrocadeSwitchParser:
             
             if sw_params_dct.get('is-enabled-state') is False:
                 switch_role = 'Disabled'
+                switch_role_id = -1
             elif sw_params_dct['principal'] == 1:
                 switch_role = 'Principal'
+                switch_role_id = 1
             elif sw_params_dct['ag-mode'] == 3:
                 switch_role = None
+                switch_role_id = None
             elif sw_params_dct['principal'] == 0:
                 switch_role = 'Subordinate'
+                switch_role_id = 0
             else:
                 switch_role = 'Unknown'
+                switch_role_id = None
             sw_params_dct['switch-role'] = switch_role
+            sw_params_dct['switch-role-id'] = switch_role_id
     
     
     def _get_fabric_switch_value(self) -> Dict[int, List[Dict[str, Union[str, int]]]]:
@@ -273,6 +283,7 @@ class BrocadeSwitchParser:
                 for fc_sw in fabric_container_lst:
                     current_sw_dct = {key: fc_sw[key] for key in BrocadeSwitchParser.FABRIC_SWITCH_LEAFS}
                     current_sw_dct['fabric-id'] = vf_id
+                    current_sw_dct['switch-wwn'] = current_sw_dct['name']
                     # add fabric_name from the fc_switch attribute
                     if self.fc_switch.get(vf_id):
                         current_sw_dct['fabric-user-friendly-name'] = self.fc_switch[vf_id]['fabric-user-friendly-name']
@@ -287,8 +298,27 @@ class BrocadeSwitchParser:
                 # add list of swithes in the current fabric to to the total fabrics dictionary
                 fabric_dct[vf_id] = current_fabric_lst
         return fabric_dct
-    
-    
+
+
+    def get_switch_details(self, vf_id: int, keys=['switch-name', 'switch-wwn', 'vf-id']) -> Dict[str, Optional[str]]:
+        """
+        Method to get switch details.
+        
+        Args:
+            vf_id {int}: switch vf_id.
+            keys {list}: extracted switch parameters titles.
+        
+        Returns:
+            Dict[str, Optional[str]]: Dictionary with switchparameters values.
+        """
+        
+        sw_details = self.fc_switch.get(vf_id)
+        if sw_details:
+            return {key: sw_details[key] for key in keys}
+        else:
+            return {key: None for key in keys}
+
+
     @staticmethod
     def seconds_to_hrf(seconds: int) -> str:
         """
