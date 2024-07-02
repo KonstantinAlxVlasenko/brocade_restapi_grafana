@@ -9,9 +9,10 @@ from datetime import date, datetime
 from typing import Dict, List, Union
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+from brocade_base_parser import BrocadeTelemetryParser
 
 
-class BrocadeChassisParser:
+class BrocadeChassisParser(BrocadeTelemetryParser):
     """
     Class to create chassis level parameters dictionaries and license list.
 
@@ -35,7 +36,8 @@ class BrocadeChassisParser:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        super().__init__(sw_telemetry)
+        # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._chassis: dict = self._get_chassis_value()
         if self.chassis:
             self._get_switch_value()
@@ -118,17 +120,21 @@ class BrocadeChassisParser:
         # if switch doesn't support virtual fabrics
         if self.chassis['vf-supported'] is False:
             self.chassis['virtual-fabrics'] = 'Not Applicable'
+            self.chassis['virtual-fabrics-id'] = -1
             self.chassis['ls-number'] = 0
         else: 
             # if virtual mode is enabled ls qunatity is calculated by '_get_switch_value' method
             if self.chassis['vf-enabled'] is True:
                 self.chassis['virtual-fabrics'] = 'Enabled'
+                self.chassis['virtual-fabrics-id'] = 1
             # if virtual mode is disabled ls number is 0
             elif self.chassis['vf-enabled'] is False:
                 self.chassis['virtual-fabrics'] = 'Disabled'
+                self.chassis['virtual-fabrics-id'] = 1
                 self.chassis['ls-number'] = 0
             else:
                 self.chassis['virtual-fabrics'] = None
+                self.chassis['virtual-fabrics-id'] = None
                 if not 'ls-number' in self.chassis:
                     self.chassis['ls-number'] = None
                 
@@ -198,10 +204,13 @@ class BrocadeChassisParser:
             container = self.sw_telemetry.clock_server['Response']['clock-server']
             # active ntp server
             ntp_dct['active-server'] = container.get('active-server')
+            ntp_dct['chassis-wwn'] = self.ch_wwn
             if container.get('ntp-server-address'):
                 ntp_lst = container['ntp-server-address'].get('server-address')
                 # defined ntp servers
                 ntp_dct['ntp-server-address'] = ', '.join(ntp_lst) if ntp_lst else None
+            else:
+                ntp_dct['ntp-server-address'] = None
         return ntp_dct
                 
        
@@ -242,7 +251,8 @@ class BrocadeChassisParser:
                 # license_feature_lst.append([lic_feature, exp_date_str, lic_status])
                 license_feature_lst.append({'feature': lic_feature, 
                                             'expiration-date': exp_date_str, 
-                                            'license-status-id': lic_status})
+                                            'license-status-id': lic_status,
+                                            'chassis-wwn': self.ch_wwn})
         # license module extracted but container is empty
         else:
             if self.sw_telemetry.sw_license.get('status-code'):
@@ -250,7 +260,8 @@ class BrocadeChassisParser:
                 # license_feature_lst.append([lic_feature, 'Not applicable', 0])
                 license_feature_lst.append({'feature': lic_feature, 
                                             'expiration-date': 'Not Applicable', 
-                                            'license-status-id': 0})
+                                            'license-status-id': 0,
+                                            'chassis-wwn': self.ch_wwn})
         return license_feature_lst
             
 

@@ -19,6 +19,8 @@ from brocade_maps_parser import BrocadeMAPSParser
 from brocade_fru_parser import BrocadeFRUParser
 from brocade_switch_parser import BrocadeSwitchParser
 
+from brocade_chassis_toolbar import BrocadeChassisToolbar
+
 
 def load_object(dirname, filename):
     filpath = os.path.join(dirname, filename)
@@ -159,6 +161,11 @@ def get_ordered_values(values_dct, keys, fillna='no data'):
 request_status_container_labels = ['module', 'container', 'vf-id']
 # TELEMETRY_STATUS_ID = {'OK': 1, 'WARNING': 2, 'FAIL': 3}
 gauge_request_status_id = gauge_init(name='request_status_id', description='Request status id', label_names=request_status_container_labels)
+
+
+
+gauge_request_status_id._labelnames
+
 fill_chassis_level_gauge_metrics(gauge_request_status_id, gauge_data=request_status_now.request_status, label_names=request_status_container_labels, metric_name='status-id')
 # HTTP Status Code, 200-OK, 400-Bad Request etc
 gauge_request_status_code = gauge_init(name='request_status_code', description='HTTP Request status code', label_names=request_status_container_labels)
@@ -194,9 +201,8 @@ gauge_chassis_fos =  gauge_init(name='chassis_fos', description='Chassis firmwar
 fill_chassis_level_gauge_metrics(gauge_chassis_fos, gauge_data=ch_parser_now.chassis, label_names=chassis_fos_labels)
 
 # chassis ls number
-chassis_ls_number_labels = chassis_labels + ['ls-number']
-gauge_chassis_ls_number =  gauge_init(name='chassis_ls_number', description='Chassis logical switch number', label_names=chassis_ls_number_labels)
-fill_chassis_level_gauge_metrics(gauge_chassis_ls_number, gauge_data=ch_parser_now.chassis, label_names=chassis_ls_number_labels)
+gauge_chassis_ls_number =  gauge_init(name='chassis_ls_number', description='Chassis logical switch number', label_names=chassis_labels)
+fill_chassis_level_gauge_metrics(gauge_chassis_ls_number, gauge_data=ch_parser_now.chassis, label_names=chassis_labels, metric_name='ls-number')
 
 # chassis vf mode
 # -1 - 'Not Applicable',  1 - 'Enabled', 0 - 'Disabled'
@@ -204,16 +210,35 @@ gauge_chassis_vf_mode =  gauge_init(name='chassis_vf_mode', description='Chassis
 fill_chassis_level_gauge_metrics(gauge_chassis_vf_mode, gauge_data=ch_parser_now.chassis, label_names=chassis_labels, metric_name='virtual-fabrics-id')
 
 
-# chassis datetetime gauge
-datetime_labels = ['date', 'time', 'time-zone']
-gauge_datetime = gauge_init(name='datetime_parameters', description='Datetime and timezone', label_names=datetime_labels)
-fill_chassis_level_gauge_metrics(gauge_datetime, gauge_data=ch_parser_now.chassis, label_names=datetime_labels)
+# chassis date gauge
+chassis_date_labels = chassis_labels + ['date']
+gauge_chassis_date =  gauge_init(name='chassis_date', description='Chassis date', label_names=chassis_date_labels)
+fill_chassis_level_gauge_metrics(gauge_chassis_ls_number, gauge_data=ch_parser_now.chassis, label_names=chassis_date_labels)
+
+# chassis time gauge
+chassis_time_labels = chassis_labels + ['time']
+gauge_chassis_time =  gauge_init(name='chassis_time', description='Chassis time', label_names=chassis_time_labels)
+fill_chassis_level_gauge_metrics(gauge_chassis_time, gauge_data=ch_parser_now.chassis, label_names=chassis_time_labels)
+
+# chassis timezone gauge
+chassis_tz_labels = chassis_labels + ['time-zone']
+gauge_chassis_tz =  gauge_init(name='chassis_tz', description='Chassis timezone', label_names=chassis_tz_labels)
+fill_chassis_level_gauge_metrics(gauge_chassis_tz, gauge_data=ch_parser_now.chassis, label_names=chassis_tz_labels)
 
 
 # chassis ntpserver gauge
-ntp_labels = ['active-server', 'ntp-server-address']
-gauge_ntp_server = gauge_init(name='ntp_server', description='NTP Address', label_names=ntp_labels)
-fill_chassis_level_gauge_metrics(gauge_ntp_server, gauge_data=ch_parser_now.ntp_server, label_names=ntp_labels)
+chassis_wwn_label = ['chassis-wwn']
+# chassis active ntp
+chassis_ntp_active_labels = chassis_wwn_label + ['active-server']
+gauge_ntp_active = gauge_init(name='ntp_server', description='Active NTP Address', label_names=chassis_ntp_active_labels)
+fill_chassis_level_gauge_metrics(gauge_ntp_active, gauge_data=ch_parser_now.ntp_server, label_names=chassis_ntp_active_labels)
+
+# chassis configured ntp
+chassis_ntp_configured_labels = chassis_wwn_label + ['ntp-server-address']
+gauge_ntp_configured = gauge_init(name='ntp_list', description='Configured NTP Address(es)', label_names=chassis_ntp_configured_labels)
+fill_chassis_level_gauge_metrics(gauge_ntp_configured, gauge_data=ch_parser_now.ntp_server, label_names=chassis_ntp_configured_labels)
+
+
 
 
 # chassis license gauge
@@ -221,9 +246,25 @@ fill_chassis_level_gauge_metrics(gauge_ntp_server, gauge_data=ch_parser_now.ntp_
 # 0 - No expiration date
 # 1 - Expiration date has not arrived
 # 2 - Expiration date has arrived
-license_labels = ['feature', 'expiration-date']
+license_labels = ['chassis-wwn', 'feature', 'expiration-date']
 gauge_licenses = gauge_init(name='licenses', description='Switch licenses', label_names=license_labels)
 fill_chassis_level_gauge_metrics(gauge_licenses, gauge_data=ch_parser_now.sw_license, label_names=license_labels, metric_name='license-status-id')
+
+
+chassis_tb = BrocadeChassisToolbar()
+
+chassis_tb.gauge_ch_name.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+chassis_tb.gauge_fos.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+chassis_tb.gauge_date.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+chassis_tb.gauge_time.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+chassis_tb.gauge_tz.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+chassis_tb.gauge_ntp_active.fill_chassis_gauge_metrics(ch_parser_now.ntp_server)
+chassis_tb.gauge_ntp_configured.fill_chassis_gauge_metrics(ch_parser_now.ntp_server)
+chassis_tb.gauge_vf_mode.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+chassis_tb.gauge_ls_number.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+chassis_tb.gauge_licenses.fill_chassis_gauge_metrics(ch_parser_now.sw_license)
+
+
 
 
 # fru fan gauge
