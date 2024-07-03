@@ -26,7 +26,8 @@ class BrocadeGauge:
         self._description  = description
         self._label_keys = label_keys
         self._metric_key = metric_key
-        self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys), registry=self.registry)
+        # self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys), registry=self.registry)
+        self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys))
 
     # def gauge_init(self, name: str, description: str, label_names: List[str]):
 

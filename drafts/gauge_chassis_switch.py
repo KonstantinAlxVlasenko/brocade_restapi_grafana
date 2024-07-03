@@ -3,7 +3,8 @@ import pickle
 from typing import List, Union, Dict
 
 
-script_dir = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts'
+# script_dir = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts'
+script_dir = r'/home/kavlasenko@dtln.local/Projects/brocade_restapi_grafana/drafts'
 # Change the current working directory
 os.chdir(script_dir)
 
@@ -32,7 +33,10 @@ def load_object(dirname, filename):
 
 
 
-storage_directory = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts\storage'
+# storage_directory = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts\storage'
+storage_directory = r'/home/kavlasenko@dtln.local/Projects/brocade_restapi_grafana/drafts/storage'
+
+
 
 o1_g620_009_vc5_f1 = load_object(dirname=storage_directory, filename='o1_g620_009_vc5_f1')
 o3_g630_003_vc01_f1_a = load_object(dirname=storage_directory, filename='o3_g630_003_vc01_f1_a')

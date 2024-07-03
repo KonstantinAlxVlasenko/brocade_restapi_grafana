@@ -4,8 +4,8 @@ import time
 from capacity import * 
 
 # Подключение к Infinibox
-system = InfiniBox('ibox2512-ost.dtln.ru',auth=("exporter", "22"),use_ssl=False)
-
+# system = InfiniBox('ibox2512-ost.dtln.ru',auth=("exporter", "22"),use_ssl=False)
+system = InfiniBox('ibox1159-nord.dtln.ru',auth=("exporter", "eRxybh22"),use_ssl=False)
 
 # Определение метрик 
 gauge_info_InfiniBox = Gauge('name_Infinibox', 'Name and version Infinibox', ['InfiniBox_name'])
@@ -121,6 +121,7 @@ def collect_metrics():
 # Запуск экспортера
 if __name__ == '__main__':
     start_http_server(13053)
+    # collect_metrics()
     while True:
         collect_metrics()
         time.sleep(60)
