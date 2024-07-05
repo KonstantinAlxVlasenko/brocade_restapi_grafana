@@ -45,7 +45,7 @@ class BrocadeRequestStatus:
         self._time: datetime = datetime.now().strftime("%H:%M:%S")
         self._request_status: dict = self._get_request_status()
         
-        
+
     def _get_request_status(self) -> List[Dict[str, Union[str, int]]]:
         """
         Method verifies telemetry request status for all http requests.
@@ -62,20 +62,21 @@ class BrocadeRequestStatus:
         # check request status for the telemetry with url wo vf_id
         for current_sw_telemetry, (module, container) in self.sw_telemetry._ch_unique_containers:
             request_status_lst.append(
-                BrocadeRequestStatus._create_status_dct(current_sw_telemetry, module, container)
+                BrocadeRequestStatus._create_status_dct(self.sw_telemetry.sw_ipaddress, current_sw_telemetry, module, container)
                 )
                 
         # check request status for the telemetry with url w vf_id        
         for current_sw_telemetry, (module, container) in self.sw_telemetry._vf_unique_containers:
             for vf_id, current_vf_telemetry in current_sw_telemetry.items():
                 request_status_lst.append(
-                    BrocadeRequestStatus._create_status_dct(current_vf_telemetry, module, container, vf_id)
+                    BrocadeRequestStatus._create_status_dct(self.sw_telemetry.sw_ipaddress, current_vf_telemetry, module, container, vf_id)
                     )
         return request_status_lst
     
     
     @staticmethod
-    def _create_status_dct(telemetry_dct: Dict[str, Union[str, int]], 
+    def _create_status_dct(ip_address: str,
+                           telemetry_dct: Dict[str, Union[str, int]], 
                            module: str, container: str, 
                            vf_id=None) -> Dict[str, Union[str, int]]:
         """
@@ -106,6 +107,7 @@ class BrocadeRequestStatus:
         # add status and its id
         telemetry_status_dct['status'] = status
         telemetry_status_dct['status-id'] =  BrocadeRequestStatus.TELEMETRY_STATUS_ID[status]
+        telemetry_status_dct['ip-address'] = ip_address
         return telemetry_status_dct
     
     
@@ -144,6 +146,11 @@ class BrocadeRequestStatus:
     def sw_telemetry(self):
         return self._sw_telemetry
 
+
+    @property
+    def ch_wwn(self):
+        return self._ch_wwn
+    
                 
     @property
     def date(self):

@@ -1,9 +1,17 @@
 from brocade_base_gauge import BrocadeGauge
 
+from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
+class BrocadeChassisToolbar:
+    """
+    Class to create Chassis toolbar.
+    Chassis Toolbar is a set of prometheus gauges:
+    chassis_name, fos version, date, time, timezone, ntp_active, ntp_configured, vf_mode, ls_number, licenses installed.
+    Each unique chassis identified by chassis wwn, serial number, model and product name.
 
-class BrocadeChassisToolbar():
-
+    Attributes:
+        sw_telemetry: set of switch telemetry retrieved from the switch
+    """
 
     chassis_keys = ['chassis-wwn', 'switch-serial-number', 'model', 'product-name']
     chassis_name_keys = chassis_keys + ['chassis-user-friendly-name']
@@ -15,12 +23,10 @@ class BrocadeChassisToolbar():
     ntp_configured_keys = ['chassis-wwn', 'ntp-server-address']
     license_keys = ['chassis-wwn', 'feature', 'expiration-date']
 
-    # vf_mode_metric = 'virtual-fabrics-id'
-    # ls_number_metric =  'ls-number'
-    # license_metric =  'license-status-id'
 
+    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
 
-    def __init__(self):
+        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
 
         # chassis name gauge
         self._gauge_ch_name = BrocadeGauge(name='chassis_name', description='Chassis name', 
@@ -59,7 +65,12 @@ class BrocadeChassisToolbar():
                                             label_keys=BrocadeChassisToolbar.license_keys, metric_key='license-status-id')
 
     def __repr__(self):
-            return f"{self.__class__.__name__}"
+        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
+
+
+    @property
+    def sw_telemetry(self):
+        return self._sw_telemetry
 
 
     @property

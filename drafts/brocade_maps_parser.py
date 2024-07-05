@@ -173,7 +173,9 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
                 if not ssp_leaf in container:
                     continue
                 state = container[ssp_leaf]
-                ssp_report_lst.append({'name': ssp_leaf,
+                ssp_report_lst.append({'chassis-wwn': self.ch_wwn,
+                                       'chassis-name': self.ch_name,
+                                       'name': ssp_leaf,
                                        'operational-state': state.upper(),
                                        'operational-state-id': BrocadeMAPSParser.SSP_STATE[state]})
         # elif self.sw_telemetry.ssp_report.get('status-code'):
@@ -202,6 +204,8 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
             system_resources_dct = self.sw_telemetry.system_resources['Response']['system-resources'].copy()
             missing_resources_dct = {resource: None for resource in resources if resource not in system_resources_dct}
             system_resources_dct.update(missing_resources_dct)
+            system_resources_dct['chassis-wwn'] = self.ch_wwn
+            system_resources_dct['chassis-name'] = self.ch_name
             return system_resources_dct
         else:
             return dict()
@@ -277,9 +281,9 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
         return dashboard_rule_dct
 
 
-    @property
-    def sw_telemetry(self):
-        return self._sw_telemetry
+    # @property
+    # def sw_telemetry(self):
+    #     return self._sw_telemetry
     
 
     @property

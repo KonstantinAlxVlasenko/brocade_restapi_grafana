@@ -3,8 +3,8 @@ import pickle
 from typing import List, Union, Dict
 
 
-# script_dir = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts'
-script_dir = r'/home/kavlasenko@dtln.local/Projects/brocade_restapi_grafana/drafts'
+script_dir = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts'
+# script_dir = r'/home/kavlasenko@dtln.local/Projects/brocade_restapi_grafana/drafts'
 # Change the current working directory
 os.chdir(script_dir)
 
@@ -21,6 +21,10 @@ from brocade_fru_parser import BrocadeFRUParser
 from brocade_switch_parser import BrocadeSwitchParser
 
 from brocade_chassis_toolbar import BrocadeChassisToolbar
+from brocade_request_status_toolbar import BrocadeRequestStatusToolbar
+from brocade_fru_toolbar import BrocadeFRUToolbar
+from brocade_maps_system_toolbar import BrocadeMAPSSystemToolbar
+from brocade_maps_dashboard_toolbar import BrocadeMAPSDashboardToolbar
 
 
 def load_object(dirname, filename):
@@ -33,10 +37,11 @@ def load_object(dirname, filename):
 
 
 
-# storage_directory = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts\storage'
-storage_directory = r'/home/kavlasenko@dtln.local/Projects/brocade_restapi_grafana/drafts/storage'
+storage_directory = r'E:\Documents\05.PYTHON\Projects\brocade_restapi_grafana\drafts\storage'
+# storage_directory = r'/home/kavlasenko@dtln.local/Projects/brocade_restapi_grafana/drafts/storage'
 
-
+chassis_keys = ['chassis-wwn', 'switch-serial-number', 'model', 'product-name']
+chassis_name_keys = chassis_keys + ['chassis-user-friendly-name']
 
 o1_g620_009_vc5_f1 = load_object(dirname=storage_directory, filename='o1_g620_009_vc5_f1')
 o3_g630_003_vc01_f1_a = load_object(dirname=storage_directory, filename='o3_g630_003_vc01_f1_a')
@@ -61,7 +66,7 @@ request_status_prev = BrocadeRequestStatus(sw_telemetry_prev)
 ch_parser_prev = BrocadeChassisParser(sw_telemetry_prev)
 sw_parser_prev = BrocadeSwitchParser(sw_telemetry_prev)
 fru_parser_prev = BrocadeFRUParser(sw_telemetry_prev)
-maps_config_prev = BrocadeMAPSParser(sw_telemetry_prev, sw_parser_prev)
+maps_parser_prev = BrocadeMAPSParser(sw_telemetry_prev, sw_parser_prev)
 fcport_params_parser_prev = BrocadeFCPortParametersParser(sw_telemetry_prev, sw_parser_prev)
 sfp_media_parser_prev = BrocadeSFPMediaParser(sw_telemetry_prev, fcport_params_parser_prev)
 fcport_stats_parser_prev = BrocadeFCPortStatisticsParser(sw_telemetry_prev, fcport_params_parser_prev)
@@ -72,7 +77,7 @@ request_status_now = BrocadeRequestStatus(sw_telemetry_now)
 ch_parser_now = BrocadeChassisParser(sw_telemetry_now)
 sw_parser_now = BrocadeSwitchParser(sw_telemetry_now)
 fru_parser_now = BrocadeFRUParser(sw_telemetry_now)
-maps_config_now = BrocadeMAPSParser(sw_telemetry_now, sw_parser_now)
+maps_parser_now = BrocadeMAPSParser(sw_telemetry_now, sw_parser_now)
 fcport_params_parser_now = BrocadeFCPortParametersParser(sw_telemetry_now, sw_parser_now, fcport_params_parser_prev)
 sfp_media_parser_now = BrocadeSFPMediaParser(sw_telemetry_now, fcport_params_parser_now, sfp_media_parser_prev)
 fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport_params_parser_now, fcport_stats_parser_prev)
@@ -161,101 +166,106 @@ def get_ordered_values(values_dct, keys, fillna='no data'):
     return values_lst
 
 
-# request status gauge
-request_status_container_labels = ['module', 'container', 'vf-id']
-# TELEMETRY_STATUS_ID = {'OK': 1, 'WARNING': 2, 'FAIL': 3}
-gauge_request_status_id = gauge_init(name='request_status_id', description='Request status id', label_names=request_status_container_labels)
+# # request status gauge
+# request_status_container_labels = ['module', 'container', 'vf-id']
+# # TELEMETRY_STATUS_ID = {'OK': 1, 'WARNING': 2, 'FAIL': 3}
+# gauge_request_status_id = gauge_init(name='request_status_id', description='Request status id', label_names=request_status_container_labels)
+
+
+# fill_chassis_level_gauge_metrics(gauge_request_status_id, gauge_data=request_status_now.request_status, label_names=request_status_container_labels, metric_name='status-id')
+# # HTTP Status Code, 200-OK, 400-Bad Request etc
+# gauge_request_status_code = gauge_init(name='request_status_code', description='HTTP Request status code', label_names=request_status_container_labels)
+# fill_chassis_level_gauge_metrics(gauge_request_status_code, gauge_data=request_status_now.request_status, label_names=request_status_container_labels, metric_name='status-code')
+
+# # request status error message
+# request_status_error_labels = request_status_container_labels + ['error-message']
+# gauge_request_status_error = gauge_init(name='request_status_error', description='HTTP Request status error', label_names=request_status_error_labels)
+# fill_chassis_level_gauge_metrics(gauge_request_status_error, gauge_data=request_status_now.request_status, label_names=request_status_error_labels)
+
+# # request status date
+# request_status_date_labels = request_status_container_labels + ['date']
+# gauge_request_status_date = gauge_init(name='request_status_date', description='HTTP Request status date', label_names=request_status_date_labels)
+# fill_chassis_level_gauge_metrics(gauge_request_status_date, gauge_data=request_status_now.request_status, label_names=request_status_date_labels)
+
+# # request status time
+# request_status_time_labels = request_status_container_labels + ['time']
+# gauge_request_status_time = gauge_init(name='request_status_time', description='HTTP Request status time', label_names=request_status_time_labels)
+# fill_chassis_level_gauge_metrics(gauge_request_status_time, gauge_data=request_status_now.request_status, label_names=request_status_time_labels)
+
+
+request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
+request_status_tb.gauge_rs_id.fill_chassis_gauge_metrics(request_status_now.request_status)
+request_status_tb.gauge_rs_code.fill_chassis_gauge_metrics(request_status_now.request_status)
+request_status_tb.gauge_rs_error.fill_chassis_gauge_metrics(request_status_now.request_status)
+request_status_tb.gauge_rs_date.fill_chassis_gauge_metrics(request_status_now.request_status)
+request_status_tb.gauge_rs_time.fill_chassis_gauge_metrics(request_status_now.request_status)
 
 
 
-gauge_request_status_id._labelnames
+# # chassis parameters gauge
+# chassis_labels = ['chassis-wwn', 'switch-serial-number', 'model', 'product-name']
+# # chassis name gauge
+# chassis_name_labels = chassis_labels + ['chassis-user-friendly-name']
+# gauge_chassis_name =  gauge_init(name='chassis_name', description='Chassis name', label_names=chassis_name_labels)
+# fill_chassis_level_gauge_metrics(gauge_chassis_name, gauge_data=ch_parser_now.chassis, label_names=chassis_name_labels)
 
-fill_chassis_level_gauge_metrics(gauge_request_status_id, gauge_data=request_status_now.request_status, label_names=request_status_container_labels, metric_name='status-id')
-# HTTP Status Code, 200-OK, 400-Bad Request etc
-gauge_request_status_code = gauge_init(name='request_status_code', description='HTTP Request status code', label_names=request_status_container_labels)
-fill_chassis_level_gauge_metrics(gauge_request_status_code, gauge_data=request_status_now.request_status, label_names=request_status_container_labels, metric_name='status-code')
+# # chassis fos version
+# chassis_fos_labels = chassis_labels + ['firmware-version']
+# gauge_chassis_fos =  gauge_init(name='chassis_fos', description='Chassis firmware version', label_names=chassis_fos_labels)
+# fill_chassis_level_gauge_metrics(gauge_chassis_fos, gauge_data=ch_parser_now.chassis, label_names=chassis_fos_labels)
 
-# request status error message
-request_status_error_labels = request_status_container_labels + ['error-message']
-gauge_request_status_error = gauge_init(name='request_status_error', description='HTTP Request status error', label_names=request_status_error_labels)
-fill_chassis_level_gauge_metrics(gauge_request_status_error, gauge_data=request_status_now.request_status, label_names=request_status_error_labels)
+# # chassis ls number
+# gauge_chassis_ls_number =  gauge_init(name='chassis_ls_number', description='Chassis logical switch number', label_names=chassis_labels)
+# fill_chassis_level_gauge_metrics(gauge_chassis_ls_number, gauge_data=ch_parser_now.chassis, label_names=chassis_labels, metric_name='ls-number')
 
-# request status date
-request_status_date_labels = request_status_container_labels + ['date']
-gauge_request_status_date = gauge_init(name='request_status_date', description='HTTP Request status date', label_names=request_status_date_labels)
-fill_chassis_level_gauge_metrics(gauge_request_status_date, gauge_data=request_status_now.request_status, label_names=request_status_date_labels)
-
-# request status time
-request_status_time_labels = request_status_container_labels + ['time']
-gauge_request_status_time = gauge_init(name='request_status_time', description='HTTP Request status time', label_names=request_status_time_labels)
-fill_chassis_level_gauge_metrics(gauge_request_status_time, gauge_data=request_status_now.request_status, label_names=request_status_time_labels)
-
+# # chassis vf mode
+# # -1 - 'Not Applicable',  1 - 'Enabled', 0 - 'Disabled'
+# gauge_chassis_vf_mode =  gauge_init(name='chassis_vf_mode', description='Chassis virtual fabrics mode', label_names=chassis_labels)
+# fill_chassis_level_gauge_metrics(gauge_chassis_vf_mode, gauge_data=ch_parser_now.chassis, label_names=chassis_labels, metric_name='virtual-fabrics-id')
 
 
-# chassis parameters gauge
-chassis_labels = ['chassis-wwn', 'switch-serial-number', 'model', 'product-name']
-# chassis name gauge
-chassis_name_labels = chassis_labels + ['chassis-user-friendly-name']
-gauge_chassis_name =  gauge_init(name='chassis_name', description='Chassis name', label_names=chassis_name_labels)
-fill_chassis_level_gauge_metrics(gauge_chassis_name, gauge_data=ch_parser_now.chassis, label_names=chassis_name_labels)
+# # chassis date gauge
+# chassis_date_labels = chassis_labels + ['date']
+# gauge_chassis_date =  gauge_init(name='chassis_date', description='Chassis date', label_names=chassis_date_labels)
+# fill_chassis_level_gauge_metrics(gauge_chassis_ls_number, gauge_data=ch_parser_now.chassis, label_names=chassis_date_labels)
 
-# chassis fos version
-chassis_fos_labels = chassis_labels + ['firmware-version']
-gauge_chassis_fos =  gauge_init(name='chassis_fos', description='Chassis firmware version', label_names=chassis_fos_labels)
-fill_chassis_level_gauge_metrics(gauge_chassis_fos, gauge_data=ch_parser_now.chassis, label_names=chassis_fos_labels)
+# # chassis time gauge
+# chassis_time_labels = chassis_labels + ['time']
+# gauge_chassis_time =  gauge_init(name='chassis_time', description='Chassis time', label_names=chassis_time_labels)
+# fill_chassis_level_gauge_metrics(gauge_chassis_time, gauge_data=ch_parser_now.chassis, label_names=chassis_time_labels)
 
-# chassis ls number
-gauge_chassis_ls_number =  gauge_init(name='chassis_ls_number', description='Chassis logical switch number', label_names=chassis_labels)
-fill_chassis_level_gauge_metrics(gauge_chassis_ls_number, gauge_data=ch_parser_now.chassis, label_names=chassis_labels, metric_name='ls-number')
-
-# chassis vf mode
-# -1 - 'Not Applicable',  1 - 'Enabled', 0 - 'Disabled'
-gauge_chassis_vf_mode =  gauge_init(name='chassis_vf_mode', description='Chassis virtual fabrics mode', label_names=chassis_labels)
-fill_chassis_level_gauge_metrics(gauge_chassis_vf_mode, gauge_data=ch_parser_now.chassis, label_names=chassis_labels, metric_name='virtual-fabrics-id')
+# # chassis timezone gauge
+# chassis_tz_labels = chassis_labels + ['time-zone']
+# gauge_chassis_tz =  gauge_init(name='chassis_tz', description='Chassis timezone', label_names=chassis_tz_labels)
+# fill_chassis_level_gauge_metrics(gauge_chassis_tz, gauge_data=ch_parser_now.chassis, label_names=chassis_tz_labels)
 
 
-# chassis date gauge
-chassis_date_labels = chassis_labels + ['date']
-gauge_chassis_date =  gauge_init(name='chassis_date', description='Chassis date', label_names=chassis_date_labels)
-fill_chassis_level_gauge_metrics(gauge_chassis_ls_number, gauge_data=ch_parser_now.chassis, label_names=chassis_date_labels)
+# # chassis ntpserver gauge
+# chassis_wwn_label = ['chassis-wwn']
+# # chassis active ntp
+# chassis_ntp_active_labels = chassis_wwn_label + ['active-server']
+# gauge_ntp_active = gauge_init(name='ntp_server', description='Active NTP Address', label_names=chassis_ntp_active_labels)
+# fill_chassis_level_gauge_metrics(gauge_ntp_active, gauge_data=ch_parser_now.ntp_server, label_names=chassis_ntp_active_labels)
 
-# chassis time gauge
-chassis_time_labels = chassis_labels + ['time']
-gauge_chassis_time =  gauge_init(name='chassis_time', description='Chassis time', label_names=chassis_time_labels)
-fill_chassis_level_gauge_metrics(gauge_chassis_time, gauge_data=ch_parser_now.chassis, label_names=chassis_time_labels)
-
-# chassis timezone gauge
-chassis_tz_labels = chassis_labels + ['time-zone']
-gauge_chassis_tz =  gauge_init(name='chassis_tz', description='Chassis timezone', label_names=chassis_tz_labels)
-fill_chassis_level_gauge_metrics(gauge_chassis_tz, gauge_data=ch_parser_now.chassis, label_names=chassis_tz_labels)
-
-
-# chassis ntpserver gauge
-chassis_wwn_label = ['chassis-wwn']
-# chassis active ntp
-chassis_ntp_active_labels = chassis_wwn_label + ['active-server']
-gauge_ntp_active = gauge_init(name='ntp_server', description='Active NTP Address', label_names=chassis_ntp_active_labels)
-fill_chassis_level_gauge_metrics(gauge_ntp_active, gauge_data=ch_parser_now.ntp_server, label_names=chassis_ntp_active_labels)
-
-# chassis configured ntp
-chassis_ntp_configured_labels = chassis_wwn_label + ['ntp-server-address']
-gauge_ntp_configured = gauge_init(name='ntp_list', description='Configured NTP Address(es)', label_names=chassis_ntp_configured_labels)
-fill_chassis_level_gauge_metrics(gauge_ntp_configured, gauge_data=ch_parser_now.ntp_server, label_names=chassis_ntp_configured_labels)
+# # chassis configured ntp
+# chassis_ntp_configured_labels = chassis_wwn_label + ['ntp-server-address']
+# gauge_ntp_configured = gauge_init(name='ntp_list', description='Configured NTP Address(es)', label_names=chassis_ntp_configured_labels)
+# fill_chassis_level_gauge_metrics(gauge_ntp_configured, gauge_data=ch_parser_now.ntp_server, label_names=chassis_ntp_configured_labels)
 
 
 
 
-# chassis license gauge
-# License status:
-# 0 - No expiration date
-# 1 - Expiration date has not arrived
-# 2 - Expiration date has arrived
-license_labels = ['chassis-wwn', 'feature', 'expiration-date']
-gauge_licenses = gauge_init(name='licenses', description='Switch licenses', label_names=license_labels)
-fill_chassis_level_gauge_metrics(gauge_licenses, gauge_data=ch_parser_now.sw_license, label_names=license_labels, metric_name='license-status-id')
+# # chassis license gauge
+# # License status:
+# # 0 - No expiration date
+# # 1 - Expiration date has not arrived
+# # 2 - Expiration date has arrived
+# license_labels = ['chassis-wwn', 'feature', 'expiration-date']
+# gauge_licenses = gauge_init(name='licenses', description='Switch licenses', label_names=license_labels)
+# fill_chassis_level_gauge_metrics(gauge_licenses, gauge_data=ch_parser_now.sw_license, label_names=license_labels, metric_name='license-status-id')
 
 
-chassis_tb = BrocadeChassisToolbar()
+chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
 
 chassis_tb.gauge_ch_name.fill_chassis_gauge_metrics(ch_parser_now.chassis)
 chassis_tb.gauge_fos.fill_chassis_gauge_metrics(ch_parser_now.chassis)
@@ -271,37 +281,47 @@ chassis_tb.gauge_licenses.fill_chassis_gauge_metrics(ch_parser_now.sw_license)
 
 
 
-# fru fan gauge
-fan_labels = ['unit-number', 'airflow-direction']
-# FAN_STATE = {'absent': 0, 'ok': 1, 'below minimum': 2, 'above maximum': 3, 'unknown': 4, 'not ok': 5, 'faulty': 6}
-gauge_fan_state = gauge_init(name='fan_state', description='Status of each fan in the system', label_names=fan_labels)
-fill_chassis_level_gauge_metrics(gauge_fan_state, gauge_data=fru_parser_now.fru_fan, label_names=fan_labels, metric_name='operational-state-id')
-# fan speed
-gauge_fan_speed = gauge_init(name='fan_speed', description='Speed of each fan in the system', label_names=fan_labels)
-fill_chassis_level_gauge_metrics(gauge_fan_speed, gauge_data=fru_parser_now.fru_fan, label_names=fan_labels, metric_name='speed')
+# # fru fan gauge
+# fan_labels = ['unit-number', 'airflow-direction']
+# # FAN_STATE = {'absent': 0, 'ok': 1, 'below minimum': 2, 'above maximum': 3, 'unknown': 4, 'not ok': 5, 'faulty': 6}
+# gauge_fan_state = gauge_init(name='fan_state', description='Status of each fan in the system', label_names=fan_labels)
+# fill_chassis_level_gauge_metrics(gauge_fan_state, gauge_data=fru_parser_now.fru_fan, label_names=fan_labels, metric_name='operational-state-id')
+# # fan speed
+# gauge_fan_speed = gauge_init(name='fan_speed', description='Speed of each fan in the system', label_names=fan_labels)
+# fill_chassis_level_gauge_metrics(gauge_fan_speed, gauge_data=fru_parser_now.fru_fan, label_names=fan_labels, metric_name='speed')
 
 
-# fru ps gauge
-# PS_STATE = {'absent': 0, 'ok': 1, 'predicting failure': 2, 'unknown': 3, 'try reseating unit': 4, 'faulty': 5}
-ps_labels = ['unit-number']
-gauge_ps_state = gauge_init(name='ps', description='Status of the switch power supplies', label_names=ps_labels)
-fill_chassis_level_gauge_metrics(gauge_ps_state, gauge_data=fru_parser_now.fru_ps, label_names=ps_labels, metric_name='operational-state-id')
+# # fru ps gauge
+# # PS_STATE = {'absent': 0, 'ok': 1, 'predicting failure': 2, 'unknown': 3, 'try reseating unit': 4, 'faulty': 5}
+# ps_labels = ['unit-number']
+# gauge_ps_state = gauge_init(name='ps', description='Status of the switch power supplies', label_names=ps_labels)
+# fill_chassis_level_gauge_metrics(gauge_ps_state, gauge_data=fru_parser_now.fru_ps, label_names=ps_labels, metric_name='operational-state-id')
 
 
-# fru sensor gauge
-# SENSOR_STATE = {'absent': 0, 'ok': 1}
-sensor_labels = ['unit-number']
-gauge_sensor_state = gauge_init(name='sensor_state', description='Sensor temperature state', label_names=sensor_labels)
-fill_chassis_level_gauge_metrics(gauge_sensor_state, gauge_data=fru_parser_now.fru_sensor, label_names=sensor_labels, metric_name='operational-state-id')
-# sensor temperature
-gauge_sensor_temp = gauge_init(name='sensor_temp', description='Sensor temperature', label_names=sensor_labels)
-fill_chassis_level_gauge_metrics(gauge_sensor_temp, gauge_data=fru_parser_now.fru_sensor, label_names=sensor_labels, metric_name='temperature')
+# # fru sensor gauge
+# # SENSOR_STATE = {'absent': 0, 'ok': 1}
+# sensor_labels = ['unit-number']
+# gauge_sensor_state = gauge_init(name='sensor_state', description='Sensor temperature state', label_names=sensor_labels)
+# fill_chassis_level_gauge_metrics(gauge_sensor_state, gauge_data=fru_parser_now.fru_sensor, label_names=sensor_labels, metric_name='operational-state-id')
+# # sensor temperature
+# gauge_sensor_temp = gauge_init(name='sensor_temp', description='Sensor temperature', label_names=sensor_labels)
+# fill_chassis_level_gauge_metrics(gauge_sensor_temp, gauge_data=fru_parser_now.fru_sensor, label_names=sensor_labels, metric_name='temperature')
+
+
+fru_tb = BrocadeFRUToolbar(sw_telemetry_now)
+
+fru_tb.gauge_fan_state.fill_chassis_gauge_metrics(fru_parser_now.fru_fan)
+fru_tb.gauge_fan_speed.fill_chassis_gauge_metrics(fru_parser_now.fru_fan)
+fru_tb.gauge_ps_state.fill_chassis_gauge_metrics(fru_parser_now.fru_ps)
+fru_tb.gauge_sensor_state.fill_chassis_gauge_metrics(fru_parser_now.fru_sensor)
+fru_tb.gauge_sensor_temp.fill_chassis_gauge_metrics(fru_parser_now.fru_sensor)
 
 
 # maps system resources gauge
 gauge_system_resource_data = maps_config_now.system_resources.copy()
 gauge_system_resource_data['chassis-wwn'] = maps_config_now.ch_wwn
 system_resource_labels = ['chassis-wwn']
+
 # cpu
 gauge_cpu = gauge_init(name='cpu', description='CPU usage', label_names=system_resource_labels)
 fill_chassis_level_gauge_metrics(gauge_cpu, gauge_data=gauge_system_resource_data, label_names=system_resource_labels, metric_name='cpu-usage')
@@ -349,6 +369,29 @@ gauge_mapsdb_rule_severity = gauge_init(name='mapsdb_rule_severity', description
 fill_switch_level_gauge_metrics(gauge_mapsdb_rule_severity, gauge_data=maps_config_now.dashboard_rule, 
                                 label_names=maps_dashboard_labels, metric_name='severity', reverse=True)
 
+
+
+
+maps_system_tb = BrocadeMAPSSystemToolbar(sw_telemetry_now)
+maps_system_tb.gauge_sys_resource_chname.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
+maps_system_tb.gauge_cpu_usage.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
+maps_system_tb.gauge_flash_usage.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
+maps_system_tb.gauge_memory_usage.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
+
+maps_system_tb.gauge_ssp_report_chname.fill_chassis_gauge_metrics(maps_parser_now.ssp_report)
+maps_system_tb.gauge_ssp_report.fill_chassis_gauge_metrics(maps_parser_now.ssp_report)
+
+maps_dashboard_tb = BrocadeMAPSDashboardToolbar(sw_telemetry_now)
+maps_dashboard_tb.gauge_mapsconfig_swname.fill_switch_gauge_metrics(maps_parser_now.maps_config)
+maps_dashboard_tb.gauge_mapsconfig_vfid.fill_switch_gauge_metrics(maps_parser_now.maps_config)
+maps_dashboard_tb.gauge_maps_policy.fill_switch_gauge_metrics(maps_parser_now.maps_config)
+maps_dashboard_tb.gauge_maps_actions.fill_switch_gauge_metrics(maps_parser_now.maps_config)
+
+maps_dashboard_tb.gauge_db_swname.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+maps_dashboard_tb.gauge_db_vfid.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+maps_dashboard_tb.gauge_db_repetition_count.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+maps_dashboard_tb.gauge_db_triggered_count.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+maps_dashboard_tb.gauge_db_severity.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
 
 
 # switch name

@@ -325,37 +325,41 @@ class BrocadeSwitchTelemetry:
     def sw_ipaddress(self):
         return str(self._sw_ipaddress)
     
+    
     @property
     def secure_login(self):
         return self._secure_login    
+
 
     @property
     def chassis(self):
         """The complete details of the chassis."""
         return self._chassis
     
+
     @property
     def fabric_switch(self):
         """The list of configured switches in the fabric."""
         return self._fabric_switch
     
+
     @property
     def fc_switch(self):
         """Switch state parameters."""
         return self._fc_switch
+    
     
     @property
     def fc_logical_switch(self):
         """The logical switch state parameters of all configured logical switches."""
         return self._fc_logical_switch
     
+
     @property
     def ts_timezone(self):
         """The time zone parameters."""
         return self._ts_timezone
     
-        self._clock_server = {}
-        self._ntp_clock_server = {}
     
     @property
     def clock_server(self):
@@ -368,27 +372,32 @@ class BrocadeSwitchTelemetry:
         """The details about the power supply units."""
         return self._fru_ps
     
+
     @property
     def fru_fan(self):
         """The details about the fan units"""
         return self._fru_fan
     
+
     @property
     def fru_sensor(self):
         return self._fru_sensor
     
+
     @property
     def ssp_report(self):
         """The Switch Status Policy report container. 
         The SSP report provides the overall health status of the switch."""
         return self._ssp_report
     
+
     @property
     def system_resources(self):
         """The system resources (such as CPU, RAM, and flash memory usage) container. 
         Note that usage is not real time and may be delayed up to 2 minutes."""
         return self._system_resources
     
+
     @property
     def maps_policy(self):
         """The MAPS policy container.
@@ -397,11 +406,13 @@ class BrocadeSwitchTelemetry:
         When you enable a policy, all of the rules in the policy are in effect. A switch can have multiple policies."""
         return self._maps_policy
     
+
     @property
     def maps_config(self):
         """The MAPS configuration container (MAPS actions)."""
         return self._maps_config
     
+
     @property
     def dashboard_rule(self):
         """A list of dashboards container. 
@@ -410,21 +421,25 @@ class BrocadeSwitchTelemetry:
         You can view a triggered rules list for the last 7 days."""
         return self._dashboard_rule
     
+
     @property
     def sw_license(self):
         """The container for licenses installed on the switch."""
         return self._sw_license
     
+
     @property
     def fc_interface(self):
         """FC interface-related configuration and operational state."""
         return self._fc_interface
     
+
     @property
     def fc_statistics(self):
         """Statistics for all FC interfaces on the device."""
         return self._fc_statistics
     
+
     @property
     def media_rdp(self):
         """SFP transceivers media data container. 
@@ -432,17 +447,20 @@ class BrocadeSwitchTelemetry:
         interfaces, manufacturer, and other information."""
         return self._media_rdp
     
+
     @property
     def fdmi_hba(self):
         """A detailed view of the Fabric Device Management Interface (FDMI).
         List of HBA attributes registered with FDMI."""
         return self._fdmi_hba
     
+
     @property
     def fdmi_port(self):
         """A detailed view of the Fabric Device Management Interface (FDMI).
         A list of HBA port attributes registered with FDMI."""
         return self._fdmi_port
+    
     
     @property 
     def fc_nameserver(self):

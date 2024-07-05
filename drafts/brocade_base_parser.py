@@ -12,21 +12,33 @@ class BrocadeTelemetryParser:
 
         self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._ch_wwn = self._get_chassis_wwn()
+        self._ch_name = self._get_chassis_name()
         self._telemetry_date = self._get_telemetry_datetime('date')
         self._telemetry_time = self._get_telemetry_datetime('time')
 
 
     def _get_chassis_wwn(self) -> str:
         """
-        Method extracts chassis parameters from the chassis module.
+        Method extracts chassis wwn from the chassis module.
         
         Returns:
-            Chassis parameters dictionary.
-            Dictionary keys are CHASSIS_LEAFS. 
+            Chassis wwn. 
         """
         
         if self.sw_telemetry.chassis.get('Response'):
             return self.sw_telemetry.chassis['Response']['chassis']['chassis-wwn']
+        
+
+    def _get_chassis_name(self) -> str:
+        """
+        Method extracts chassis name from the chassis module.
+        
+        Returns:
+            Chassis name. 
+        """
+        
+        if self.sw_telemetry.chassis.get('Response'):
+            return self.sw_telemetry.chassis['Response']['chassis']['chassis-user-friendly-name']
         
 
     def _get_telemetry_datetime(self, key: str) -> str:
@@ -186,7 +198,11 @@ class BrocadeTelemetryParser:
     @property
     def ch_wwn(self):
         return self._ch_wwn
-    
+
+    @property
+    def ch_name(self):
+        return self._ch_name
+
 
     @property
     def telemetry_date(self):

@@ -7,9 +7,10 @@ Created on Tue Jan 30 17:45:30 2024
 from typing import Dict, List, Tuple, Union
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+from brocade_base_parser import BrocadeTelemetryParser
 
 
-class BrocadeFRUParser:
+class BrocadeFRUParser(BrocadeTelemetryParser):
     """
     Class to create sensor (ps and fan) readings lists.
 
@@ -49,7 +50,8 @@ class BrocadeFRUParser:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        super().__init__(sw_telemetry)
         self._fru_ps: list = self._get_ps_value()
         self._fru_fan: list = self._get_fan_value()
         self._fru_sensor: list = self._get_sensor_value()
@@ -72,7 +74,8 @@ class BrocadeFRUParser:
             for ps in container:
                 ps_id = 'Power Supply #' + str(ps['unit-number'])
                 ps_state = ps['operational-state']
-                ps_lst.append({'unit-number': ps_id, 
+                ps_lst.append({'chassis-wwn': self.ch_wwn,
+                               'unit-number': ps_id, 
                                'operational-state': ps_state.upper(), 
                                'operational-state-id': BrocadeFRUParser.PS_STATE.get(ps_state)})
         return ps_lst
@@ -96,7 +99,8 @@ class BrocadeFRUParser:
                 fan_airflow = fan['airflow-direction']
                 fan_state = fan['operational-state']
                 fan_speed = fan['speed']
-                fan_lst.append({'unit-number': fan_id, 
+                fan_lst.append({'chassis-wwn': self.ch_wwn,
+                                'unit-number': fan_id, 
                                 'airflow-direction': fan_airflow, 
                                 'operational-state': fan_state.upper(), 
                                 'operational-state-id': BrocadeFRUParser.FAN_STATE.get(fan_state), 
@@ -121,12 +125,13 @@ class BrocadeFRUParser:
             for sensor in container:
                 sensor_id = sensor['category'].capitalize() + ' #' + str(sensor['id'])
                 sensor_state = sensor['state']
-                sensor_lst.append({'unit-number': sensor_id,
+                sensor_lst.append({'chassis-wwn': self.ch_wwn,
+                                   'unit-number': sensor_id,
                                    'temperature': sensor['temperature'],
-                                    'operational-state': sensor_state.upper(), 
-                                    'operational-state-id': BrocadeFRUParser.SENSOR_STATE.get(sensor_state, 3), 
-                                    'slot-number': sensor.get('slot-number'), 
-                                    'index': sensor.get('index')})
+                                   'operational-state': sensor_state.upper(), 
+                                   'operational-state-id': BrocadeFRUParser.SENSOR_STATE.get(sensor_state, 3), 
+                                   'slot-number': sensor.get('slot-number'), 
+                                   'index': sensor.get('index')})
         return sensor_lst    
     
 

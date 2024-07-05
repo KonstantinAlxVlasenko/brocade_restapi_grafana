@@ -19,13 +19,14 @@ class BrocadeGauge:
     switch_wwn_key  = ['switch-wwn']
 
 
-    def __init__(self, name: str, description: str, label_keys: List[str], metric_key: str = None):
+    def __init__(self, name: str, description: str, label_keys: List[str], metric_key: str = None, reverse_filling: bool = False):
 
         self._registry = CollectorRegistry()
         self._name = name
         self._description  = description
         self._label_keys = label_keys
         self._metric_key = metric_key
+        self._reverse_filling = reverse_filling
         # self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys), registry=self.registry)
         self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys))
 
@@ -62,24 +63,23 @@ class BrocadeGauge:
             self.add_gauge_metric(gauge_data)
 
             
-    # def fill_switch_gauge_metrics(self, gauge_instance: Gauge, gauge_data: Dict[int, Dict], 
-    #                                     label_names: List[str], metric_name: str=None, reverse=False):
+    def fill_switch_gauge_metrics(self, gauge_data: Dict[int, Dict]):
         
-    #     if not gauge_data:
-    #         return
+        if not gauge_data:
+            return
         
-    #     for gauge_data_switch in gauge_data.values():
+        for gauge_data_switch in gauge_data.values():
         
-    #         if not gauge_data_switch:
-    #             continue
+            if not gauge_data_switch:
+                continue
         
-    #         if isinstance(gauge_data_switch, list):
-    #             gauge_data_switch_ordered = gauge_data_switch[::-1] if reverse else gauge_data_switch
-                    
-    #             for gauge_data_current in gauge_data_switch_ordered:
-    #                 self.add_gauge_metric(gauge_instance, gauge_data_current, label_names, metric_name)
-    #         elif isinstance(gauge_data_switch, dict):
-    #             self.add_gauge_metric(gauge_instance, gauge_data_switch, label_names, metric_name)
+            if isinstance(gauge_data_switch, list):
+                gauge_data_switch_ordered = gauge_data_switch[::-1] if self.reverse_filling else gauge_data_switch
+
+                for gauge_data_current in gauge_data_switch_ordered:
+                    self.add_gauge_metric(gauge_data_current)
+            elif isinstance(gauge_data_switch, dict):
+                self.add_gauge_metric(gauge_data_switch)
         
 
     def add_gauge_metric(self, gauge_data):
@@ -131,6 +131,11 @@ class BrocadeGauge:
     @property
     def metric_key(self):
         return self._metric_key
+    
+
+    @property
+    def reverse_filling(self):
+        return self._reverse_filling
 
 
     @property
