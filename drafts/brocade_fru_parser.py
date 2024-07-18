@@ -74,7 +74,8 @@ class BrocadeFRUParser(BrocadeTelemetryParser):
             for ps in container:
                 ps_id = 'Power Supply #' + str(ps['unit-number'])
                 ps_state = ps['operational-state']
-                ps_lst.append({'chassis-wwn': self.ch_wwn,
+                ps_lst.append({'chassis-name': self.ch_name,
+                               'chassis-wwn': self.ch_wwn,
                                'unit-number': ps_id, 
                                'operational-state': ps_state.upper(), 
                                'operational-state-id': BrocadeFRUParser.PS_STATE.get(ps_state)})
@@ -99,7 +100,8 @@ class BrocadeFRUParser(BrocadeTelemetryParser):
                 fan_airflow = fan['airflow-direction']
                 fan_state = fan['operational-state']
                 fan_speed = fan['speed']
-                fan_lst.append({'chassis-wwn': self.ch_wwn,
+                fan_lst.append({'chassis-name': self.ch_name,
+                                'chassis-wwn': self.ch_wwn,
                                 'unit-number': fan_id, 
                                 'airflow-direction': fan_airflow, 
                                 'operational-state': fan_state.upper(), 
@@ -125,7 +127,8 @@ class BrocadeFRUParser(BrocadeTelemetryParser):
             for sensor in container:
                 sensor_id = sensor['category'].capitalize() + ' #' + str(sensor['id'])
                 sensor_state = sensor['state']
-                sensor_lst.append({'chassis-wwn': self.ch_wwn,
+                sensor_lst.append({'chassis-name': self.ch_name,
+                                   'chassis-wwn': self.ch_wwn,
                                    'unit-number': sensor_id,
                                    'temperature': sensor['temperature'],
                                    'operational-state': sensor_state.upper(), 

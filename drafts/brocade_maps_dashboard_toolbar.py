@@ -16,9 +16,13 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         sw_telemetry: set of switch telemetry retrieved from the switch.
     """
 
-    maps_policy_keys  = BrocadeToolbar.switch_wwn_key  + ['maps-policy']
-    maps_actions_keys  = BrocadeToolbar.switch_wwn_key   +  ['maps-actions']
+    # maps_policy_keys  = BrocadeToolbar.switch_wwn_key  + ['maps-policy']
+    # maps_actions_keys  = BrocadeToolbar.switch_wwn_key   +  ['maps-actions']
     db_rule_keys = BrocadeToolbar.switch_wwn_key + ['category', 'name', 'time-stamp', 'object-element', 'object-value']
+
+    DB_SEVERITY_RULE_STATE_ID = {0: 'no event triggired or retrieved',
+                                 1: 'information that event condition is cleared',
+                                 2: 'warning that event condition detected'}
 
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
@@ -29,37 +33,73 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
 
         super().__init__(sw_telemetry)
 
+        # # maps config switch name gauge
+        # self._gauge_mapsconfig_swname  = BrocadeGauge(name='mapsconfig_swname', description='MAPS config switchanme', 
+        #                                  label_keys=BrocadeMAPSDashboardToolbar.switch_name_keys)
+        # # mapsconfig switch vf-id gauge
+        # self._gauge_mapsconfig_vfid  = BrocadeGauge(name='mapsconfig_vfid', description='MAPS config switch VF ID', 
+        #                                  label_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
+        # # maps config switch name gauge
+        # self._gauge_maps_policy  = BrocadeGauge(name='maps_policy', description='MAPS policy name', 
+        #                                  label_keys=BrocadeMAPSDashboardToolbar.maps_policy_keys)
+        # # maps config switch name gauge
+        # self._gauge_maps_actions  = BrocadeGauge(name='maps_actions', description='MAPS actions list', 
+        #                                  label_keys=BrocadeMAPSDashboardToolbar.maps_actions_keys)
+
+        # # dashboard rules switch name gauge
+        # self._gauge_db_swname = BrocadeGauge(name='dashboard_rule_swname', description='Dashboard rules affecting health switchname.',
+        #                                      label_keys=BrocadeMAPSDashboardToolbar.switch_name_keys)
+        # # dashboard rules vfid gauge
+        # self._gauge_db_vfid = BrocadeGauge(name='dashboard_rule_vfid', description='Dashboard rules affecting health switch VF ID.',
+        #                                      label_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
+        # # dashboard rules repetition count gauge
+        # self._gauge_db_repetition_count = BrocadeGauge(name='dashboard_rule_repetition_count', description='The number of times a rule was triggered.',
+        #                                      label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='repetition-count')
+        # # dashboard rules triggered count gauge
+        # self._gauge_db_triggered_count = BrocadeGauge(name='dashboard_rule_triggered_count', description='The number of times the rule was triggered for the category.',
+        #                                      label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='triggered-count')
+        # # dashboard rules severity gauge
+        # # 0 - no event triggired or retrieved
+        # # 1 - information that event condition is cleared 
+        # # 2 - warning that event condition detected
+        # self._gauge_db_severity = BrocadeGauge(name='dashboard_rule_severiry', description='Dashboard rules affecting health severity.',
+        #                                      label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='severity')
+        
+
+
+
         # maps config switch name gauge
         self._gauge_mapsconfig_swname  = BrocadeGauge(name='mapsconfig_swname', description='MAPS config switchanme', 
-                                         label_keys=BrocadeMAPSDashboardToolbar.switch_name_keys)
+                                         unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='switch-name')
         # mapsconfig switch vf-id gauge
         self._gauge_mapsconfig_vfid  = BrocadeGauge(name='mapsconfig_vfid', description='MAPS config switch VF ID', 
-                                         label_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
+                                         unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
         # maps config switch name gauge
         self._gauge_maps_policy  = BrocadeGauge(name='maps_policy', description='MAPS policy name', 
-                                         label_keys=BrocadeMAPSDashboardToolbar.maps_policy_keys)
+                                         unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='maps-policy')
         # maps config switch name gauge
         self._gauge_maps_actions  = BrocadeGauge(name='maps_actions', description='MAPS actions list', 
-                                         label_keys=BrocadeMAPSDashboardToolbar.maps_actions_keys)
+                                         unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='maps-actions')
 
         # dashboard rules switch name gauge
         self._gauge_db_swname = BrocadeGauge(name='dashboard_rule_swname', description='Dashboard rules affecting health switchname.',
-                                             label_keys=BrocadeMAPSDashboardToolbar.switch_name_keys)
+                                             unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='switch-name')
         # dashboard rules vfid gauge
         self._gauge_db_vfid = BrocadeGauge(name='dashboard_rule_vfid', description='Dashboard rules affecting health switch VF ID.',
-                                             label_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
+                                             unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
         # dashboard rules repetition count gauge
         self._gauge_db_repetition_count = BrocadeGauge(name='dashboard_rule_repetition_count', description='The number of times a rule was triggered.',
-                                             label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='repetition-count')
+                                             unit_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='repetition-count')
         # dashboard rules triggered count gauge
         self._gauge_db_triggered_count = BrocadeGauge(name='dashboard_rule_triggered_count', description='The number of times the rule was triggered for the category.',
-                                             label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='triggered-count')
+                                                        unit_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='triggered-count')
         # dashboard rules severity gauge
         # 0 - no event triggired or retrieved
         # 1 - information that event condition is cleared 
         # 2 - warning that event condition detected
-        self._gauge_db_severity = BrocadeGauge(name='dashboard_rule_severiry', description='Dashboard rules affecting health severity.',
-                                             label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='severity')
+        db_severity_description = f'Dashboard rules affecting health severity {BrocadeMAPSDashboardToolbar.DB_SEVERITY_RULE_STATE_ID}.'
+        self._gauge_db_severity = BrocadeGauge(name='dashboard_rule_severiry', description=db_severity_description,
+                                                unit_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='severity')
         
 
     def __repr__(self):

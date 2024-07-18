@@ -1,8 +1,10 @@
 from brocade_base_gauge import BrocadeGauge
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+from brocade_base_toolbar import BrocadeToolbar
 
-class BrocadeChassisToolbar:
+
+class BrocadeChassisToolbar(BrocadeToolbar):
     """
     Class to create Chassis toolbar.
     Chassis Toolbar is a set of prometheus gauges:
@@ -14,68 +16,105 @@ class BrocadeChassisToolbar:
     """
 
     chassis_keys = ['chassis-wwn', 'switch-serial-number', 'model', 'product-name']
-    chassis_name_keys = chassis_keys + ['chassis-user-friendly-name']
-    fos_keys = chassis_keys + ['firmware-version']
-    chassis_date_keys = chassis_keys + ['date']
-    chassis_time_keys = chassis_keys + ['time']
-    tz_keys = chassis_keys + ['time-zone']
-    ntp_active_keys = ['chassis-wwn', 'active-server']
-    ntp_configured_keys = ['chassis-wwn', 'ntp-server-address']
-    license_keys = ['chassis-wwn', 'feature', 'expiration-date']
+    # chassis_uf_name_keys = chassis_keys + ['chassis-user-friendly-name']
+    # fos_keys = chassis_keys + ['firmware-version']
+    # chassis_date_keys = chassis_keys + ['date']
+    # chassis_time_keys = chassis_keys + ['time']
+    # tz_keys = chassis_keys + ['time-zone']
+    
+    # ntp_active_keys = ['chassis-wwn', 'active-server']
+    # ntp_configured_keys = ['chassis-wwn', 'ntp-server-address']
+    license_keys = ['chassis-wwn', 'name', 'feature']
+
+    VF_MODE_STATUS_ID = {-1: 'Not Applicable',  1: 'Enabled', 0: 'Disabled'}
+
+    LICENSE_STATUS_ID = {0: 'OK', 
+                         1: 'Temporary', 
+                         2: 'Expired'}
 
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
+        """
+        Args:
+            sw_telemetry: set of switch telemetry retrieved from the switch
+        """
 
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        super().__init__(sw_telemetry)
+
+        # # chassis name gauge
+        # self._gauge_chname = BrocadeGauge(name='chassis_name', description='Chassis name', 
+        #                                   label_keys=BrocadeChassisToolbar.chassis_uf_name_keys)
+        # # fos version gauge
+        # self._gauge_fos =  BrocadeGauge(name='chassis_fos', description='Chassis firmware version', 
+        #                                 label_keys=BrocadeChassisToolbar.fos_keys)
+        # # date gauge
+        # self._gauge_date =  BrocadeGauge(name='chassis_date', description='Chassis date', 
+        #                                  label_keys=BrocadeChassisToolbar.chassis_date_keys)
+        # # time gauge
+        # self._gauge_time =  BrocadeGauge(name='chassis_time', description='Chassis time', 
+        #                                  label_keys=BrocadeChassisToolbar.chassis_time_keys)
+        # # timezone gauge
+        # self._gauge_tz =  BrocadeGauge(name='chassis_tz', description='Chassis timezone', 
+        #                                label_keys=BrocadeChassisToolbar.tz_keys)
+        # # active ntp
+        # self._gauge_ntp_active = BrocadeGauge(name='ntp_server', description='Active NTP Address', 
+        #                                       label_keys=BrocadeChassisToolbar.ntp_active_keys)
+        # # configured ntp
+        # self._gauge_ntp_configured = BrocadeGauge(name='ntp_list', description='Configured NTP Address(es)', 
+        #                                           label_keys=BrocadeChassisToolbar.ntp_configured_keys)
+        
 
         # chassis name gauge
-        self._gauge_ch_name = BrocadeGauge(name='chassis_name', description='Chassis name', 
-                                           label_keys=BrocadeChassisToolbar.chassis_name_keys)
+        self._gauge_chname = BrocadeGauge(name='chassis_name', description='Chassis name', 
+                                          unit_keys=BrocadeChassisToolbar.chassis_keys, parameter_key='chassis-user-friendly-name')
         # fos version gauge
         self._gauge_fos =  BrocadeGauge(name='chassis_fos', description='Chassis firmware version', 
-                                        label_keys=BrocadeChassisToolbar.fos_keys)
+                                        unit_keys=BrocadeChassisToolbar.chassis_keys, parameter_key='firmware-version')
         # date gauge
         self._gauge_date =  BrocadeGauge(name='chassis_date', description='Chassis date', 
-                                         label_keys=BrocadeChassisToolbar.chassis_date_keys)
+                                         unit_keys=BrocadeChassisToolbar.chassis_keys, parameter_key='date')
         # time gauge
         self._gauge_time =  BrocadeGauge(name='chassis_time', description='Chassis time', 
-                                         label_keys=BrocadeChassisToolbar.chassis_time_keys)
+                                         unit_keys=BrocadeChassisToolbar.chassis_keys, parameter_key='time')
         # timezone gauge
         self._gauge_tz =  BrocadeGauge(name='chassis_tz', description='Chassis timezone', 
-                                       label_keys=BrocadeChassisToolbar.tz_keys)
+                                       unit_keys=BrocadeChassisToolbar.chassis_keys, parameter_key='time-zone')
         # active ntp
         self._gauge_ntp_active = BrocadeGauge(name='ntp_server', description='Active NTP Address', 
-                                              label_keys=BrocadeChassisToolbar.ntp_active_keys)
+                                              unit_keys=BrocadeChassisToolbar.chassis_wwn_key, parameter_key='active-server')
         # configured ntp
         self._gauge_ntp_configured = BrocadeGauge(name='ntp_list', description='Configured NTP Address(es)', 
-                                                  label_keys=BrocadeChassisToolbar.ntp_configured_keys)
-
+                                                  unit_keys=BrocadeChassisToolbar.chassis_wwn_key, parameter_key='ntp-server-address')
         # vf mode gauge
         # -1 - 'Not Applicable',  1 - 'Enabled', 0 - 'Disabled'
-        self._gauge_vf_mode =  BrocadeGauge(name='chassis_vf_mode', description='Chassis virtual fabrics mode', 
-                                            label_keys=BrocadeChassisToolbar.chassis_keys, metric_key='virtual-fabrics-id')
+        vf_mode_description = f'Chassis virtual fabrics mode {BrocadeChassisToolbar.VF_MODE_STATUS_ID}.'
+        self._gauge_vf_mode =  BrocadeGauge(name='chassis_vf_mode', description=vf_mode_description, 
+                                            unit_keys=BrocadeChassisToolbar.chassis_keys, metric_key='virtual-fabrics-mode-id')
         # ls quantity gauge
         self._gauge_ls_number =  BrocadeGauge(name='chassis_ls_number', description='Chassis logical switch qunatity', 
-                                              label_keys=BrocadeChassisToolbar.chassis_keys, metric_key='ls-number')
-        # license starus gauge
+                                              unit_keys=BrocadeChassisToolbar.chassis_keys, metric_key='ls-number')
+        # license status gauge
         # 0 - No expiration date
         # 1 - Expiration date has not arrived
         # 2 - Expiration date has arrived
-        self._gauge_licenses = BrocadeGauge(name='licenses', description='Switch licenses', 
-                                            label_keys=BrocadeChassisToolbar.license_keys, metric_key='license-status-id')
+        license_status_description = f'Switch licenses status {BrocadeChassisToolbar.LICENSE_STATUS_ID}.'
+        self._gauge_license_status = BrocadeGauge(name='license_status', description=license_status_description, 
+                                            unit_keys=BrocadeChassisToolbar.license_keys, metric_key='license-status-id')
+        # license capacity gauge
+        self._gauge_license_capacity = BrocadeGauge(name='license_capacity', description='POD license capacity', 
+                                            unit_keys=BrocadeChassisToolbar.license_keys, metric_key='capacity')        
+        # license exp date gauge
+        self._gauge_license_exp_date = BrocadeGauge(name='license_exp_date', description='License expiration date', 
+                                            unit_keys=BrocadeChassisToolbar.license_keys, parameter_key='expiration-date')
+
 
     def __repr__(self):
         return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
 
 
     @property
-    def sw_telemetry(self):
-        return self._sw_telemetry
-
-
-    @property
     def gauge_ch_name(self):
-        return self._gauge_ch_name
+        return self._gauge_chname
     
 
     @property
@@ -119,62 +158,15 @@ class BrocadeChassisToolbar:
 
 
     @property
-    def gauge_licenses(self):
-        return self._gauge_licenses
+    def gauge_license_status(self):
+        return self._gauge_license_status
+    
+
+    @property
+    def gauge_license_capacity(self):
+        return self._gauge_license_capacity
 
 
-
-        # # chassis name gauge
-        # fill_chassis_level_gauge_metrics(gauge_chassis_name, gauge_data=ch_parser_now.chassis, label_names=chassis_name_labels)
-
-        # # chassis fos version
-        # fill_chassis_level_gauge_metrics(gauge_chassis_fos, gauge_data=ch_parser_now.chassis, label_names=fos_labels)
-
-        # # chassis ls number
-        # fill_chassis_level_gauge_metrics(gauge_chassis_ls_number, gauge_data=ch_parser_now.chassis, label_names=chassis_labels, metric_name='ls-number')
-
-        # # chassis vf mode
-        # # -1 - 'Not Applicable',  1 - 'Enabled', 0 - 'Disabled'
-        # fill_chassis_level_gauge_metrics(gauge_chassis_vf_mode, gauge_data=ch_parser_now.chassis, label_names=chassis_labels, metric_name='virtual-fabrics-id')
-
-
-        # # chassis date gauge
-        # fill_chassis_level_gauge_metrics(gauge_chassis_ls_number, gauge_data=ch_parser_now.chassis, label_names=chassis_date_labels)
-
-        # # chassis time gauge
-        # fill_chassis_level_gauge_metrics(gauge_chassis_time, gauge_data=ch_parser_now.chassis, label_names=chassis_time_labels)
-
-        # # chassis timezone gauge
-        # fill_chassis_level_gauge_metrics(gauge_chassis_tz, gauge_data=ch_parser_now.chassis, label_names=tz_labels)
-
-
-        # # chassis active ntp
-        # fill_chassis_level_gauge_metrics(gauge_ntp_active, gauge_data=ch_parser_now.ntp_server, label_names=ntp_active_labels)
-
-        # # chassis configured ntp
-        # fill_chassis_level_gauge_metrics(gauge_ntp_configured, gauge_data=ch_parser_now.ntp_server, label_names=ntp_configured_labels)
-
-
-
-
-        # # chassis license gauge
-        # # License status:
-        # # 0 - No expiration date
-        # # 1 - Expiration date has not arrived
-        # # 2 - Expiration date has arrived
-        # fill_chassis_level_gauge_metrics(gauge_licenses, gauge_data=ch_parser_now.sw_license, label_names=license_labels, metric_name='license-status-id')
-
-
-
-
-       
-        # self._gauge_ch_name
-        # self._gauge_fos
-        # self._gauge_date
-        # self._gauge_time 
-        # self._gauge_tz
-        # self._gauge_ntp_active
-        # self._gauge_ntp_configured
-        # self._gauge_vf_mode
-        # self._gauge_ls_number
-        # self._gauge_licenses
+    @property
+    def gauge_license_exp_date(self):
+        return self._gauge_license_exp_date

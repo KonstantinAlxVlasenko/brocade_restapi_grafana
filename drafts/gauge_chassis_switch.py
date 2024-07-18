@@ -25,6 +25,8 @@ from brocade_request_status_toolbar import BrocadeRequestStatusToolbar
 from brocade_fru_toolbar import BrocadeFRUToolbar
 from brocade_maps_system_toolbar import BrocadeMAPSSystemToolbar
 from brocade_maps_dashboard_toolbar import BrocadeMAPSDashboardToolbar
+from brocade_switch_toolbar import BrocadeSwitchToolbar
+from brocade_fabricshow_toolbar import BrocadeFabricShowToolbar
 
 
 def load_object(dirname, filename):
@@ -81,6 +83,12 @@ maps_parser_now = BrocadeMAPSParser(sw_telemetry_now, sw_parser_now)
 fcport_params_parser_now = BrocadeFCPortParametersParser(sw_telemetry_now, sw_parser_now, fcport_params_parser_prev)
 sfp_media_parser_now = BrocadeSFPMediaParser(sw_telemetry_now, fcport_params_parser_now, sfp_media_parser_prev)
 fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport_params_parser_now, fcport_stats_parser_prev)
+
+
+for sw_port_params in fcport_params_parser_now.fcport_params.values():
+    for port_params in sw_port_params.values():
+        if port_params['is-enabled-state']:
+            print(port_params['port-number'])
 
 
 # sw_parser_now.get_switch_details(vf_id=2)
@@ -317,57 +325,57 @@ fru_tb.gauge_sensor_state.fill_chassis_gauge_metrics(fru_parser_now.fru_sensor)
 fru_tb.gauge_sensor_temp.fill_chassis_gauge_metrics(fru_parser_now.fru_sensor)
 
 
-# maps system resources gauge
-gauge_system_resource_data = maps_config_now.system_resources.copy()
-gauge_system_resource_data['chassis-wwn'] = maps_config_now.ch_wwn
-system_resource_labels = ['chassis-wwn']
+# # maps system resources gauge
+# gauge_system_resource_data = maps_config_now.system_resources.copy()
+# gauge_system_resource_data['chassis-wwn'] = maps_config_now.ch_wwn
+# system_resource_labels = ['chassis-wwn']
 
-# cpu
-gauge_cpu = gauge_init(name='cpu', description='CPU usage', label_names=system_resource_labels)
-fill_chassis_level_gauge_metrics(gauge_cpu, gauge_data=gauge_system_resource_data, label_names=system_resource_labels, metric_name='cpu-usage')
-# flash
-gauge_flash = gauge_init(name='flash', description='Flash usage', label_names=system_resource_labels)
-fill_chassis_level_gauge_metrics(gauge_flash, gauge_data=gauge_system_resource_data, label_names=system_resource_labels, metric_name='flash-usage')
-# memory
-gauge_memory = gauge_init(name='memory', description='Memory usage', label_names=system_resource_labels)
-fill_chassis_level_gauge_metrics(gauge_memory, gauge_data=gauge_system_resource_data, label_names=system_resource_labels, metric_name='memory-usage')
-
-
-# maps ssp report gauge
-# SSP_STATE = {'healthy': 1, 'unknown': 2, 'marginal': 3, 'down': 4}
-ssp_report_labels = ['name']
-gauge_ssp_report = gauge_init(name='ssp_report', description='The switch status policy report state.', label_names=ssp_report_labels)
-fill_chassis_level_gauge_metrics(gauge_ssp_report, gauge_data=maps_config_now.ssp_report, label_names=ssp_report_labels, metric_name='operational-state-id')
+# # cpu
+# gauge_cpu = gauge_init(name='cpu', description='CPU usage', label_names=system_resource_labels)
+# fill_chassis_level_gauge_metrics(gauge_cpu, gauge_data=gauge_system_resource_data, label_names=system_resource_labels, metric_name='cpu-usage')
+# # flash
+# gauge_flash = gauge_init(name='flash', description='Flash usage', label_names=system_resource_labels)
+# fill_chassis_level_gauge_metrics(gauge_flash, gauge_data=gauge_system_resource_data, label_names=system_resource_labels, metric_name='flash-usage')
+# # memory
+# gauge_memory = gauge_init(name='memory', description='Memory usage', label_names=system_resource_labels)
+# fill_chassis_level_gauge_metrics(gauge_memory, gauge_data=gauge_system_resource_data, label_names=system_resource_labels, metric_name='memory-usage')
 
 
-# maps config
-maps_config_labels = ['switch-name', 'switch-wwn', 'vf-id', 'maps-policy', 'maps-actions']
-gauge_maps_config = gauge_init(name='maps_config', description='Active MAPS policy and actions', label_names=maps_config_labels)
-fill_switch_level_gauge_metrics(gauge_maps_config, gauge_data=maps_config_now.maps_config, label_names=maps_config_labels)
+# # maps ssp report gauge
+# # SSP_STATE = {'healthy': 1, 'unknown': 2, 'marginal': 3, 'down': 4}
+# ssp_report_labels = ['name']
+# gauge_ssp_report = gauge_init(name='ssp_report', description='The switch status policy report state.', label_names=ssp_report_labels)
+# fill_chassis_level_gauge_metrics(gauge_ssp_report, gauge_data=maps_config_now.ssp_report, label_names=ssp_report_labels, metric_name='operational-state-id')
+
+
+# # maps config
+# maps_config_labels = ['switch-name', 'switch-wwn', 'vf-id', 'maps-policy', 'maps-actions']
+# gauge_maps_config = gauge_init(name='maps_config', description='Active MAPS policy and actions', label_names=maps_config_labels)
+# fill_switch_level_gauge_metrics(gauge_maps_config, gauge_data=maps_config_now.maps_config, label_names=maps_config_labels)
 
 
 
 
-# maps dashboard
-maps_dashboard_labels = ['switch-name', 'switch-wwn', 'vf-id', 'category', 'name', 'time-stamp', 'object-element', 'object-value']
-# category triggered-count
-gauge_mapsdb_triggered_count = gauge_init(name='mapsdb_triggered_count', description='The number of times the rule was triggered for the category', 
-                                          label_names=maps_dashboard_labels)
-fill_switch_level_gauge_metrics(gauge_mapsdb_triggered_count, gauge_data=maps_config_now.dashboard_rule, 
-                                label_names=maps_dashboard_labels, metric_name='triggered-count', reverse=True)
-# rule repetition-count
-gauge_mapsdb_repetition_count = gauge_init(name='mapsdb_repetition_count', description='The number of times a rule was triggered', 
-                                           label_names=maps_dashboard_labels)
-fill_switch_level_gauge_metrics(gauge_mapsdb_repetition_count, gauge_data=maps_config_now.dashboard_rule, 
-                                label_names=maps_dashboard_labels, metric_name='repetition-count', reverse=True)
-# mapsdb rule severity
-# Severity level:
-# 0 - no event triggired or retrieved
-# 1 - information that event condition is cleared 
-# 2 - warning that event condition detected
-gauge_mapsdb_rule_severity = gauge_init(name='mapsdb_rule_severity', description='MAPS rule severity', label_names=maps_dashboard_labels)
-fill_switch_level_gauge_metrics(gauge_mapsdb_rule_severity, gauge_data=maps_config_now.dashboard_rule, 
-                                label_names=maps_dashboard_labels, metric_name='severity', reverse=True)
+# # maps dashboard
+# maps_dashboard_labels = ['switch-name', 'switch-wwn', 'vf-id', 'category', 'name', 'time-stamp', 'object-element', 'object-value']
+# # category triggered-count
+# gauge_mapsdb_triggered_count = gauge_init(name='mapsdb_triggered_count', description='The number of times the rule was triggered for the category', 
+#                                           label_names=maps_dashboard_labels)
+# fill_switch_level_gauge_metrics(gauge_mapsdb_triggered_count, gauge_data=maps_config_now.dashboard_rule, 
+#                                 label_names=maps_dashboard_labels, metric_name='triggered-count', reverse=True)
+# # rule repetition-count
+# gauge_mapsdb_repetition_count = gauge_init(name='mapsdb_repetition_count', description='The number of times a rule was triggered', 
+#                                            label_names=maps_dashboard_labels)
+# fill_switch_level_gauge_metrics(gauge_mapsdb_repetition_count, gauge_data=maps_config_now.dashboard_rule, 
+#                                 label_names=maps_dashboard_labels, metric_name='repetition-count', reverse=True)
+# # mapsdb rule severity
+# # Severity level:
+# # 0 - no event triggired or retrieved
+# # 1 - information that event condition is cleared 
+# # 2 - warning that event condition detected
+# gauge_mapsdb_rule_severity = gauge_init(name='mapsdb_rule_severity', description='MAPS rule severity', label_names=maps_dashboard_labels)
+# fill_switch_level_gauge_metrics(gauge_mapsdb_rule_severity, gauge_data=maps_config_now.dashboard_rule, 
+#                                 label_names=maps_dashboard_labels, metric_name='severity', reverse=True)
 
 
 
@@ -394,163 +402,150 @@ maps_dashboard_tb.gauge_db_triggered_count.fill_switch_gauge_metrics(maps_parser
 maps_dashboard_tb.gauge_db_severity.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
 
 
-# switch name
-switch_name_labels = ['switch-wwn', 'switch-name']
-gauge_switch_name = gauge_init(name='switch_name', description='Switch name', label_names=switch_name_labels)
-fill_switch_level_gauge_metrics(gauge_switch_name, gauge_data=sw_parser_now.fc_switch, label_names=switch_name_labels)
+# # switch name
+# switch_name_labels = ['switch-wwn', 'switch-name']
+# gauge_switch_name = gauge_init(name='switch_name', description='Switch name', label_names=switch_name_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_name, gauge_data=sw_parser_now.fc_switch, label_names=switch_name_labels)
 
-# switch ip address
-switch_ip_labels = ['switch-wwn', 'ip-address']
-gauge_switch_ip = gauge_init(name='switch_ip', description='Switch IP address', label_names=switch_ip_labels)
-fill_switch_level_gauge_metrics(gauge_switch_ip, gauge_data=sw_parser_now.fc_switch, label_names=switch_ip_labels)
+# # switch ip address
+# switch_ip_labels = ['switch-wwn', 'ip-address']
+# gauge_switch_ip = gauge_init(name='switch_ip', description='Switch IP address', label_names=switch_ip_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_ip, gauge_data=sw_parser_now.fc_switch, label_names=switch_ip_labels)
 
-# switch fabric name
-switch_fabric_name_labels = ['switch-wwn', 'fabric-user-friendly-name']
-gauge_switch_fabric_name = gauge_init(name='switch_fabric_name', description='Switch fabric name', label_names=switch_fabric_name_labels)
-fill_switch_level_gauge_metrics(gauge_switch_fabric_name, gauge_data=sw_parser_now.fc_switch, label_names=switch_fabric_name_labels)
+# # switch fabric name
+# switch_fabric_name_labels = ['switch-wwn', 'fabric-user-friendly-name']
+# gauge_switch_fabric_name = gauge_init(name='switch_fabric_name', description='Switch fabric name', label_names=switch_fabric_name_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_fabric_name, gauge_data=sw_parser_now.fc_switch, label_names=switch_fabric_name_labels)
 
-# switch uptime
-switch_uptime_labels = ['switch-wwn', 'up-time-hrf']
-gauge_switch_uptime = gauge_init(name='switch_uptime', description='Switch uptime', label_names=switch_uptime_labels)
-fill_switch_level_gauge_metrics(gauge_switch_uptime, gauge_data=sw_parser_now.fc_switch, label_names=switch_uptime_labels)
-
-
-# switch
-switch_labels = ['switch-wwn']
-
-# switch state
-# 0 - Undefined, 2 - Online. 3 = Offline. 7 - Testing
-gauge_switch_state = gauge_init(name='switch_state', description='The current state of the switch.', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_switch_state, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='operational-status')
-
-# switch role
-# -1 - Disabled, 0 - Subordinate, 1 - Principal
-gauge_switch_role = gauge_init(name='switch_role', description='Switch role: Principal, Subordinate, or Disabled.', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_switch_role, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='switch-role-id')
-
-# switch mode
-# 0, 1 - Native, 2 - 'Access Gateway'
-gauge_switch_mode = gauge_init(name='switch_mode', description='Switch operation mode: Access Gateway (if AG is enabled).', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_switch_mode, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='ag-mode')
-
-# switch did
-gauge_switch_did = gauge_init(name='switch_domain_id', description='Switch domain ID', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_switch_did, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='domain-id')
-
-# switch fid
-gauge_switch_fid = gauge_init(name='switch_fabric_id', description='Switch fabric ID', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_switch_fid, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='fabric-id')
-
-# switch port quantity
-gauge_switch_port_quantity = gauge_init(name='switch_port_quantity', description='Switch port member quantity', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_switch_port_quantity, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='port-member-quantity')
-
-# switch vf id
-gauge_switch_vfid = gauge_init(name='switch_vfid', description='Switch virtual fabric ID', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_switch_vfid, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='vf-id')
-
-# base switch status
-# 0 = Disabled. 1 = Enabled
-gauge_base_switch_status = gauge_init(name='base_switch_status', description='Base switch status', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_base_switch_status, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='base-switch-enabled')
-
-# default switch status
-# 0 = Disabled. 1 = Enabled
-gauge_default_switch_status = gauge_init(name='default_switch_status', description='Deafault switch status', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_default_switch_status, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='default-switch-status')
-
-# logical isl status
-# 0 = Disabled. 1 = Enabled
-gauge_logical_isl_status = gauge_init(name='logical_isl_status', description='Logical isl status', label_names=switch_labels)
-fill_switch_level_gauge_metrics(gauge_logical_isl_status, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='logical-isl-enabled')
-
-# fabricshow
-switch_wwn_label = ['switch-wwn']
-
-# principal label
-# 1 - ">", 0 - "-"
-gauge_fabricshow_principal_label = gauge_init(name='fabricshow_principal_label', description='Fabricshow principal switch label >', label_names=switch_wwn_label)
-fill_switch_level_gauge_metrics(gauge_fabricshow_principal_label, gauge_data=sw_parser_now.fabric, label_names=switch_wwn_label, metric_name='principal')
-
-# fabricshow switch did
-gauge_fabricshow_switch_did = gauge_init(name='fabricshow_switch_did', description='Fabricshow switch domain ID', label_names=switch_wwn_label)
-fill_switch_level_gauge_metrics(gauge_fabricshow_switch_did, gauge_data=sw_parser_now.fabric, label_names=switch_wwn_label, metric_name='domain-id')
-
-# fabricshow switch fid
-gauge_fabricshow_switch_fid = gauge_init(name='fabricshow_switch_fid', description='Fabricshow switch fabric ID', label_names=switch_wwn_label)
-fill_switch_level_gauge_metrics(gauge_fabricshow_switch_fid, gauge_data=sw_parser_now.fabric, label_names=switch_wwn_label, metric_name='fabric-id')
-
-# fabricshow path-count
-gauge_fabricshow_path_count = gauge_init(name='fabricshow_path_count', description='Fabricshow path count', label_names=switch_wwn_label)
-fill_switch_level_gauge_metrics(gauge_fabricshow_path_count, gauge_data=sw_parser_now.fabric, label_names=switch_wwn_label, metric_name='path-count')
-
-# fabricshow fabric name
-fabricshow_fabricname_labels = ['switch-wwn', 'fabric-user-friendly-name']
-gauge_fabricshow_fabricname = gauge_init(name='fabricshow_fabricname', description='Fabric name in the fabricshow output', label_names=fabricshow_fabricname_labels)
-fill_switch_level_gauge_metrics(gauge_fabricshow_fabricname, gauge_data=sw_parser_now.fabric, label_names=fabricshow_fabricname_labels)
-
-# fabricshow fos
-fabricshow_fos_labels = ['switch-wwn', 'firmware-version']
-gauge_fabricshow_fos = gauge_init(name='fabricshow_fos', description='Firmware version in the fabricshow output', label_names=fabricshow_fos_labels)
-fill_switch_level_gauge_metrics(gauge_fabricshow_fos, gauge_data=sw_parser_now.fabric, label_names=fabricshow_fos_labels)
-
-# fabricshow ip-address
-fabricshow_ip_labels = ['switch-wwn', 'ip-address']
-gauge_fabricshow_ip = gauge_init(name='fabricshow_ip', description='Switch ip-address in the fabricshow output', label_names=fabricshow_ip_labels)
-fill_switch_level_gauge_metrics(gauge_fabricshow_ip, gauge_data=sw_parser_now.fabric, label_names=fabricshow_ip_labels)
-
-# fabricshow switch name
-fabricshow_switchname_labels = ['switch-wwn', 'switch-user-friendly-name']
-gauge_fabricshow_switchname = gauge_init(name='fabricshow_switchname', description='Switch name in the fabricshow output', label_names=fabricshow_switchname_labels)
-fill_switch_level_gauge_metrics(gauge_fabricshow_switchname, gauge_data=sw_parser_now.fabric, label_names=fabricshow_switchname_labels)
+# # switch uptime
+# switch_uptime_labels = ['switch-wwn', 'up-time-hrf']
+# gauge_switch_uptime = gauge_init(name='switch_uptime', description='Switch uptime', label_names=switch_uptime_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_uptime, gauge_data=sw_parser_now.fc_switch, label_names=switch_uptime_labels)
 
 
-# maps ssp report gauge
+# # switch
+# switch_labels = ['switch-wwn']
 
-# request status gauge
-# request_status_labels = ['module', 'container', 'vf-id', 'status-code', 'status', 'error-message', 'date', 'time']
-# gauge_request_status = Gauge('request_status', 'Request status', replace_underscore(request_status_labels))
-# for request in request_status_now.request_status:
-#     request_parameters = get_ordered_values(request, request_status_labels)
-#     gauge_request_status.labels(*request_parameters).set(request['status-id'])
-    
+# # switch state
+# # 0 - Undefined, 2 - Online. 3 = Offline. 7 - Testing
+# gauge_switch_state = gauge_init(name='switch_state', description='The current state of the switch.', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_state, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='operational-status')
 
-# # chassis parameters gauge
-# chassis_labels = ['chassis-user-friendly-name', 'chassis-wwn', 'switch-serial-number', 'model', 'product-name', 'firmware-version', 'virtual-fabrics', 'ls-number']
-# gauge_chassis_parameters = Gauge('chassis_parameters', 'Chassis parameters', replace_underscore(chassis_labels))
+# # switch role
+# # -1 - Disabled, 0 - Subordinate, 1 - Principal
+# gauge_switch_role = gauge_init(name='switch_role', description='Switch role: Principal, Subordinate, or Disabled.', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_role, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='switch-role-id')
 
-# chassis_parameters = get_ordered_values(ch_parser_now.chassis, chassis_labels)
-# gauge_chassis_parameters.labels(*chassis_parameters).set(1)
+# # switch mode
+# # 0, 1 - Native, 2 - 'Access Gateway'
+# gauge_switch_mode = gauge_init(name='switch_mode', description='Switch operation mode: Access Gateway (if AG is enabled).', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_mode, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='ag-mode')
 
+# # switch did
+# gauge_switch_did = gauge_init(name='switch_domain_id', description='Switch domain ID', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_did, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='domain-id')
 
-# # chassis datetetime gauge
-# datetime_labels = ['date', 'time', 'time-zone']
-# gauge_datetime_parameters = Gauge('datetime_parameters', 'Datetime', replace_underscore(datetime_labels))
-# datetime_parameters = get_ordered_values(ch_parser_now.chassis, datetime_labels)
-# gauge_datetime_parameters.labels(*datetime_parameters).set(1)
+# # switch fid
+# gauge_switch_fid = gauge_init(name='switch_fabric_id', description='Switch fabric ID', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_fid, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='fabric-id')
 
+# # switch port quantity
+# gauge_switch_port_quantity = gauge_init(name='switch_port_quantity', description='Switch port member quantity', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_port_quantity, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='port-member-quantity')
 
-# # chassis ntpserver gauge
-# ntp_labels = ['active-server', 'ntp-server-address']
-# gauge_ntp_server = Gauge('ntp_server', 'NTP Address', replace_underscore(ntp_labels))
-# ntp_parameters = get_ordered_values(ch_parser_now.ntp_server, ntp_labels)
-# gauge_ntp_server.labels(*ntp_parameters).set(1)
-
-
-# # chassis license gauge
-# license_labels = ['feature', 'expiration-date']
-# gauge_licenses = Gauge('licenses', 'Switch licenses', replace_underscore(license_labels))
-# for lic in ch_parser_now.sw_license:
-#     lic_parameters = get_ordered_values(lic, license_labels)
-#     gauge_licenses.labels(*lic_parameters).set(lic['license-status-id'])
+# # switch vf id
+# gauge_switch_vfid = gauge_init(name='switch_vfid', description='Switch virtual fabric ID', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_switch_vfid, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='vf-id')
 
 
-# # fru fan gauge
-# fan_labels = ['unit-number', 'airflow-direction', 'speed', 'operational-state']
-# gauge_fans = Gauge('fans', 'Status and speed of each fan in the system', replace_underscore(fan_labels))
-# for fan in fru_parser_now.fru_fan:
-#     fan_parameters = get_ordered_values(fan, fan_labels)
-#     gauge_fans.labels(*fan_parameters).set(fan['operational-state-id'])
+
+# # base switch status
+# # 0 = Disabled. 1 = Enabled
+# gauge_base_switch_status = gauge_init(name='base_switch_status', description='Base switch status', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_base_switch_status, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='base-switch-enabled')
+
+# # default switch status
+# # 0 = Disabled. 1 = Enabled
+# gauge_default_switch_status = gauge_init(name='default_switch_status', description='Deafault switch status', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_default_switch_status, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='default-switch-status')
+
+# # logical isl status
+# # 0 = Disabled. 1 = Enabled
+# gauge_logical_isl_status = gauge_init(name='logical_isl_status', description='Logical isl status', label_names=switch_labels)
+# fill_switch_level_gauge_metrics(gauge_logical_isl_status, gauge_data=sw_parser_now.fc_switch, label_names=switch_labels, metric_name='logical-isl-enabled')
+
+
+switch_tb = BrocadeSwitchToolbar(sw_telemetry_now)
+switch_tb.gauge_swname.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_fabric_name.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_uptime.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_state.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_mode.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_role.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_did.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_vfid.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_port_quantity.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_base_switch_status.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_default_switch_status.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_logical_isl_status.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+
+
+
+# # fabricshow
+# switch_wwn_label = ['switch-wwn']
+
+# # principal label
+# # 1 - ">", 0 - "-"
+# gauge_fabricshow_principal_label = gauge_init(name='fabricshow_principal_label', description='Fabricshow principal switch label >', label_names=switch_wwn_label)
+# fill_switch_level_gauge_metrics(gauge_fabricshow_principal_label, gauge_data=sw_parser_now.fabric, label_names=switch_wwn_label, metric_name='principal')
+
+# # fabricshow switch did
+# gauge_fabricshow_switch_did = gauge_init(name='fabricshow_switch_did', description='Fabricshow switch domain ID', label_names=switch_wwn_label)
+# fill_switch_level_gauge_metrics(gauge_fabricshow_switch_did, gauge_data=sw_parser_now.fabric, label_names=switch_wwn_label, metric_name='domain-id')
+
+# # fabricshow switch fid
+# gauge_fabricshow_switch_fid = gauge_init(name='fabricshow_switch_fid', description='Fabricshow switch fabric ID', label_names=switch_wwn_label)
+# fill_switch_level_gauge_metrics(gauge_fabricshow_switch_fid, gauge_data=sw_parser_now.fabric, label_names=switch_wwn_label, metric_name='fabric-id')
+
+# # fabricshow path-count
+# gauge_fabricshow_path_count = gauge_init(name='fabricshow_path_count', description='Fabricshow path count', label_names=switch_wwn_label)
+# fill_switch_level_gauge_metrics(gauge_fabricshow_path_count, gauge_data=sw_parser_now.fabric, label_names=switch_wwn_label, metric_name='path-count')
+
+# # fabricshow fabric name
+# fabricshow_fabricname_labels = ['switch-wwn', 'fabric-user-friendly-name']
+# gauge_fabricshow_fabricname = gauge_init(name='fabricshow_fabricname', description='Fabric name in the fabricshow output', label_names=fabricshow_fabricname_labels)
+# fill_switch_level_gauge_metrics(gauge_fabricshow_fabricname, gauge_data=sw_parser_now.fabric, label_names=fabricshow_fabricname_labels)
+
+# # fabricshow fos
+# fabricshow_fos_labels = ['switch-wwn', 'firmware-version']
+# gauge_fabricshow_fos = gauge_init(name='fabricshow_fos', description='Firmware version in the fabricshow output', label_names=fabricshow_fos_labels)
+# fill_switch_level_gauge_metrics(gauge_fabricshow_fos, gauge_data=sw_parser_now.fabric, label_names=fabricshow_fos_labels)
+
+# # fabricshow ip-address
+# fabricshow_ip_labels = ['switch-wwn', 'ip-address']
+# gauge_fabricshow_ip = gauge_init(name='fabricshow_ip', description='Switch ip-address in the fabricshow output', label_names=fabricshow_ip_labels)
+# fill_switch_level_gauge_metrics(gauge_fabricshow_ip, gauge_data=sw_parser_now.fabric, label_names=fabricshow_ip_labels)
+
+# # fabricshow switch name
+# fabricshow_switchname_labels = ['switch-wwn', 'switch-user-friendly-name']
+# gauge_fabricshow_switchname = gauge_init(name='fabricshow_switchname', description='Switch name in the fabricshow output', label_names=fabricshow_switchname_labels)
+# fill_switch_level_gauge_metrics(gauge_fabricshow_switchname, gauge_data=sw_parser_now.fabric, label_names=fabricshow_switchname_labels)
+
+
+
+fabricshow_tb = BrocadeFabricShowToolbar(sw_telemetry_now)
+fabricshow_tb.gauge_swname.fill_switch_gauge_metrics(sw_parser_now.fabric)
+fabricshow_tb.gauge_fabricname.fill_switch_gauge_metrics(sw_parser_now.fabric)
+fabricshow_tb.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser_now.fabric)
+fabricshow_tb.gauge_switch_fos.fill_switch_gauge_metrics(sw_parser_now.fabric)
+fabricshow_tb.gauge_principal_label.fill_switch_gauge_metrics(sw_parser_now.fabric)
+fabricshow_tb.gauge_switch_did.fill_switch_gauge_metrics(sw_parser_now.fabric)
+fabricshow_tb.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser_now.fabric)
+fabricshow_tb.gauge_path_count.fill_switch_gauge_metrics(sw_parser_now.fabric)
+
+
 
 
 

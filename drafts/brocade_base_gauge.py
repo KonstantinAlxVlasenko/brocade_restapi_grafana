@@ -19,35 +19,47 @@ class BrocadeGauge:
     switch_wwn_key  = ['switch-wwn']
 
 
-    def __init__(self, name: str, description: str, label_keys: List[str], metric_key: str = None, reverse_filling: bool = False):
+    # def __init__(self, name: str, description: str, label_keys: List[str], metric_key: str = None, reverse_filling: bool = False):
 
-        self._registry = CollectorRegistry()
+    #     self._registry = CollectorRegistry()
+    #     self._name = name
+    #     self._description  = description
+    #     self._label_keys = label_keys
+    #     self._metric_key = metric_key
+    #     self._reverse_filling = reverse_filling
+    #     # self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys), registry=self.registry)
+    #     self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys))
+
+
+
+    def __init__(self, name: str, description: str, unit_keys: List[str], parameter_key: str = None, metric_key: str = None, reverse_filling: bool = False):
+
+        # self._registry = CollectorRegistry()
         self._name = name
         self._description  = description
-        self._label_keys = label_keys
+        self._unit_keys = unit_keys
+        self._parameter_key = parameter_key
         self._metric_key = metric_key
+        self.validate_gauge_parameters()
         self._reverse_filling = reverse_filling
+        self._label_keys = self._unit_keys + [self._parameter_key] if self._parameter_key else self._unit_keys
+
         # self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys), registry=self.registry)
         self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys))
 
-    # def gauge_init(self, name: str, description: str, label_names: List[str]):
-
-    #     return Gauge(name, description, BrocadeGauge.replace_underscore(label_names))
 
 
-    # def fill_chassis_gauge_metrics_(self, gauge_instance: Gauge, gauge_data: Union[List[dict], Dict], label_names: List[str], metric_name: str=None):
-        
-        
-    #     if not gauge_data:
-    #         return
-        
-    #     if isinstance(gauge_data, list):
-            
-    #         for gauge_data_current in gauge_data:
-    #             self.add_gauge_metric(gauge_instance, gauge_data_current, label_names, metric_name)
-    #     elif isinstance(gauge_data, dict):
-    #         self.add_gauge_metric(gauge_instance, gauge_data, label_names, metric_name)
+    def validate_gauge_parameters(self):
+        """Method checks if gauge instance is initialized with parameter or metric key.
+        Gauge istance must have either parameter_key or metric_key passed as class parameter but not both.
+        If parameter_key is passed then metric_key has to be None and vice versa"""
 
+        if all(v is not None for v in [self.parameter_key, self.metric_key]):
+            raise ValueError(f"{self.name} gauge of the {self.__class__.__name__} class has both parameter_key and metric_key. "
+                             "Gauge is initialized with either parameter_key or metric_key.")
+        elif all(v is None for v in [self.parameter_key, self.metric_key]):
+            raise ValueError(f"{self.name} gauge of the {self.__class__.__name__} class has no parameter_key or metric_key. " 
+                             "Gauge is initialized with either parameter_key or metric_key.")
 
 
     def fill_chassis_gauge_metrics(self, gauge_data: Union[List[dict], Dict]):
@@ -84,7 +96,16 @@ class BrocadeGauge:
 
     def add_gauge_metric(self, gauge_data):
         label_values = BrocadeGauge.get_ordered_values(gauge_data, self.label_keys)
-        metric_value = gauge_data[self.metric_key] if self.metric_key is not None else 1
+        # metric_value = gauge_data[self.metric_key] if self.metric_key is not None else 1
+
+        if self.metric_key:
+            metric_value = gauge_data[self.metric_key]
+        elif self.parameter_key:
+            if gauge_data[self.parameter_key] is None:
+                metric_value = 0
+            else:
+                metric_value = 1
+
         if metric_value is not None:
             self.gauge.labels(*label_values).set(metric_value)
 
@@ -122,6 +143,15 @@ class BrocadeGauge:
     # def labelkeys(self):
     #     return self._labelkeys
     
+    @property
+    def unit_keys(self):
+        return self._unit_keys
+
+
+    @property
+    def parameter_key(self):
+        return self._parameter_key
+
 
     @property
     def label_keys(self):

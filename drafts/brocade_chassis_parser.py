@@ -113,6 +113,8 @@ class BrocadeChassisParser(BrocadeTelemetryParser):
         Method sets virtual fabrics mode and logical switch quantity
         to the chassis parameters attribute.
         
+        -1 - 'Not Applicable',  1 - 'Enabled', 0 - 'Disabled'
+
         Returns:
             None. 
         """
@@ -120,21 +122,21 @@ class BrocadeChassisParser(BrocadeTelemetryParser):
         # if switch doesn't support virtual fabrics
         if self.chassis['vf-supported'] is False:
             self.chassis['virtual-fabrics'] = 'Not Applicable'
-            self.chassis['virtual-fabrics-id'] = -1
+            self.chassis['virtual-fabrics-mode-id'] = -1
             self.chassis['ls-number'] = 0
         else: 
             # if virtual mode is enabled ls qunatity is calculated by '_get_switch_value' method
             if self.chassis['vf-enabled'] is True:
                 self.chassis['virtual-fabrics'] = 'Enabled'
-                self.chassis['virtual-fabrics-id'] = 1
+                self.chassis['virtual-fabrics-mode-id'] = 1
             # if virtual mode is disabled ls number is 0
             elif self.chassis['vf-enabled'] is False:
                 self.chassis['virtual-fabrics'] = 'Disabled'
-                self.chassis['virtual-fabrics-id'] = 1
+                self.chassis['virtual-fabrics-mode-id'] = 0
                 self.chassis['ls-number'] = 0
             else:
                 self.chassis['virtual-fabrics'] = None
-                self.chassis['virtual-fabrics-id'] = None
+                self.chassis['virtual-fabrics-mode-id'] = None
                 if not 'ls-number' in self.chassis:
                     self.chassis['ls-number'] = None
                 
@@ -247,21 +249,32 @@ class BrocadeChassisParser(BrocadeTelemetryParser):
                 # no expiration date
                 else: 
                     lic_status = 0
-                    exp_date_str = 'No expiration date'
+                    # exp_date_str = 'No expiration date'
+                    exp_date_str = None
                 # license_feature_lst.append([lic_feature, exp_date_str, lic_status])
-                license_feature_lst.append({'feature': lic_feature, 
+                license_feature_lst.append({'name': lic_leaf['name'],
+                                            'feature': lic_feature,
+                                            'capacity': lic_leaf.get('capacity'),
+                                            'generation-date': lic_leaf.get('generation-date'),
                                             'expiration-date': exp_date_str, 
                                             'license-status-id': lic_status,
-                                            'chassis-wwn': self.ch_wwn})
+                                            'chassis-wwn': self.ch_wwn,
+                                            'chassis-name': self.ch_name})
+                print('\n')
+                print(license_feature_lst)
         # license module extracted but container is empty
         else:
             if self.sw_telemetry.sw_license.get('status-code'):
                 lic_feature = self.sw_telemetry.sw_license['error-message']
                 # license_feature_lst.append([lic_feature, 'Not applicable', 0])
-                license_feature_lst.append({'feature': lic_feature, 
-                                            'expiration-date': 'Not Applicable', 
+                license_feature_lst.append({'name': None,
+                                            'feature': lic_feature,
+                                            'capacity': None,
+                                            'generation-date': None, 
+                                            'expiration-date': None, 
                                             'license-status-id': 0,
-                                            'chassis-wwn': self.ch_wwn})
+                                            'chassis-wwn': self.ch_wwn,
+                                            'chassis-name': self.ch_name})
         return license_feature_lst
             
 

@@ -15,32 +15,50 @@ class BrocadeRequestStatusToolbar:
 
 
     rs_container_keys = ['ip-address', 'vf-id', 'module', 'container']
-    rs_error_keys =  rs_container_keys + ['error-message']
-    rs_date_keys  =  rs_container_keys + ['date']
-    rs_time_keys   =   rs_container_keys + ['time']
+    # rs_error_keys =  rs_container_keys + ['error-message']
+    # rs_date_keys  =  rs_container_keys + ['date']
+    # rs_time_keys   =   rs_container_keys + ['time']
     
+    REQUEST_STATUS_ID = {1: 'OK',  2: 'Warnig', 3: 'Fail'}
+
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
 
         self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
 
+
+
         # request status_id gauge
         # 1 - 'Ok',  2 - 'Warnig', 3 - 'Fail'
-        self._gauge_rs_id =  BrocadeGauge(name='request_status_id', description='HTTP request status ID', 
-                                            label_keys=BrocadeRequestStatusToolbar.rs_container_keys, metric_key='status-id')
+        # self._gauge_rs_id =  BrocadeGauge(name='request_status_id', description='HTTP request status ID', 
+        #                                     label_keys=BrocadeRequestStatusToolbar.rs_container_keys, metric_key='status-id')
+        rs_id_description = f'HTTP request status ID {BrocadeRequestStatusToolbar.REQUEST_STATUS_ID}.'
+        self._gauge_rs_id =  BrocadeGauge(name='request_status_id', description=rs_id_description,
+                                          unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, metric_key='status-id')
         # request status_code gauge
         # HTTP Status Code, 200-OK, 400-Bad Request etc
+        # self._gauge_rs_code =  BrocadeGauge(name='request_status_code', description='HTTP request status code', 
+        #                                     label_keys=BrocadeRequestStatusToolbar.rs_container_keys, metric_key='status-code')
         self._gauge_rs_code =  BrocadeGauge(name='request_status_code', description='HTTP request status code', 
-                                            label_keys=BrocadeRequestStatusToolbar.rs_container_keys, metric_key='status-code')
+                                            unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, metric_key='status-code')
         # request status error message guage
+        # self._gauge_rs_error =  BrocadeGauge(name='request_status_error', description='HTTP request status error message', 
+        #                                     label_keys=BrocadeRequestStatusToolbar.rs_error_keys)
         self._gauge_rs_error =  BrocadeGauge(name='request_status_error', description='HTTP request status error message', 
-                                            label_keys=BrocadeRequestStatusToolbar.rs_error_keys)
+                                            unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, parameter_key='error-message')
         # request status date guage
+        # self._gauge_rs_date =  BrocadeGauge(name='request_status_date', description='HTTP request status date', 
+        #                                     label_keys=BrocadeRequestStatusToolbar.rs_date_keys)
         self._gauge_rs_date =  BrocadeGauge(name='request_status_date', description='HTTP request status date', 
-                                            label_keys=BrocadeRequestStatusToolbar.rs_date_keys)
+                                            unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, parameter_key='date')
+
+
+        # request status time guage
+        # self._gauge_rs_time =  BrocadeGauge(name='request_status_time', description='HTTP request status time', 
+        #                                     label_keys=BrocadeRequestStatusToolbar.rs_time_keys)
         # request status time guage
         self._gauge_rs_time =  BrocadeGauge(name='request_status_time', description='HTTP request status time', 
-                                            label_keys=BrocadeRequestStatusToolbar.rs_time_keys)
+                                            unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, parameter_key='time')
 
 
     def __repr__(self):

@@ -35,7 +35,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                        'remote-media-voltage']
     
     FC_PORT_PARAMS = ['swicth-name', 'port-name', 'physical-state', 
-                      'port-enable-status', 'link-speed', 'port-type']
+                      'port-enable-status', 'port-speed-hrf', 'port-type']
 
     REMOTE_OPTICAL_PRODUCT_LEAFS = ['part-number', 'serial-number', 'vendor-name']
 

@@ -19,6 +19,8 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
     # The Switch Status Policy report keys
     ssp_report_keys = BrocadeToolbar.chassis_wwn_key + ['name']
 
+    SSP_REPORT_STATE_ID = {1: 'healthy', 2: 'unknown', 3: 'marginal', 4: 'down'}
+
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
@@ -28,26 +30,48 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
 
         super().__init__(sw_telemetry)
 
+        # # system resource chassis name gauge
+        # self._gauge_sys_resource_chname = BrocadeGauge(name='system_resource_chname', description='System resource chassis name',
+        #                                                label_keys=BrocadeMAPSSystemToolbar.chassis_name_keys)
+        # # cpu usage gauge
+        # self._gauge_cpu_usage = BrocadeGauge(name='cpu', description='CPU usage', 
+        #                                label_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, metric_key='cpu-usage')
+        # # flash flash gauge
+        # self._gauge_flash_usage = BrocadeGauge(name='flash', description='Flash usage', 
+        #                                  label_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, metric_key='flash-usage')
+        # # memory memory gauge
+        # self._gauge_memory_usage = BrocadeGauge(name='memory', description='Memory usage', 
+        #                                   label_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, metric_key='memory-usage')
+        
+        # # ssp report chname gauge
+        # self._gauge_ssp_report_chname = BrocadeGauge(name='ssp_report_chname', description='SSP report chassis name',
+        #                                              label_keys=BrocadeMAPSSystemToolbar.chassis_name_keys)
+        # # ssp report gauge
+        # # 1 - 'healthy', 2 - 'unknown', 3 - 'marginal', 4 - 'down'
+        # self._gauge_ssp_report  = BrocadeGauge(name='ssp_report', description='The switch status policy report state', 
+        #                                        label_keys=BrocadeMAPSSystemToolbar.ssp_report_keys, metric_key='operational-state-id')
+
         # system resource chassis name gauge
         self._gauge_sys_resource_chname = BrocadeGauge(name='system_resource_chname', description='System resource chassis name',
-                                                       label_keys=BrocadeMAPSSystemToolbar.chassis_name_keys)
+                                                       unit_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, parameter_key='chassis-name')
         # cpu usage gauge
         self._gauge_cpu_usage = BrocadeGauge(name='cpu', description='CPU usage', 
-                                       label_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, metric_key='cpu-usage')
+                                            unit_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, metric_key='cpu-usage')
         # flash flash gauge
         self._gauge_flash_usage = BrocadeGauge(name='flash', description='Flash usage', 
-                                         label_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, metric_key='flash-usage')
+                                            unit_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, metric_key='flash-usage')
         # memory memory gauge
         self._gauge_memory_usage = BrocadeGauge(name='memory', description='Memory usage', 
-                                          label_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, metric_key='memory-usage')
+                                                unit_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, metric_key='memory-usage')
         
         # ssp report chname gauge
         self._gauge_ssp_report_chname = BrocadeGauge(name='ssp_report_chname', description='SSP report chassis name',
-                                                     label_keys=BrocadeMAPSSystemToolbar.chassis_name_keys)
+                                                    unit_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, parameter_key='chassis-name')
         # ssp report gauge
         # 1 - 'healthy', 2 - 'unknown', 3 - 'marginal', 4 - 'down'
-        self._gauge_ssp_report  = BrocadeGauge(name='ssp_report', description='The switch status policy report state', 
-                                               label_keys=BrocadeMAPSSystemToolbar.ssp_report_keys, metric_key='operational-state-id')
+        ssp_report_description = f'The switch status policy report state {BrocadeMAPSSystemToolbar.SSP_REPORT_STATE_ID}'
+        self._gauge_ssp_report  = BrocadeGauge(name='ssp_report', description=ssp_report_description, 
+                                                unit_keys=BrocadeMAPSSystemToolbar.ssp_report_keys, metric_key='operational-state-id')
 
 
     def __repr__(self):

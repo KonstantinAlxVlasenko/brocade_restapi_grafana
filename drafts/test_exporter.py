@@ -37,6 +37,8 @@ from brocade_request_status_toolbar import BrocadeRequestStatusToolbar
 from brocade_fru_toolbar import BrocadeFRUToolbar
 from brocade_maps_system_toolbar import BrocadeMAPSSystemToolbar
 from brocade_maps_dashboard_toolbar import BrocadeMAPSDashboardToolbar
+from brocade_switch_toolbar import BrocadeSwitchToolbar
+from brocade_fabricshow_toolbar import BrocadeFabricShowToolbar
 
 
 def load_object(dirname, filename):
@@ -128,11 +130,14 @@ fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport
 #     return values_lst
 
 
-chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
+
 request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
+chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
 fru_tb = BrocadeFRUToolbar(sw_telemetry_now)
 maps_system_tb = BrocadeMAPSSystemToolbar(sw_telemetry_now)
 maps_dashboard_tb = BrocadeMAPSDashboardToolbar(sw_telemetry_now)
+# switch_tb = BrocadeSwitchToolbar(sw_telemetry_now)
+# fabricshow_tb = BrocadeFabricShowToolbar(sw_telemetry_now)
 
 
 if __name__ == '__main__':
@@ -140,47 +145,52 @@ if __name__ == '__main__':
     
     while True:
         
-        print('request_status')
-        request_status_tb.gauge_rs_id.fill_chassis_gauge_metrics(request_status_now.request_status)
-        request_status_tb.gauge_rs_code.fill_chassis_gauge_metrics(request_status_now.request_status)
-        request_status_tb.gauge_rs_error.fill_chassis_gauge_metrics(request_status_now.request_status)
-        request_status_tb.gauge_rs_date.fill_chassis_gauge_metrics(request_status_now.request_status)
-        request_status_tb.gauge_rs_time.fill_chassis_gauge_metrics(request_status_now.request_status)
+        # print('request_status')
+        # request_status_tb.gauge_rs_id.fill_chassis_gauge_metrics(request_status_now.request_status)
+        # request_status_tb.gauge_rs_code.fill_chassis_gauge_metrics(request_status_now.request_status)
+        # request_status_tb.gauge_rs_error.fill_chassis_gauge_metrics(request_status_now.request_status)
+        # request_status_tb.gauge_rs_date.fill_chassis_gauge_metrics(request_status_now.request_status)
+        # request_status_tb.gauge_rs_time.fill_chassis_gauge_metrics(request_status_now.request_status)
         
-        print('chassis')
-        chassis_tb.gauge_ch_name.fill_chassis_gauge_metrics(ch_parser_now.chassis)
-        chassis_tb.gauge_fos.fill_chassis_gauge_metrics(ch_parser_now.chassis)
-        chassis_tb.gauge_date.fill_chassis_gauge_metrics(ch_parser_now.chassis)
-        chassis_tb.gauge_time.fill_chassis_gauge_metrics(ch_parser_now.chassis)
-        chassis_tb.gauge_tz.fill_chassis_gauge_metrics(ch_parser_now.chassis)
-        chassis_tb.gauge_ntp_active.fill_chassis_gauge_metrics(ch_parser_now.ntp_server)
-        chassis_tb.gauge_ntp_configured.fill_chassis_gauge_metrics(ch_parser_now.ntp_server)
-        chassis_tb.gauge_vf_mode.fill_chassis_gauge_metrics(ch_parser_now.chassis)
-        chassis_tb.gauge_ls_number.fill_chassis_gauge_metrics(ch_parser_now.chassis)
-        chassis_tb.gauge_licenses.fill_chassis_gauge_metrics(ch_parser_now.sw_license)
+        # print('chassis')
+        # chassis_tb.gauge_ch_name.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+        # chassis_tb.gauge_fos.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+        # chassis_tb.gauge_date.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+        # chassis_tb.gauge_time.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+        # chassis_tb.gauge_tz.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+        # chassis_tb.gauge_ntp_active.fill_chassis_gauge_metrics(ch_parser_now.ntp_server)
+        # chassis_tb.gauge_ntp_configured.fill_chassis_gauge_metrics(ch_parser_now.ntp_server)
+        # chassis_tb.gauge_vf_mode.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+        # chassis_tb.gauge_ls_number.fill_chassis_gauge_metrics(ch_parser_now.chassis)
+        # chassis_tb.gauge_license_status.fill_chassis_gauge_metrics(ch_parser_now.sw_license)
+        # chassis_tb.gauge_license_capacity.fill_chassis_gauge_metrics(ch_parser_now.sw_license)
+        # chassis_tb.gauge_license_exp_date.fill_chassis_gauge_metrics(ch_parser_now.sw_license)
 
-        print('fru')
-        fru_tb.gauge_fan_state.fill_chassis_gauge_metrics(fru_parser_now.fru_fan)
-        fru_tb.gauge_fan_speed.fill_chassis_gauge_metrics(fru_parser_now.fru_fan)
-        fru_tb.gauge_ps_state.fill_chassis_gauge_metrics(fru_parser_now.fru_ps)
-        fru_tb.gauge_sensor_state.fill_chassis_gauge_metrics(fru_parser_now.fru_sensor)
-        fru_tb.gauge_sensor_temp.fill_chassis_gauge_metrics(fru_parser_now.fru_sensor)
+        # print('fru')
+        # fru_tb.gauge_fan_chame.fill_chassis_gauge_metrics(fru_parser_now.fru_fan)
+        # fru_tb.gauge_fan_state.fill_chassis_gauge_metrics(fru_parser_now.fru_fan)
+        # fru_tb.gauge_fan_speed.fill_chassis_gauge_metrics(fru_parser_now.fru_fan)
+        # fru_tb.gauge_ps_chame.fill_chassis_gauge_metrics(fru_parser_now.fru_ps)
+        # fru_tb.gauge_ps_state.fill_chassis_gauge_metrics(fru_parser_now.fru_ps)
+        # fru_tb.gauge_sensor_chame.fill_chassis_gauge_metrics(fru_parser_now.fru_sensor)
+        # fru_tb.gauge_sensor_state.fill_chassis_gauge_metrics(fru_parser_now.fru_sensor)
+        # fru_tb.gauge_sensor_temp.fill_chassis_gauge_metrics(fru_parser_now.fru_sensor)
 
-        print('maps system resources')
-        maps_system_tb.gauge_sys_resource_chname.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
-        maps_system_tb.gauge_cpu_usage.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
-        maps_system_tb.gauge_flash_usage.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
-        maps_system_tb.gauge_memory_usage.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
+        # print('maps system resources')
+        # maps_system_tb.gauge_sys_resource_chname.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
+        # maps_system_tb.gauge_cpu_usage.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
+        # maps_system_tb.gauge_flash_usage.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
+        # maps_system_tb.gauge_memory_usage.fill_chassis_gauge_metrics(maps_parser_now.system_resources)
 
-        print('maps system health')
-        maps_system_tb.gauge_ssp_report_chname.fill_chassis_gauge_metrics(maps_parser_now.ssp_report)
-        maps_system_tb.gauge_ssp_report.fill_chassis_gauge_metrics(maps_parser_now.ssp_report)
+        # print('maps system health')
+        # maps_system_tb.gauge_ssp_report_chname.fill_chassis_gauge_metrics(maps_parser_now.ssp_report)
+        # maps_system_tb.gauge_ssp_report.fill_chassis_gauge_metrics(maps_parser_now.ssp_report)
 
-        print('maps policy, actions')
-        maps_dashboard_tb.gauge_mapsconfig_swname.fill_switch_gauge_metrics(maps_parser_now.maps_config)
-        maps_dashboard_tb.gauge_mapsconfig_vfid.fill_switch_gauge_metrics(maps_parser_now.maps_config)
-        maps_dashboard_tb.gauge_maps_policy.fill_switch_gauge_metrics(maps_parser_now.maps_config)
-        maps_dashboard_tb.gauge_maps_actions.fill_switch_gauge_metrics(maps_parser_now.maps_config)
+        # print('maps policy, actions')
+        # maps_dashboard_tb.gauge_mapsconfig_swname.fill_switch_gauge_metrics(maps_parser_now.maps_config)
+        # maps_dashboard_tb.gauge_mapsconfig_vfid.fill_switch_gauge_metrics(maps_parser_now.maps_config)
+        # maps_dashboard_tb.gauge_maps_policy.fill_switch_gauge_metrics(maps_parser_now.maps_config)
+        # maps_dashboard_tb.gauge_maps_actions.fill_switch_gauge_metrics(maps_parser_now.maps_config)
         
         print('maps dashboard')
         maps_dashboard_tb.gauge_db_swname.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
@@ -188,6 +198,34 @@ if __name__ == '__main__':
         maps_dashboard_tb.gauge_db_repetition_count.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
         maps_dashboard_tb.gauge_db_triggered_count.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
         maps_dashboard_tb.gauge_db_severity.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+
+        # print('switch')
+        
+        # switch_tb.gauge_swname.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_fabric_name.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_uptime.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_state.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_mode.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_role.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_did.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_vfid.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_switch_port_quantity.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_base_switch_status.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_default_switch_status.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_logical_isl_status.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+
+        # print('fabrichsow')
+        # fabricshow_tb.gauge_swname.fill_switch_gauge_metrics(sw_parser_now.fabric)
+        # fabricshow_tb.gauge_fabricname.fill_switch_gauge_metrics(sw_parser_now.fabric)
+        # fabricshow_tb.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser_now.fabric)
+        # fabricshow_tb.gauge_switch_fos.fill_switch_gauge_metrics(sw_parser_now.fabric)
+        # fabricshow_tb.gauge_principal_label.fill_switch_gauge_metrics(sw_parser_now.fabric)
+        # fabricshow_tb.gauge_switch_did.fill_switch_gauge_metrics(sw_parser_now.fabric)
+        # fabricshow_tb.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser_now.fabric)
+        # fabricshow_tb.gauge_path_count.fill_switch_gauge_metrics(sw_parser_now.fabric)
+
 
         time.sleep(5)
     

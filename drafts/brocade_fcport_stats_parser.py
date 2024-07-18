@@ -69,7 +69,7 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
     FC_STATISTICS_LEAFS = FC_STATISTICS_PARAMS_LEAFS + FC_STATISTICS_COUNTER_LEAFS
     
     FC_PORT_PARAMS = ['swicth-name', 'port-name', 'physical-state', 
-                      'port-enable-status', 'link-speed', 'port-type', 'speed']
+                      'port-enable-status', 'port-speed-hrf', 'port-type', 'speed']
     
     DELTA_TAG = '-delta'
     HRF_TAG = '-hrf'

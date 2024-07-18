@@ -94,6 +94,8 @@ class BrocadeSwitchParser:
                     current_sw_dct = {key: fc_sw[key] for key in BrocadeSwitchParser.FC_SWITCH_LEAFS}
                     current_sw_dct['switch-wwn'] = fc_sw['name']
                     current_sw_dct['switch-name'] = fc_sw['user-friendly-name']
+                    current_sw_dct['uport-gport-enabled-quantity'] = 0
+                    current_sw_dct['enabled-port-quantity'] = 0
                     if fc_logical_sw_container_lst:
                         # find logical switch dictionary with the same switch wwn
                         for fc_logical_sw in fc_logical_sw_container_lst:
@@ -284,6 +286,7 @@ class BrocadeSwitchParser:
                     current_sw_dct = {key: fc_sw[key] for key in BrocadeSwitchParser.FABRIC_SWITCH_LEAFS}
                     current_sw_dct['fabric-id'] = vf_id
                     current_sw_dct['switch-wwn'] = current_sw_dct['name']
+                    current_sw_dct['switch-name'] = current_sw_dct['switch-user-friendly-name']
                     # add fabric_name from the fc_switch attribute
                     if self.fc_switch.get(vf_id):
                         current_sw_dct['fabric-user-friendly-name'] = self.fc_switch[vf_id]['fabric-user-friendly-name']
