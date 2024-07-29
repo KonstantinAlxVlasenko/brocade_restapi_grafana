@@ -4,6 +4,10 @@ from typing import Dict, List, Optional, Tuple, Union
 
 class BrocadeTelemetryParser:
 
+    STATUS_VALUE = {'ok': 1, 'unknown': 2, 'warning': 3, 'critical': 4}
+
+    STATUS_ID = {1: 'OK', 2: 'Unknown', 2: 'Warning', 2: 'Critical'}
+
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
         Args:

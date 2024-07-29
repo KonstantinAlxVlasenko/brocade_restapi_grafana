@@ -96,6 +96,7 @@ class BrocadeSwitchParser:
                     current_sw_dct['switch-name'] = fc_sw['user-friendly-name']
                     current_sw_dct['uport-gport-enabled-quantity'] = 0
                     current_sw_dct['enabled-port-quantity'] = 0
+                    current_sw_dct['online-port-quantity'] = 0
                     if fc_logical_sw_container_lst:
                         # find logical switch dictionary with the same switch wwn
                         for fc_logical_sw in fc_logical_sw_container_lst:

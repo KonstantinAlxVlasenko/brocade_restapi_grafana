@@ -19,7 +19,7 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
     # The Switch Status Policy report keys
     ssp_report_keys = BrocadeToolbar.chassis_wwn_key + ['name']
 
-    SSP_REPORT_STATE_ID = {1: 'healthy', 2: 'unknown', 3: 'marginal', 4: 'down'}
+    SSP_REPORT_STATUS_ID = {1: 'healthy', 2: 'unknown', 3: 'marginal', 4: 'down'}
 
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
@@ -69,7 +69,7 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
                                                     unit_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, parameter_key='chassis-name')
         # ssp report gauge
         # 1 - 'healthy', 2 - 'unknown', 3 - 'marginal', 4 - 'down'
-        ssp_report_description = f'The switch status policy report state {BrocadeMAPSSystemToolbar.SSP_REPORT_STATE_ID}'
+        ssp_report_description = f'The switch status policy report state {BrocadeMAPSSystemToolbar.SSP_REPORT_STATUS_ID}'
         self._gauge_ssp_report  = BrocadeGauge(name='ssp_report', description=ssp_report_description, 
                                                 unit_keys=BrocadeMAPSSystemToolbar.ssp_report_keys, metric_key='operational-state-id')
 

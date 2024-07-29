@@ -68,11 +68,9 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                          'no_light': 11, 'no_sync': 12, 'in_sync': 13, 'port_flt': 14, 'hard_flt': 15, 
                          'diag_flt': 16, 'lock_ref': 17, 'mod_inv': 18, 'mod_val': 19, 'no_sigdet': 20}
 
-
     FC_PORT_PARAMS_CHANGED = ['port-speed-hrf', 'long-distance-level', 'neighbor-node-wwn', 'neighbor-port-wwn',
                               'physical-state', 'port-enable-status', 'port-name', 'port-type', 'speed']
     
-
     
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser, fcport_params_parser=None):
         """
@@ -163,16 +161,17 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                     port_speed_gbps = int(fc_interface_container['speed']/1000_000_000)
                     # add leading 'N' or closing 'G' to the port_seed value
                     port_speed_gbps_hrf = BrocadeFCPortParametersParser._label_auto_fixed_speed_mode(port_speed_gbps, fc_interface_container['auto-negotiate'])
-                    # join wwns conneected to the port
+                    # The Fibre Channel WWN of the neighbor port
                     # neighbor_port_wwn = ', '.join(fc_interface_container['neighbor']['wwn']) if fc_interface_container['neighbor'] else None
                     neighbor_port_wwn = fc_interface_container['neighbor']['wwn'] if fc_interface_container['neighbor'] else None
+                    neighbor_port_wwn_str = '\n'.join(sorted(neighbor_port_wwn, reverse=True)) if neighbor_port_wwn else None
                     # port owner (remove closing '.')
                     sw_details_dct = self._get_port_owner(slot_port_number, vf_id)
                     # dynamic or static portname
                     port_name = fc_interface_container['user-friendly-name'].rstrip('.')
                     # port enabled or disabled
                     port_enable_status, port_enable_status_id = BrocadeFCPortParametersParser._get_port_enable_status(fc_interface_container)
-                    # online, offline, ,faulty, no_module, laser_flt, no_light, no_sync, in_sync, mod_inv, mod_val etc
+                    # online, offline, faulty, no_module, laser_flt, no_light, no_sync, in_sync, mod_inv, mod_val etc
                     physical_state = BrocadeFCPortParametersParser._get_port_physical_state(fc_interface_container)
                     # flag if fc port is enabled but has no device connected
                     nodevice_enabled_port_flag = BrocadeFCPortParametersParser._get_nodevice_enabled_port_flag(fc_interface_container)
@@ -181,9 +180,14 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                     
                     if fc_interface_container['is-enabled-state']:
                         self.sw_parser.fc_switch[vf_id]['enabled-port-quantity'] += 1
+
+                    if fc_interface_container['physical-state'] == 'online':
+                        self.sw_parser.fc_switch[vf_id]['online-port-quantity'] += 1
                     
                     pod_license_status_id = BrocadeFCPortParametersParser._get_pod_license_id(fc_interface_container)
+                    physical_state_status_id =  BrocadeFCPortParametersParser._get_physical_state_status_id(fc_interface_container)
 
+                    
                     # create dictionary with current port parameters 
                     fcport_params_current_dct = {
                         # 'swicth-name': sw_name,
@@ -202,12 +206,15 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                         'port-type': BrocadeFCPortParametersParser.PORT_TYPE_ID.get(fc_interface_container['port-type'], fc_interface_container['port-type']),
                         'enabled-port-type-id': BrocadeFCPortParametersParser._get_enabled_port_type_id(fc_interface_container),
                         'neighbor-port-wwn': neighbor_port_wwn,
+                        'neighbor-port-wwn-str': neighbor_port_wwn_str,
                         'port-enable-status': port_enable_status,
                         'port-enable-status-id': port_enable_status_id,
                         'nodevice-enabled-port': nodevice_enabled_port_flag,
                         'uport-gport-enabled': uport_gport_enabled_flag,
                         'long-distance-level': BrocadeFCPortParametersParser.LONG_DISTANCE_LEVEL.get(fc_interface_container['long-distance']),
-                        'pod-license-status-id': pod_license_status_id
+                        'pod-license-status-id': pod_license_status_id,
+                        'physical-state-status-id': physical_state_status_id,
+                        'physical-state-status': BrocadeFCPortParametersParser.STATUS_ID.get(physical_state_status_id),
                         }
                     
                     fcport_params_current_dct.update(sw_details_dct)
@@ -308,7 +315,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
     def _get_uport_gport_enabled_flag(self, fc_interface_container, vf_id):
         """
         Method to check if fc port is enabled but has not yet assumed a specific function in the fabric.
-        Port type is U-Port or G-port.
+        Port type is U-Port or G-port. 10: 'G-Port', 11: 'U-Port'
         
         Args:
             fc_interface_container {dict}: container with fc port parameters leafs.
@@ -320,12 +327,13 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
 
         if fc_interface_container['is-enabled-state'] and fc_interface_container['port-type'] in [10, 11]:
             self.sw_parser.fc_switch[vf_id]['uport-gport-enabled'] =+ 1
-            return 1
+            if fc_interface_container['port-type'] == 11:
+                return 1
+            elif fc_interface_container['port-type'] == 10:
+                return 2
         else:
             return 0
         
-
-
 
     @staticmethod
     def _get_enabled_port_type_id(fc_interface_container: Dict[str, Optional[Union[str,int]]]) -> Optional[int]:
@@ -439,6 +447,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
             port_speed = str(port_speed) + 'G'
         return port_speed
 
+
     @staticmethod
     def _get_pod_license_id(fc_interface_container: Dict[str, Optional[Union[str,int]]]) -> Optional[int]:
 
@@ -456,7 +465,67 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
             
         return 4
         
+
+    @staticmethod
+    def _get_physical_state_status_id(fc_interface_container):
+        """
+        Method to check port physical state status depending on port enable state.
+        Port physical states: offline, online, testing, faulty, e_port, f_port, 
+                            segmented, unknown, no_port, no_module, laser_flt, 
+                            no_light, no_sync, in_sync, port_flt, hard_flt, 
+                            diag_flt, lock_ref, mod_inv, mod_val, no_sigdet
         
+        Statuses: ok, unknown, warning, critical
+                            
+        Args:
+            fc_interface_container {dict}: container with fc port parameters leafs.
+        
+        Returns:
+            int: 1 (ok), 2 (unknown), 3 (warning), 4 (critical)
+        """
+
+        # unknown status
+        if not fc_interface_container['physical-state']:
+            return 2
+        
+        phys_state = fc_interface_container['physical-state'].lower()
+        
+        # ok status
+        if phys_state in ['online', 'e_port', 'f_port']:
+            return 1
+        
+        # critical status
+        if phys_state in ['faulty', 'laser_flt', 'port_flt', 'hard_flt', 
+                          'diag_flt', 'lock_ref', 'mod_inv', 'mod_val', 'segmented']:
+            return 4
+
+        # unknown status
+        if phys_state in ['unknown']:
+            return 2
+        
+        # warning status
+        if phys_state in ['testing']:
+            return 3
+        
+        if phys_state in ['no_sync', 'in_sync']:
+            # critical status
+            if fc_interface_container['is-enabled-state']:
+                return 4
+            # warning status
+            else:
+                return 3 
+        
+        if phys_state in ['offline', 'no_port', 'no_module', 'no_light', 'no_sigdet']:
+            # warning status
+            if fc_interface_container['is-enabled-state']:
+                return 3
+            # ok status
+            else:
+                return 1
+        # unknown status
+        return 2
+
+
     @property
     def sw_telemetry(self):
         return self._sw_telemetry

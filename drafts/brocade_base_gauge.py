@@ -92,6 +92,37 @@ class BrocadeGauge:
                     self.add_gauge_metric(gauge_data_current)
             elif isinstance(gauge_data_switch, dict):
                 self.add_gauge_metric(gauge_data_switch)
+
+
+
+    def fill_port_gauge_metrics(self, gauge_data: Dict[int, Dict]):
+        
+        if not gauge_data:
+            return
+        
+        for gauge_data_switch in gauge_data.values():
+        
+            if not gauge_data_switch:
+                continue
+
+            for gauge_data_port in gauge_data_switch.values():
+                
+                if not gauge_data_port:
+                    continue
+        
+                # if isinstance(gauge_data_port, list):
+                #     gauge_data_port_ordered = gauge_data_port[::-1] if self.reverse_filling else gauge_data_port
+
+                #     for gauge_data_current in gauge_data_port_ordered:
+                #         self.add_gauge_metric(gauge_data_current)
+                # elif isinstance(gauge_data_port, dict):
+                #     self.add_gauge_metric(gauge_data_port)
+
+                if isinstance(gauge_data_port, dict):
+                    # print(gauge_data_port['port-number'])
+                    self.add_gauge_metric(gauge_data_port)
+                else:
+                    print('NOT DICT')
         
 
     def add_gauge_metric(self, gauge_data):

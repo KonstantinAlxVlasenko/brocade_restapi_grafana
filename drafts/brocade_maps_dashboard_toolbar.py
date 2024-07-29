@@ -20,7 +20,7 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
     # maps_actions_keys  = BrocadeToolbar.switch_wwn_key   +  ['maps-actions']
     db_rule_keys = BrocadeToolbar.switch_wwn_key + ['category', 'name', 'time-stamp', 'object-element', 'object-value']
 
-    DB_SEVERITY_RULE_STATE_ID = {0: 'no event triggired or retrieved',
+    DB_SEVERITY_RULE_ID = {0: 'no event triggired or retrieved',
                                  1: 'information that event condition is cleared',
                                  2: 'warning that event condition detected'}
 
@@ -97,7 +97,7 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         # 0 - no event triggired or retrieved
         # 1 - information that event condition is cleared 
         # 2 - warning that event condition detected
-        db_severity_description = f'Dashboard rules affecting health severity {BrocadeMAPSDashboardToolbar.DB_SEVERITY_RULE_STATE_ID}.'
+        db_severity_description = f'Dashboard rules affecting health severity {BrocadeMAPSDashboardToolbar.DB_SEVERITY_RULE_ID}.'
         self._gauge_db_severity = BrocadeGauge(name='dashboard_rule_severiry', description=db_severity_description,
                                                 unit_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='severity')
         

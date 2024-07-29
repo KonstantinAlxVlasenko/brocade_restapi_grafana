@@ -39,6 +39,8 @@ from brocade_maps_system_toolbar import BrocadeMAPSSystemToolbar
 from brocade_maps_dashboard_toolbar import BrocadeMAPSDashboardToolbar
 from brocade_switch_toolbar import BrocadeSwitchToolbar
 from brocade_fabricshow_toolbar import BrocadeFabricShowToolbar
+from brocade_fcport_params_toolbar import BrocadeFCPortParamsToolbar
+from brocade_sfp_media_toolbar import BrocadeSFPMediaToolbar
 
 
 def load_object(dirname, filename):
@@ -91,6 +93,7 @@ sfp_media_parser_now = BrocadeSFPMediaParser(sw_telemetry_now, fcport_params_par
 fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport_params_parser_now, fcport_stats_parser_prev)
 
 
+
 # def gauge_init(name: str, description: str, label_names: List[str]):
 
 #     return Gauge(name, description, replace_underscore(label_names), registry=CollectorRegistry())
@@ -131,13 +134,15 @@ fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport
 
 
 
-request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
-chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
-fru_tb = BrocadeFRUToolbar(sw_telemetry_now)
-maps_system_tb = BrocadeMAPSSystemToolbar(sw_telemetry_now)
-maps_dashboard_tb = BrocadeMAPSDashboardToolbar(sw_telemetry_now)
+# request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
+# chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
+# fru_tb = BrocadeFRUToolbar(sw_telemetry_now)
+# maps_system_tb = BrocadeMAPSSystemToolbar(sw_telemetry_now)
+# maps_dashboard_tb = BrocadeMAPSDashboardToolbar(sw_telemetry_now)
 # switch_tb = BrocadeSwitchToolbar(sw_telemetry_now)
 # fabricshow_tb = BrocadeFabricShowToolbar(sw_telemetry_now)
+# fcport_params_tb = BrocadeFCPortParamsToolbar(sw_telemetry_now)
+sfp_media_tb = BrocadeSFPMediaToolbar(sw_telemetry_now)
 
 
 if __name__ == '__main__':
@@ -192,12 +197,12 @@ if __name__ == '__main__':
         # maps_dashboard_tb.gauge_maps_policy.fill_switch_gauge_metrics(maps_parser_now.maps_config)
         # maps_dashboard_tb.gauge_maps_actions.fill_switch_gauge_metrics(maps_parser_now.maps_config)
         
-        print('maps dashboard')
-        maps_dashboard_tb.gauge_db_swname.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
-        maps_dashboard_tb.gauge_db_vfid.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
-        maps_dashboard_tb.gauge_db_repetition_count.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
-        maps_dashboard_tb.gauge_db_triggered_count.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
-        maps_dashboard_tb.gauge_db_severity.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+        # print('maps dashboard')
+        # maps_dashboard_tb.gauge_db_swname.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+        # maps_dashboard_tb.gauge_db_vfid.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+        # maps_dashboard_tb.gauge_db_repetition_count.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+        # maps_dashboard_tb.gauge_db_triggered_count.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
+        # maps_dashboard_tb.gauge_db_severity.fill_switch_gauge_metrics(maps_parser_now.dashboard_rule)
 
         # print('switch')
         
@@ -212,6 +217,8 @@ if __name__ == '__main__':
         # switch_tb.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
         # switch_tb.gauge_switch_vfid.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
         # switch_tb.gauge_switch_port_quantity.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_online_port_quantity.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+        # switch_tb.gauge_uport_gport_enabled_quantity.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
         # switch_tb.gauge_base_switch_status.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
         # switch_tb.gauge_default_switch_status.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
         # switch_tb.gauge_logical_isl_status.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
@@ -225,6 +232,67 @@ if __name__ == '__main__':
         # fabricshow_tb.gauge_switch_did.fill_switch_gauge_metrics(sw_parser_now.fabric)
         # fabricshow_tb.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser_now.fabric)
         # fabricshow_tb.gauge_path_count.fill_switch_gauge_metrics(sw_parser_now.fabric)
+
+
+        # print('fcport parameters')
+        # fcport_params_tb.gauge_swname.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_fabricname.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_portname.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_neighbor_wwpn.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_switch_vfid.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_port_speed_value.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_port_speed_mode.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_port_speed_mode.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_port_ld_mode.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_port_physical_state.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_port_physical_state_status.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_port_type.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_enabled_port_type.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_port_status.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_nodevice_enabled_port.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_uport_gport_enabled_port.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+        # fcport_params_tb.gauge_pod_license_state.fill_port_gauge_metrics(fcport_params_parser_now.fcport_params)
+
+
+        print('sfp media')
+
+        sfp_media_tb.fill_toolbar_gauge_metrics(sfp_media_parser_now)
+
+        # sfp_media_tb.gauge_swname.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_fabricname.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_portname.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_switch_vfid.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_port_speed_value.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_port_speed_mode.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_port_physical_state.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_port_type.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # # sfp_media_tb.gauge_enabled_port_type.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_vendor.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_pn.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_sn.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_laser_type.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_speed_capability.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_wavelength.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_power_on_time.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_temperature.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_rx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_rx_power_dbm.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_rx_power_status.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_tx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_tx_power_dbm.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_tx_power_status.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_vendor.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_pn.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_sn.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_laser_type.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_speed_capability.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_temperature.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_rx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_rx_power_dbm.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_rx_power_status.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_tx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_tx_power_dbm.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
+        # sfp_media_tb.gauge_remote_tx_power_status.fill_port_gauge_metrics(sfp_media_parser_now.sfp_media)
 
 
         time.sleep(5)

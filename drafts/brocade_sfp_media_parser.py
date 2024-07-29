@@ -34,8 +34,10 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                        'remote-media-temperature', 'remote-media-tx-power', 
                        'remote-media-voltage']
     
-    FC_PORT_PARAMS = ['swicth-name', 'port-name', 'physical-state', 
-                      'port-enable-status', 'port-speed-hrf', 'port-type']
+    FC_PORT_PARAMS = ['switch-name', 'switch-wwn', 'fabric-user-friendly-name', 'vf-id', 'port-name', 'physical-state', 'physical-state-id',
+                      'port-enable-status', 'port-enable-status-id', 
+                      'port-speed-hrf', 'auto-negotiate', 'port-speed-gbps', 
+                      'port-type', 'port-type-id']
 
     REMOTE_OPTICAL_PRODUCT_LEAFS = ['part-number', 'serial-number', 'vendor-name']
 
@@ -48,7 +50,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
     MEDIA_POWER_CHANGED = ['rx-power', 'tx-power', 'remote-media-rx-power', 'remote-media-tx-power',
                            'rx-power-dbm', 'tx-power-dbm', 'remote-media-rx-power-dbm', 'remote-media-tx-power-dbm']
     
-    MEDIA_POWER_STATUS_CHANGED = ['rx-power-status', 'tx-power-status', 'remote-rx-power-status', 'remote-tx-power-status']
+    MEDIA_POWER_STATUS_CHANGED = ['rx-power-status', 'tx-power-status', 'remote-media-rx-power-status', 'remote-media-tx-power-status']
     
 
     # SFP_LW_TX_POWER_ALERT = {'high-alarm': 2500, 'low-alarm': 1000, 'high-warning': 2300, 'low-warning': 1200}
@@ -247,7 +249,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
 
     def _add_power_status(self, sfp_media_dct) -> None:
         """
-        Method adds power status ('ok', 'warning', 'critical') to the sfp media dictionary for the 
+        Method adds power status id and power status ('ok', 'unknown', 'warning', 'critical') to the sfp media dictionary for the 
         'rx-power', 'tx-power', 'remote-media-rx-power', 'remote-media-tx-power'
         depending on power value for Online ports.
                 
@@ -268,34 +270,146 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
 
         # check power value for Online ports only
         if sfp_media_dct.get('physical-state') == 'Online':
-            if sfp_media_dct.get('rx-power'):
+            if sfp_media_dct.get('rx-power') is not None:
+                rx_power_status_id = 2
                 if sfp_distance == 'sw':
-                    sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                    rx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
                         sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_rx'])
+
                 elif sfp_distance == 'lw':
-                    sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
-                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['lw_rx'])                                                             
-            if sfp_media_dct.get('tx-power'):
+                    rx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
+                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['lw_rx'])
+                
+                sfp_media_dct['rx-power-status-id'] = rx_power_status_id
+                sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(rx_power_status_id)
+            else:
+                sfp_media_dct['rx-power-status-id'] = None
+                sfp_media_dct['rx-power-status'] = None
+                                                                             
+            if sfp_media_dct.get('tx-power') is not None:
+                tx_power_status_id = 2
                 if sfp_distance == 'sw':
-                    sfp_media_dct['tx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                    tx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
                         sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_tx'])
                 elif sfp_distance == 'lw':
-                    sfp_media_dct['tx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                    sfp_media_dct['tx-power-status-id'] = BrocadeSFPMediaParser.get_alert_status_id(
                         sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['lw_tx'])
-            if sfp_media_dct.get('remote-media-rx-power'):
-                sfp_media_dct['remote-rx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                sfp_media_dct['tx-power-status-id'] = tx_power_status_id
+                sfp_media_dct['tx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(tx_power_status_id)
+            else:
+                sfp_media_dct['tx-power-status-id'] = None
+                sfp_media_dct['tx-power-status'] = None
+
+            if sfp_media_dct.get('remote-media-rx-power') is not None:
+                remote_rx_power_status_id = 2
+                remote_rx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
                         sfp_media_dct['remote-media-rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_rx'])
+                sfp_media_dct['remote-media-rx-power-status-id'] = remote_rx_power_status_id
+                sfp_media_dct['remote-media-rx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(remote_rx_power_status_id)
+            else:
+                sfp_media_dct['remote-media-rx-power-status-id'] = None
+                sfp_media_dct['remote-media-rx-power-status'] = None
+
             if sfp_media_dct.get('remote-media-tx-power'):
-                sfp_media_dct['remote-tx-power-status'] = BrocadeSFPMediaParser.get_alert_status(
+                remote_tx_power_status_id = 2
+                remote_tx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
                         sfp_media_dct['remote-media-tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_tx'])
+                sfp_media_dct['remote-media-tx-power-status-id'] = remote_tx_power_status_id
+                sfp_media_dct['remote-media-tx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(remote_tx_power_status_id)
+            else:
+                sfp_media_dct['remote-media-tx-power-status-id'] = None
+                sfp_media_dct['remote-media-tx-power-status'] = None
+
+        # power status and power status id for ports which are not Online
+        else:
+            empty_stutus_dct = {key: None for key in BrocadeSFPMediaParser.MEDIA_POWER_STATUS_CHANGED}
+            empty_stutus_id_dct = {key + '-id': None for key in BrocadeSFPMediaParser.MEDIA_POWER_STATUS_CHANGED}
+            sfp_media_dct.update(empty_stutus_dct)
+            sfp_media_dct.update(empty_stutus_id_dct)
                 
 
+    # def _add_power_status(self, sfp_media_dct) -> None:
+    #     """
+    #     Method adds power status ('ok', 'warning', 'critical') to the sfp media dictionary for the 
+    #     'rx-power', 'tx-power', 'remote-media-rx-power', 'remote-media-tx-power'
+    #     depending on power value for Online ports.
+                
+    #     Args: 
+    #         sfp_media_dct (dict): sfp parameters dictionary for a single port
+        
+    #     Returns:
+    #         None
+    #     """
+        
+    #     # check longwave or shortwave transceiver installed
+    #     sfp_distance = None
+    #     if sfp_media_dct.get('media-distance'):
+    #         if 'short' in sfp_media_dct['media-distance']:
+    #             sfp_distance = 'sw'
+    #         elif 'long' in sfp_media_dct['media-distance']:
+    #             sfp_distance = 'lw'
+
+    #     # check power value for Online ports only
+    #     if sfp_media_dct.get('physical-state') == 'Online':
+    #         if sfp_media_dct.get('rx-power'):
+    #             if sfp_distance == 'sw':
+    #                 sfp_media_dct['rx-power-status-id'] = BrocadeSFPMediaParser.get_alert_status_id(
+    #                     sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_rx'])
+    #                 sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(sfp_media_dct['rx-power-status-id'])
+    #             elif sfp_distance == 'lw':
+    #                 sfp_media_dct['rx-power-status-id'] = BrocadeSFPMediaParser.get_alert_status_id(
+    #                     sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['lw_rx'])
+    #                 sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(sfp_media_dct['rx-power-status-id'])                                                             
+    #         if sfp_media_dct.get('tx-power'):
+    #             if sfp_distance == 'sw':
+    #                 sfp_media_dct['tx-power-status-id'] = BrocadeSFPMediaParser.get_alert_status_id(
+    #                     sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_tx'])
+    #             elif sfp_distance == 'lw':
+    #                 sfp_media_dct['tx-power-status-id'] = BrocadeSFPMediaParser.get_alert_status_id(
+    #                     sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['lw_tx'])
+    #         if sfp_media_dct.get('remote-media-rx-power'):
+    #             sfp_media_dct['remote-rx-power-status-id'] = BrocadeSFPMediaParser.get_alert_status_id(
+    #                     sfp_media_dct['remote-media-rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_rx'])
+    #         if sfp_media_dct.get('remote-media-tx-power'):
+    #             sfp_media_dct['remote-tx-power-status-id'] = BrocadeSFPMediaParser.get_alert_status_id(
+    #                     sfp_media_dct['remote-media-tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_tx'])
+
+
+    # @staticmethod
+    # def get_alert_status(value: float, status_intervals_dct: dict) -> str:
+    #     """
+    #     Method checks to which interval value belongs to and returns corresponding status.
+    #     '--------low-alarm--------low-warning--------high-warning--------high-alarm--------'
+    #     'critical----------warning---------------ok---------------warning----------critical'
+        
+    #     Args:
+    #         value {float}: value checked to which interval it belongs to.
+    #         status_intervals_dct {dict}: dictionary with intervals 
+    #         {'high-alarm': x, 'low-alarm': y, 'high-warning': z, 'low-warning': w}
+        
+    #     Returns:
+    #         str: 'ok', 'warning', 'critical'
+    #     """
+
+    #     status = 'unknown'
+    #     if value >= status_intervals_dct['low-warning'] and value < status_intervals_dct['high-warning']:
+    #         status = 'ok'
+    #     elif value >= status_intervals_dct['high-alarm'] or value < status_intervals_dct['low-alarm']:
+    #         status = 'critical'
+    #     else:
+    #         status = 'warning'
+    #     return status
+
+
+
+
     @staticmethod
-    def get_alert_status(value: float, status_intervals_dct: dict) -> str:
+    def get_alert_status_id(value: float, status_intervals_dct: dict) -> int:
         """
         Method checks to which interval value belongs to and returns corresponding status.
         '--------low-alarm--------low-warning--------high-warning--------high-alarm--------'
         'critical----------warning---------------ok---------------warning----------critical'
+        STATUS_ID = {1: 'OK', 2: 'Unknown', 2: 'Warning', 2: 'Critical'}
         
         Args:
             value {float}: value checked to which interval it belongs to.
@@ -303,17 +417,19 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
             {'high-alarm': x, 'low-alarm': y, 'high-warning': z, 'low-warning': w}
         
         Returns:
-            str: 'ok', 'warning', 'critical'
+            int: (1,2,3,4)
         """
 
-        status = 'unknown'
+        
+        status_id = 2 # unknown
         if value >= status_intervals_dct['low-warning'] and value < status_intervals_dct['high-warning']:
-            status = 'ok'
+            status_id = 1 # ok
         elif value >= status_intervals_dct['high-alarm'] or value < status_intervals_dct['low-alarm']:
-            status = 'critical'
+            status_id = 4 # critical
         else:
-            status = 'warning'
-        return status
+            status_id = 3 # warning
+        return status_id
+
 
 
     def _add_sfp_dbm_power(self, sfp_media_dct):
@@ -327,8 +443,11 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
         sfp_dbm_power_dct = {}
 
         for sfp_param in sfp_media_dct:
-            if 'x-power' in sfp_param and sfp_media_dct[sfp_param] is not None:
-                sfp_dbm_power_dct[sfp_param + '-dbm'] = BrocadeSFPMediaParser.uW_to_dBm(sfp_media_dct[sfp_param])
+            if 'x-power' in sfp_param: 
+                if sfp_media_dct[sfp_param] is not None:
+                    sfp_dbm_power_dct[sfp_param + '-dbm'] = BrocadeSFPMediaParser.uW_to_dBm(sfp_media_dct[sfp_param])
+                else:
+                    sfp_dbm_power_dct[sfp_param + '-dbm'] = None
 
         if sfp_dbm_power_dct:
             sfp_media_dct.update(sfp_dbm_power_dct)
