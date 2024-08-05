@@ -2,6 +2,7 @@ from brocade_base_gauge import BrocadeGauge
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_base_toolbar import BrocadeToolbar
+from brocade_fru_parser import BrocadeFRUParser
 
 
 class BrocadeFRUToolbar(BrocadeToolbar):
@@ -98,6 +99,23 @@ class BrocadeFRUToolbar(BrocadeToolbar):
         # sensor temperature gauge
         self._gauge_sensor_temp = BrocadeGauge(name='sensor_temp', description='Sensor temperature', 
                                              unit_keys=BrocadeFRUToolbar.sensor_keys, metric_key='temperature')
+
+
+    def fill_toolbar_gauge_metrics(self, fru_parser: BrocadeFRUParser) -> None:
+        """Method to fill the gauge metrics for the toolbar.
+
+        Args:
+            fru_parser (BrocadeFRUParser): object contains required data to fill the gauge metrics.
+        """
+        
+        self.gauge_fan_chame.fill_chassis_gauge_metrics(fru_parser.fru_fan)
+        self.gauge_fan_state.fill_chassis_gauge_metrics(fru_parser.fru_fan)
+        self.gauge_fan_speed.fill_chassis_gauge_metrics(fru_parser.fru_fan)
+        self.gauge_ps_chame.fill_chassis_gauge_metrics(fru_parser.fru_ps)
+        self.gauge_ps_state.fill_chassis_gauge_metrics(fru_parser.fru_ps)
+        self.gauge_sensor_chame.fill_chassis_gauge_metrics(fru_parser.fru_sensor)
+        self.gauge_sensor_state.fill_chassis_gauge_metrics(fru_parser.fru_sensor)
+        self.gauge_sensor_temp.fill_chassis_gauge_metrics(fru_parser.fru_sensor)
 
 
 

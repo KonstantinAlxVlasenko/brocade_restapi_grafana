@@ -38,7 +38,8 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
     HIGH_SEVERITY_ERROR_LEAFS = ['class3-in-discards', 'class3-out-discards', 'class-3-discards', 
                                   'crc-errors', 'in-crc-errors', 'remote-crc-errors', 'remote-fec-uncorrected', 
                                   'pcs-block-errors',  'truncated-frames', 'bad-eofs-received', 
-                                  'frames-too-long', 'frames-timed-out']
+                                  'frames-too-long', 'frames-timed-out'
+                                  ]
     
     MEDIUM_SEVERITY_ERROR_LEAFS = ['address-errors', 'delimiter-errors', 'encoding-disparity-errors', 
                                     'frames-transmitter-unavailable-errors', 
@@ -84,28 +85,20 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
                           'link_error': {'warning': 10, 'critical': 20},
                           'lr_substract_ols': {'warning': 30, 'critical': 100}}
     
-    PORT_ERROR_STATUS_TAG = '-severity-errors_port-status'
+    PORT_ERROR_STATUS_TAG = '-severity-error_port-status'
 
     ERROR_SEVERITY_TYPES = ['high','medium', 'low']
 
-    PORT_ERROR_STATUS_KEYS = [severity + '-severity-errors_port-status' for severity in ERROR_SEVERITY_TYPES]
+    PORT_ERROR_STATUS_KEYS = [severity + '-severity-error_port-status' for severity in ERROR_SEVERITY_TYPES]
 
     COUNTER_CATEGORY_KEYS = [severity + '-severity_' + counter_status + '-status_errors' 
                              for severity in ERROR_SEVERITY_TYPES for counter_status in ['critical', 'warning', 'ok']]
     
-    COUNTER_CATEGORY_DELTA_KEYS = [category + '-delta' for category in COUNTER_CATEGORY_KEYS]
-    
     # STATUS_IDS = {'ok': 1, 'unknown': 2, 'warning': 3, 'critical': 4}
 
-    # IO_RATE_KEYS = [rate_key + tag for rate_key in ['in-rate', 'out-rate'] for tag in ['-bits', '-percentage', '-status']]
-    # IO_RATE_KEYS = [rate_key + tag for rate_key in ['in-rate', 'out-rate'] for tag in ['-status']]
-    
-    IO_RATE_KEYS = [rate_key + tag for rate_key in ['in-rate', 'out-rate'] for tag in ['-bits', '-percentage']]
-    IO_RATE_STATUS_KEYS = [rate_key + tag for rate_key in ['in-rate', 'out-rate'] for tag in ['-status']]
+    IO_RATE_KEYS = [rate_key + tag for rate_key in ['in-rate', 'out-rate'] for tag in ['-bits', '-%', '-status']] 
 
-    FC_PORT_STATS_CHANGED = PORT_ERROR_STATUS_KEYS + COUNTER_CATEGORY_KEYS + COUNTER_CATEGORY_DELTA_KEYS + IO_RATE_KEYS + IO_RATE_STATUS_KEYS
-
-    # FC_PORT_PATH = ['fabric-user-friendly-name', 'vf-id', 'switch-name', 'switch-wwn', 'port-name', 'name', 'slot-number', 'port-number']
+    FC_PORT_STATS_CHANGED = PORT_ERROR_STATUS_KEYS + COUNTER_CATEGORY_KEYS + IO_RATE_KEYS
 
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, fcport_params_parser: BrocadeSwitchParser, fcport_stats_prev=None):
@@ -201,7 +194,7 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
 
         for rate_key in ['in-peak-rate', 'in-rate', 'out-peak-rate', 'out-rate']:
             rate_bits_key = rate_key + '-bits'
-            rate_percantage_key = rate_key + '-percentage'
+            rate_percantage_key = rate_key + '-%'
             # convert speeds bytes to bits
             fcport_stats_current_dct[rate_bits_key] = BrocadeFCPortStatisticsParser.bytes_to_bits(fcport_stats_current_dct[rate_key])
             # find trhoughput percentage from port speed
@@ -209,12 +202,11 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
                 fcport_stats_current_dct[rate_bits_key], fcport_stats_current_dct['speed'])
             if not 'peak' in rate_key:
                 rate_status_key = rate_key + '-status'
-                rate_status_id_key = rate_status_key + '-id'
-                # find if throuput threshold is exceeded and get corresponding status id
-                fcport_stats_current_dct[rate_status_id_key] = BrocadeFCPortStatisticsParser.get_rate_status(
+                # find if throuput threshold is exceeded and get corresponding status
+                fcport_stats_current_dct[rate_status_key] = BrocadeFCPortStatisticsParser.get_rate_status(
                     fcport_stats_current_dct[rate_percantage_key])
-                # corresponding status
-                fcport_stats_current_dct[rate_status_key] = BrocadeFCPortStatisticsParser.STATUS_ID[fcport_stats_current_dct[rate_status_id_key]]
+                # corresponding status id
+                fcport_stats_current_dct[rate_status_key + '-id'] = BrocadeFCPortStatisticsParser.STATUS_VALUE[fcport_stats_current_dct[rate_status_key]]
             
             # if not 'peak' in  rate_key:
             #     print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['physical-state'], rate_key + '-%', fcport_stats_current_dct[rate_bits_key], fcport_stats_current_dct['speed'], fcport_stats_current_dct[rate_key + '-%'])
@@ -242,8 +234,7 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             for fcport_stats_vfid_now_dct in self.fcport_stats.values():
                 for fc_statistics_port_now_dct in fcport_stats_vfid_now_dct.values():
                     # BrocadeFCPortStatisticsParser._add_empty_fields(fc_statistics_port_now_dct)
-                    force_ok_status = True if other is None else False
-                    self._add_empty_fields(fc_statistics_port_now_dct, force_ok_status=force_ok_status)
+                    self._add_empty_fields(fc_statistics_port_now_dct)
         
         # check if other is for the same switch
         elif self.same_chassis(other):
@@ -341,23 +332,23 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             severity {str}: severity of the error.
         """
                 
-        counter_status_id = BrocadeFCPortStatisticsParser.get_error_status(counter_delta, BrocadeFCPortStatisticsParser.COUNTER_THRESHOLDS[counter_thresholds_key])
+        counter_status = BrocadeFCPortStatisticsParser.get_error_status(counter_delta, BrocadeFCPortStatisticsParser.COUNTER_THRESHOLDS[counter_thresholds_key])
         # update port error status if counter_status is greater than the port error status
-        self._update_port_error_status(fc_statistics_port_now_dct, counter_status_id, severity)
+        self._update_port_error_status(fc_statistics_port_now_dct, counter_status, severity)
         # add counter title to the corresponding list depending from counter severity and counter status.
-        self._categorize_error(fc_statistics_port_now_dct, counter_name, counter_status_id, severity)
+        self._categorize_error(fc_statistics_port_now_dct, counter_name, counter_status, severity)
                 
 
-    def _update_port_error_status(self, fc_statistics_port_now_dct: dict,  counter_status_id, severity: str) -> None:
+    def _update_port_error_status(self, fc_statistics_port_now_dct: dict,  counter_status, severity: str) -> None:
         """
         Method updates port error status ('critical', 'warning', 'ok') for the current severity level ('high','medium', 'low').
         If existing port error status has greater port error status id than the current port error status is not updated.
         So worse error status is assigned to the port error status.
 
         Port error status types:
-            'high-severity-errors_port-status',
-            'medium-severity-errors_port-status',
-            'low-severity-errors_port-status']
+            'high-severity-error_port-status',
+            'medium-severity-error_port-status',
+            'low-severity-error_port-status']
         
         Args:
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
@@ -368,15 +359,12 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             None
         """
 
-
-
         # port error status type title
         counter_status_key = severity + BrocadeFCPortStatisticsParser.PORT_ERROR_STATUS_TAG
         # port error status type id title
         counter_status_id_key = severity + BrocadeFCPortStatisticsParser.PORT_ERROR_STATUS_TAG + '-id'
         # get id of the current error status
-        # counter_status_id = BrocadeFCPortStatisticsParser.STATUS_VALUE[counter_status]
-        counter_status = BrocadeFCPortStatisticsParser.STATUS_ID[counter_status_id]
+        counter_status_id = BrocadeFCPortStatisticsParser.STATUS_VALUE[counter_status]
         # if port error status is assigned
         if fc_statistics_port_now_dct.get(counter_status_id_key):
             # check if current error status id is greater than the port error status id
@@ -389,7 +377,7 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             fc_statistics_port_now_dct[counter_status_id_key] = counter_status_id
 
 
-    def _categorize_error(self, fc_statistics_port_now_dct, counter_name, counter_status_id: int, severity: str) -> None:
+    def _categorize_error(self, fc_statistics_port_now_dct, counter_name, counter_status, severity: str) -> None:
         """
         Method adds counter title to the corresponding list depending on the error status ('critical', 'warning', 'ok')
         and severity ('high','medium', 'low').
@@ -418,21 +406,16 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
         # if counter_status == 'ok':
         #     return
 
-        if counter_status_id == 2: # 'unknown'
+        if counter_status == 'unknown':
             return
         
         # category name for the current counter
-        counter_category = severity + '-severity_' + BrocadeFCPortStatisticsParser.STATUS_ID[counter_status_id].lower() + '-status_errors'
-
-        counter_delta_name = counter_name if BrocadeFCPortStatisticsParser.DELTA_TAG in counter_name else counter_name + BrocadeFCPortStatisticsParser.DELTA_TAG
+        counter_category = severity + '-severity_' + counter_status + '-status_errors'
         if counter_category in fc_statistics_port_now_dct:
             fc_statistics_port_now_dct[counter_category].append(counter_name)
-            fc_statistics_port_now_dct[counter_category + BrocadeFCPortStatisticsParser.DELTA_TAG].update(
-                {counter_name: fc_statistics_port_now_dct[counter_delta_name]})
         else:
             fc_statistics_port_now_dct[counter_category] = [counter_name]
-            fc_statistics_port_now_dct[counter_category + BrocadeFCPortStatisticsParser.DELTA_TAG] ={
-                counter_name: fc_statistics_port_now_dct[counter_delta_name]}
+
 
     def _detect_lr_ols_inconsistency(self, fcport_stats_dct: dict, fcport_stats_growth_dct: dict, lr_type: str) -> None:
         """
@@ -465,11 +448,11 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
         # find diffrerence between link reset and offline sequence delta counters
         lr_substract_ols_delta = \
             BrocadeFCPortStatisticsParser.subtract_counters(fcport_stats_dct[lr_delta_leaf], fcport_stats_dct[ols_delta_leaf])
-        # save diffrerence to fc port statistics dictionaries
-        fcport_stats_dct[lr_substract_ols_leaf] = lr_substract_ols_delta 
         # add counter name to the corresponding category list depending from counter severity and counter status and assign port error status
         self._add_error_status_and_categorize_error(fcport_stats_dct, lr_substract_ols_delta, counter_thresholds_key='lr_substract_ols', 
                                                     counter_name=lr_substract_ols_leaf, severity='medium')
+        # save diffrerence to fc port statistics dictionaries
+        fcport_stats_dct[lr_substract_ols_leaf] = lr_substract_ols_delta
         BrocadeFCPortStatisticsParser.save_positive_value(fcport_stats_growth_dct, lr_substract_ols_leaf, lr_substract_ols_delta) 
 
 
@@ -508,14 +491,13 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             fcport_stats_growth_dct[vf_id][slot_port] = fcport_stats_growth_port_dct
                                    
 
-    def _add_empty_fields(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
+    def _add_empty_fields(self, fc_statistics_port_now_dct: dict) -> None:
         """
         Method adds empty fields from the BrocadeFCPortStatisticsParser list,
         empty port error status fields and empty error category fields to the fcport statistics dictionary.
 
         Args:
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
-            force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'.
         
         Returns:
             None.
@@ -523,43 +505,38 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
 
         empty_delta_dct = {counter + BrocadeFCPortStatisticsParser.DELTA_TAG: None for counter in BrocadeFCPortStatisticsParser.FC_STATISTICS_COUNTER_LEAFS}
         fc_statistics_port_now_dct.update(empty_delta_dct)
-        self._add_unknown_port_error_status_fields(fc_statistics_port_now_dct, force_ok_status)
+        self._add_unknown_port_error_status_fields(fc_statistics_port_now_dct)
         self._add_empty_error_category_fields(fc_statistics_port_now_dct)
         fc_statistics_port_now_dct['time-generated-prev-hrf'] = None
         fc_statistics_port_now_dct[BrocadeFCPortStatisticsParser.LROUT_SUBTRACT_OLSIN_LEAF] = None
         fc_statistics_port_now_dct[BrocadeFCPortStatisticsParser.LRIN_SUBTRACT_OLSOUT_LEAF] = None
         
 
-    def _add_unknown_port_error_status_fields(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
+    def _add_unknown_port_error_status_fields(self, fc_statistics_port_now_dct: dict) -> None:
         """
         Method adds port error status fields to the fcport statistics dictionary 
-        with 'unknown' value if this port error status doesn't exist or 'ok' value if it's forced.
+        with 'unknown' value if this port error status doesn't exist.
 
         Port error status types:
-            'high-severity-errors_port-status',
-            'medium-severity-errors_port-status',
-            'low-severity-errors_port-status'
+            'high-severity-error_port-status',
+            'medium-severity-error_port-status',
+            'low-severity-error_port-status']
         
         Args:
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
-            force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'. 
         
         Returns:
             None.
         """
-        
-        status_id = 1 if force_ok_status else 2
 
+        # non-exisnet port error status
+        unknown_port_error_status_dct = {port_error_severity: 'unknown' 
+                                         for  port_error_severity in BrocadeFCPortStatisticsParser.PORT_ERROR_STATUS_KEYS 
+                                         if not port_error_severity in fc_statistics_port_now_dct}
         # non-exisnet port error status id                                 
-        unknown_port_error_status_id_dct = {port_error_severity + '-id': status_id 
+        unknown_port_error_status_id_dct = {port_error_severity + '-id': BrocadeFCPortStatisticsParser.STATUS_VALUE['unknown'] 
                                             for  port_error_severity in BrocadeFCPortStatisticsParser.PORT_ERROR_STATUS_KEYS
                                             if not port_error_severity in fc_statistics_port_now_dct}
-        # non-exisnet port error status
-        unknown_port_error_status_dct = {port_error_severity: BrocadeFCPortStatisticsParser.STATUS_ID[status_id] 
-                                         for  port_error_severity in BrocadeFCPortStatisticsParser.PORT_ERROR_STATUS_KEYS 
-                                         if not port_error_severity in fc_statistics_port_now_dct}        
-        
-        
         fc_statistics_port_now_dct.update(unknown_port_error_status_dct)
         fc_statistics_port_now_dct.update(unknown_port_error_status_id_dct)
         
@@ -590,12 +567,8 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
         empty_error_categories_dct = {error_category: None 
                                        for error_category in BrocadeFCPortStatisticsParser.COUNTER_CATEGORY_KEYS 
                                        if not error_category in fc_statistics_port_now_dct}
-        empty_error_categories_w_values_dct = {error_category + BrocadeFCPortStatisticsParser.DELTA_TAG: None 
-                                       for error_category in BrocadeFCPortStatisticsParser.COUNTER_CATEGORY_KEYS 
-                                       if not error_category + BrocadeFCPortStatisticsParser.DELTA_TAG in fc_statistics_port_now_dct}
         # add empty fields to the fc port statistics dictionary
         fc_statistics_port_now_dct.update(empty_error_categories_dct)
-        fc_statistics_port_now_dct.update(empty_error_categories_w_values_dct)
         
 
     def _get_changed_fcport_stats(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
@@ -638,7 +611,7 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
                 # add changed fcport stats ports for the current vf_id
                 fcport_stats_changed_dct[vf_id] = BrocadeFCPortStatisticsParser.get_changed_vfid_ports(fcport_stats_vfid_now_dct, fcport_params_vfid_prev_dct, 
                                                                                         changed_keys=BrocadeFCPortStatisticsParser.FC_PORT_STATS_CHANGED, 
-                                                                                        const_keys=BrocadeFCPortStatisticsParser.FC_PORT_PATH, 
+                                                                                        const_keys=['switch-name', 'name', 'slot-number', 'port-number'], 
                                                                                         time_now=time_now, time_prev=time_prev)
         return fcport_stats_changed_dct
 
@@ -654,21 +627,19 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             status_intervals_dct {dict}: dictionary with intervals {'warning': x, 'critical': y}
         
         Returns:
-            int: 1: 'ok', 2: 'unknown', 3: 'warning', 4: 'critical'
+            str: 'ok', 'warning', 'critical' or 'unknown'
         """
 
-        # status = 'unknown'
-
-        status = 2 # 'unknown'
+        status = 'unknown'
         if value < 0:
             return status
 
         if value >= 0 and value < status_intervals_dct['warning']:
-            status = 1 # 'ok'
+            status = 'ok'
         elif value >= status_intervals_dct['warning'] and value < status_intervals_dct['critical']:
-            status = 3 # 'warning'                  
+            status = 'warning'                  
         elif value >= status_intervals_dct['critical']:
-            status = 4 # 'critical'
+            status = 'critical'
         return status
 
 
@@ -681,19 +652,18 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             rate_percantage {float}: in and out throughput percentage from the port speed.
         
         Returns:
-            int: Port in and out throughput status (1: 'ok', 2: 'unknown', 3: 'warning', 4: 'critical',).
-            
+            str: Port in and out throughput status ('ok', 'warning', 'critical', 'unknown').
         """
 
         if rate_percantage is None:
-            return 2 #'unknown'
+            return 'unknown'
         
         if rate_percantage >= 90:
-            return 4 #'critical'
+            return 'critical'
         elif rate_percantage >= 75:
-            return 3 #'warning'
+            return 'warning'
         else:
-            return 1 #'ok'
+            return 'ok'
 
 
     @staticmethod

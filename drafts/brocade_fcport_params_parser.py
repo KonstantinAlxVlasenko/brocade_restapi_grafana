@@ -69,7 +69,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                          'diag_flt': 16, 'lock_ref': 17, 'mod_inv': 18, 'mod_val': 19, 'no_sigdet': 20}
 
     FC_PORT_PARAMS_CHANGED = ['port-speed-hrf', 'long-distance-level', 'neighbor-node-wwn', 'neighbor-port-wwn',
-                              'physical-state', 'port-enable-status', 'port-name', 'port-type', 'speed']
+                              'physical-state', 'port-enable-status', 'port-name', 'port-type', 'speed', 'max-speed']
     
     
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser, fcport_params_parser=None):
@@ -266,7 +266,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                 # add changed sfp_media ports for the current vf_id
                 fcport_params_changed_dct[vf_id] = BrocadeFCPortParametersParser.get_changed_vfid_ports(fcport_params_vfid_now_dct, fcport_params_vfid_prev_dct, 
                                                                                         changed_keys=BrocadeFCPortParametersParser.FC_PORT_PARAMS_CHANGED, 
-                                                                                        const_keys=['swicth-name', 'name', 'slot-number', 'port-number'], 
+                                                                                        const_keys=BrocadeFCPortParametersParser.FC_PORT_PATH, 
                                                                                         time_now=time_now, time_prev=time_prev)
         return fcport_params_changed_dct
 

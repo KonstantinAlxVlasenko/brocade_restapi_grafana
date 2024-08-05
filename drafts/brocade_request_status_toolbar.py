@@ -1,5 +1,5 @@
 from brocade_base_gauge import BrocadeGauge
-
+from brocade_telemetry_request_status import BrocadeRequestStatus
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
@@ -59,6 +59,21 @@ class BrocadeRequestStatusToolbar:
         # request status time guage
         self._gauge_rs_time =  BrocadeGauge(name='request_status_time', description='HTTP request status time', 
                                             unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, parameter_key='time')
+
+
+
+    def fill_toolbar_gauge_metrics(self, request_status: BrocadeRequestStatus) -> None:
+        """Method to fill the gauge metrics for the toolbar.
+
+        Args:
+            request_status (BrocadeRequestStatus): object contains required data to fill the gauge metrics.
+        """
+
+        self.gauge_rs_id.fill_chassis_gauge_metrics(request_status.request_status)
+        self.gauge_rs_code.fill_chassis_gauge_metrics(request_status.request_status)
+        self.gauge_rs_error.fill_chassis_gauge_metrics(request_status.request_status)
+        self.gauge_rs_date.fill_chassis_gauge_metrics(request_status.request_status)
+        self.gauge_rs_time.fill_chassis_gauge_metrics(request_status.request_status)
 
 
     def __repr__(self):

@@ -1,9 +1,7 @@
 from brocade_base_gauge import BrocadeGauge
-
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_sfp_media_parser import BrocadeSFPMediaParser
-
 from brocade_base_toolbar import BrocadeToolbar
+from brocade_sfp_media_parser import BrocadeSFPMediaParser
+from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
 class BrocadeSFPMediaToolbar(BrocadeToolbar):
@@ -96,6 +94,7 @@ class BrocadeSFPMediaToolbar(BrocadeToolbar):
         self._gauge_rx_power_dbm = BrocadeGauge(name='sfp_rx_power_dbm', description='The SFP rx power in dBm.', 
                                                unit_keys=BrocadeSFPMediaToolbar.switch_port_keys, metric_key='rx-power-dbm')
         # sfp media rx-power status id gauge
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         rx_power_status_description = f'SFP rx power status {BrocadeSFPMediaToolbar.STATUS_ID}.'
         self._gauge_rx_power_status = BrocadeGauge(name='sfp_rx_power_status', description=rx_power_status_description, 
                                                unit_keys=BrocadeSFPMediaToolbar.switch_port_keys, metric_key='rx-power-status-id')
@@ -106,6 +105,7 @@ class BrocadeSFPMediaToolbar(BrocadeToolbar):
         self._gauge_tx_power_dbm = BrocadeGauge(name='sfp_tx_power_dbm', description='The SFP tx power in dBm.', 
                                                unit_keys=BrocadeSFPMediaToolbar.switch_port_keys, metric_key='tx-power-dbm')
         # sfp media tx-power status id gauge
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         tx_power_status_description = f'SFP tx power status {BrocadeSFPMediaToolbar.STATUS_ID}.'
         self._gauge_tx_power_status = BrocadeGauge(name='sfp_tx_power_status', description=tx_power_status_description, 
                                                unit_keys=BrocadeSFPMediaToolbar.switch_port_keys, metric_key='tx-power-status-id')
@@ -136,6 +136,7 @@ class BrocadeSFPMediaToolbar(BrocadeToolbar):
         self._gauge_remote_rx_power_dbm = BrocadeGauge(name='remote_sfp_rx_power_dbm', description='The remote SFP rx power in dBm.', 
                                                unit_keys=BrocadeSFPMediaToolbar.switch_port_keys, metric_key='remote-media-rx-power-dbm')
         # remote sfp media rx-power status id gauge
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         rx_power_remote_status_description = f'Remote SFP rx power status {BrocadeSFPMediaToolbar.STATUS_ID}.'
         self._gauge_remote_rx_power_status = BrocadeGauge(name='remote_sfp_rx_power_status', description=rx_power_remote_status_description, 
                                                unit_keys=BrocadeSFPMediaToolbar.switch_port_keys, metric_key='remote-media-rx-power-status-id')
@@ -146,12 +147,13 @@ class BrocadeSFPMediaToolbar(BrocadeToolbar):
         self._gauge_remote_tx_power_dbm = BrocadeGauge(name='remote_sfp_tx_power_dbm', description='The remote SFP tx power in dBm.', 
                                                unit_keys=BrocadeSFPMediaToolbar.switch_port_keys, metric_key='remote-media-tx-power-dbm')
         # remote sfp media tx-power status id gauge
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         tx_power_remote_status_description = f'Remote SFP tx power status {BrocadeSFPMediaToolbar.STATUS_ID}.'
         self._gauge_remote_tx_power_status = BrocadeGauge(name='remote_sfp_tx_power_status', description=tx_power_remote_status_description, 
                                                unit_keys=BrocadeSFPMediaToolbar.switch_port_keys, metric_key='remote-media-tx-power-status-id')
     
 
-    def fill_toolbar_gauge_metrics(self, sfp_media_parser: BrocadeSFPMediaParser):
+    def fill_toolbar_gauge_metrics(self, sfp_media_parser: BrocadeSFPMediaParser) -> None:
         """Method to fill the gauge metrics for the toolbar.
 
         Args:

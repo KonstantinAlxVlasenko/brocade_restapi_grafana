@@ -1,7 +1,7 @@
 from brocade_base_gauge import BrocadeGauge
-
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_base_toolbar import BrocadeToolbar
+from brocade_chassis_parser import BrocadeChassisParser
+from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
 class BrocadeChassisToolbar(BrocadeToolbar):
@@ -106,6 +106,27 @@ class BrocadeChassisToolbar(BrocadeToolbar):
         # license exp date gauge
         self._gauge_license_exp_date = BrocadeGauge(name='license_exp_date', description='License expiration date', 
                                             unit_keys=BrocadeChassisToolbar.license_keys, parameter_key='expiration-date')
+
+
+    def fill_toolbar_gauge_metrics(self, ch_parser: BrocadeChassisParser) -> None:
+        """Method to fill the gauge metrics for the toolbar.
+
+        Args:
+            ch_parser (BrocadeChassisParser): object contains required data to fill the gauge metrics.
+        """
+
+        self.gauge_ch_name.fill_chassis_gauge_metrics(ch_parser.chassis)
+        self.gauge_fos.fill_chassis_gauge_metrics(ch_parser.chassis)
+        self.gauge_date.fill_chassis_gauge_metrics(ch_parser.chassis)
+        self.gauge_time.fill_chassis_gauge_metrics(ch_parser.chassis)
+        self.gauge_tz.fill_chassis_gauge_metrics(ch_parser.chassis)
+        self.gauge_ntp_active.fill_chassis_gauge_metrics(ch_parser.ntp_server)
+        self.gauge_ntp_configured.fill_chassis_gauge_metrics(ch_parser.ntp_server)
+        self.gauge_vf_mode.fill_chassis_gauge_metrics(ch_parser.chassis)
+        self.gauge_ls_number.fill_chassis_gauge_metrics(ch_parser.chassis)
+        self.gauge_license_status.fill_chassis_gauge_metrics(ch_parser.sw_license)
+        self.gauge_license_capacity.fill_chassis_gauge_metrics(ch_parser.sw_license)
+        self.gauge_license_exp_date.fill_chassis_gauge_metrics(ch_parser.sw_license)
 
 
     def __repr__(self):

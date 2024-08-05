@@ -2,6 +2,7 @@ from brocade_base_gauge import BrocadeGauge
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_base_toolbar import BrocadeToolbar
+from brocade_fcport_params_parser import BrocadeFCPortParametersParser
 
 
 class BrocadeFCPortParamsToolbar(BrocadeToolbar):
@@ -207,6 +208,31 @@ class BrocadeFCPortParamsToolbar(BrocadeToolbar):
         pod_license_state_description = f'The POD license status for a port. {BrocadeFCPortParamsToolbar.POD_LICENSE_STATUS_ID}.'
         self._gauge_pod_license_state = BrocadeGauge(name='fcport_params_pod_license_state', description=pod_license_state_description,
                                                        unit_keys=BrocadeFCPortParamsToolbar.switch_port_extended_keys, metric_key='pod-license-status-id') 
+
+
+    def fill_toolbar_gauge_metrics(self, fcport_params_parser: BrocadeFCPortParametersParser) -> None:
+        """Method to fill the gauge metrics for the toolbar.
+
+        Args:
+            fcport_params_parser (BrocadeFCPortParametersParser): object contains required data to fill the gauge metrics.
+        """
+
+        self.gauge_swname.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_fabricname.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_portname.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_neighbor_wwpn.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_switch_vfid.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_port_speed_value.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_port_speed_mode.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_port_ld_mode.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_port_physical_state.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_port_physical_state_status.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_port_type.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_enabled_port_type.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_port_status.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_nodevice_enabled_port.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_uport_gport_enabled_port.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
+        self.gauge_pod_license_state.fill_port_gauge_metrics(fcport_params_parser.fcport_params)
 
 
     def __repr__(self):

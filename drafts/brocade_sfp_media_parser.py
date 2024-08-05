@@ -34,10 +34,10 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                        'remote-media-temperature', 'remote-media-tx-power', 
                        'remote-media-voltage']
     
-    FC_PORT_PARAMS = ['switch-name', 'switch-wwn', 'fabric-user-friendly-name', 'vf-id', 'port-name', 'physical-state', 'physical-state-id',
-                      'port-enable-status', 'port-enable-status-id', 
-                      'port-speed-hrf', 'auto-negotiate', 'port-speed-gbps', 
-                      'port-type', 'port-type-id']
+    # FC_PORT_PARAMS = ['switch-name', 'switch-wwn', 'fabric-user-friendly-name', 'vf-id', 'port-name', 'physical-state', 'physical-state-id',
+    #                   'port-enable-status', 'port-enable-status-id', 
+    #                   'port-speed-hrf', 'auto-negotiate', 'port-speed-gbps', 
+    #                   'port-type', 'port-type-id']
 
     REMOTE_OPTICAL_PRODUCT_LEAFS = ['part-number', 'serial-number', 'vendor-name']
 
@@ -154,7 +154,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
 
         if protocol.lower() == 'fc':
             fc_port_params_current = self.fcport_params_parser.fcport_params[vf_id][slot_port_number]
-            fcport_params = {param: fc_port_params_current.get(param) for param in BrocadeSFPMediaParser.FC_PORT_PARAMS}
+            fcport_params = {param: fc_port_params_current.get(param) for param in BrocadeSFPMediaParser.FC_PORT_ADD_PARAMS}
         else:
             fcport_params = {param: None for param in BrocadeSFPMediaParser.FC_PORT_PARAMS}
         return fcport_params
@@ -419,7 +419,6 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
         Returns:
             int: (1,2,3,4)
         """
-
         
         status_id = 2 # unknown
         if value >= status_intervals_dct['low-warning'] and value < status_intervals_dct['high-warning']:
@@ -510,7 +509,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                 sfp_media_changed_dct[vf_id] = BrocadeSFPMediaParser.get_changed_vfid_ports(
                     sfp_media_vfid_now_dct, sfp_media_vfid_prev_dct, 
                     changed_keys=BrocadeSFPMediaParser.MEDIA_RDP_CHANGED + BrocadeSFPMediaParser.MEDIA_POWER_CHANGED + BrocadeSFPMediaParser.MEDIA_POWER_STATUS_CHANGED, 
-                    const_keys=['swicth-name', 'name', 'port-protocol', 'slot-number', 'port-number'], 
+                    const_keys=BrocadeSFPMediaParser.FC_PORT_PATH, 
                     time_now=time_now, time_prev=time_prev)
         return sfp_media_changed_dct
 

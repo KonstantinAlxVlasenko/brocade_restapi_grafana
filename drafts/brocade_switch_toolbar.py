@@ -1,7 +1,7 @@
 from brocade_base_gauge import BrocadeGauge
-
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_base_toolbar import BrocadeToolbar
+from brocade_switch_parser import BrocadeSwitchParser
+from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
 class BrocadeSwitchToolbar(BrocadeToolbar):
@@ -148,8 +148,30 @@ class BrocadeSwitchToolbar(BrocadeToolbar):
                                                       unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='logical-isl-enabled')
         
     
+    def fill_toolbar_gauge_metrics(self, sw_parser: BrocadeSwitchParser) -> None:
+        """Method to fill the gauge metrics for the toolbar.
 
+        Args:
+            sw_parser (BrocadeSwitchParser): object contains required data to fill the gauge metrics.
+        """
         
+        self.gauge_swname.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_fabric_name.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_uptime.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_state.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_mode.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_role.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_did.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_vfid.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_switch_port_quantity.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_online_port_quantity.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_uport_gport_enabled_quantity.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_base_switch_status.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_default_switch_status.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        self.gauge_logical_isl_status.fill_switch_gauge_metrics(sw_parser.fc_switch)
+
 
     def __repr__(self):
         return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"

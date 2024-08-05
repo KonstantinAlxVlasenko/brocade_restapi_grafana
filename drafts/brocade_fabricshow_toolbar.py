@@ -2,6 +2,7 @@ from brocade_base_gauge import BrocadeGauge
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_base_toolbar import BrocadeToolbar
+from brocade_switch_parser import BrocadeSwitchParser
 
 
 class BrocadeFabricShowToolbar(BrocadeToolbar):
@@ -78,6 +79,23 @@ class BrocadeFabricShowToolbar(BrocadeToolbar):
         # fabricshow path-count gauge
         self._gauge_path_count = BrocadeGauge(name='fabricshow_path_count', description='The number of currently available paths to the remote domain.', 
                                               unit_keys=BrocadeFabricShowToolbar.switch_wwn_key, metric_key='path-count')
+
+
+    def fill_toolbar_gauge_metrics(self, sw_parser: BrocadeSwitchParser) -> None:
+        """Method to fill the gauge metrics for the toolbar.
+
+        Args:
+            sw_parser (BrocadeSwitchParser): object contains required data to fill the gauge metrics.
+        """
+
+        self.gauge_swname.fill_switch_gauge_metrics(sw_parser.fabric)
+        self.gauge_fabricname.fill_switch_gauge_metrics(sw_parser.fabric)
+        self.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser.fabric)
+        self.gauge_switch_fos.fill_switch_gauge_metrics(sw_parser.fabric)
+        self.gauge_principal_label.fill_switch_gauge_metrics(sw_parser.fabric)
+        self.gauge_switch_did.fill_switch_gauge_metrics(sw_parser.fabric)
+        self.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser.fabric)
+        self.gauge_path_count.fill_switch_gauge_metrics(sw_parser.fabric)
 
 
     def __repr__(self):

@@ -6,7 +6,16 @@ class BrocadeTelemetryParser:
 
     STATUS_VALUE = {'ok': 1, 'unknown': 2, 'warning': 3, 'critical': 4}
 
-    STATUS_ID = {1: 'OK', 2: 'Unknown', 2: 'Warning', 2: 'Critical'}
+    # STATUS_VALUE = {'OK': 1, 'Unknown': 2, 'Warning': 3, 'Critical': 4}
+
+    STATUS_ID = {1: 'OK', 2: 'Unknown', 3: 'Warning', 4: 'Critical'}
+
+    FC_PORT_ADD_PARAMS = ['switch-name', 'switch-wwn', 'fabric-user-friendly-name', 'vf-id', 'port-name', 'physical-state', 'physical-state-id',
+                        'port-enable-status', 'port-enable-status-id', 'speed', 'max-speed',
+                        'port-speed-hrf', 'auto-negotiate', 'port-speed-gbps', 
+                        'port-type', 'port-type-id']
+    
+    FC_PORT_PATH = ['fabric-user-friendly-name', 'vf-id', 'switch-name', 'switch-wwn', 'port-name', 'name', 'slot-number', 'port-number']
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """

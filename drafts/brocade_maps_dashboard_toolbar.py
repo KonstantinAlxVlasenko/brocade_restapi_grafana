@@ -2,6 +2,7 @@ from brocade_base_gauge import BrocadeGauge
 
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_base_toolbar import BrocadeToolbar
+from brocade_maps_parser import BrocadeMAPSParser
 
 
 class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
@@ -66,8 +67,6 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         #                                      label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='severity')
         
 
-
-
         # maps config switch name gauge
         self._gauge_mapsconfig_swname  = BrocadeGauge(name='mapsconfig_swname', description='MAPS config switchanme', 
                                          unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='switch-name')
@@ -101,6 +100,26 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         self._gauge_db_severity = BrocadeGauge(name='dashboard_rule_severiry', description=db_severity_description,
                                                 unit_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='severity')
         
+     
+    def fill_toolbar_gauge_metrics(self, maps_parser: BrocadeMAPSParser) -> None:
+        """Method to fill the gauge metrics for the toolbar.
+
+        Args:
+            maps_parser (BrocadeMAPSParser): object contains required data to fill the gauge metrics.
+        """
+        
+        # 'maps policy, actions'
+        self.gauge_mapsconfig_swname.fill_switch_gauge_metrics(maps_parser.maps_config)
+        self.gauge_mapsconfig_vfid.fill_switch_gauge_metrics(maps_parser.maps_config)
+        self.gauge_maps_policy.fill_switch_gauge_metrics(maps_parser.maps_config)
+        self.gauge_maps_actions.fill_switch_gauge_metrics(maps_parser.maps_config)
+        # 'maps dashboard'
+        self.gauge_db_swname.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+        self.gauge_db_vfid.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+        self.gauge_db_repetition_count.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+        self.gauge_db_triggered_count.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+        self.gauge_db_severity.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+
 
     def __repr__(self):
         return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
