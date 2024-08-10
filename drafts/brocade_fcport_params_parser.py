@@ -72,7 +72,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                               'physical-state', 'port-enable-status', 'port-name', 'port-type', 'speed', 'max-speed']
     
     
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser, fcport_params_parser=None):
+    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser, fcport_params_prev=None):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
@@ -85,7 +85,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
         self._fcport_params = self. _get_port_params_values()
         if self.fcport_params:
             # self._fcport_params_change = self._get_switch_ports_params_change(fcport_params_parser)
-            self._fcport_params_changed = self._get_changed_fcport_params(fcport_params_parser)
+            self._fcport_params_changed = self._get_changed_fcport_params(fcport_params_prev)
         else:
             self._fcport_params_changd = {}
 
@@ -258,7 +258,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                 if vf_id not in other.fcport_params:
                     continue
 
-                # sfp_media of the vf_id switch for the previous telemetry    
+                # port params of the vf_id switch for the previous telemetry    
                 fcport_params_vfid_prev_dct = other.fcport_params[vf_id]
                 # timestamps
                 time_now = self.telemetry_date + ' ' + self.telemetry_time

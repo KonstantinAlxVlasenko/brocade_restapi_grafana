@@ -3,6 +3,7 @@ from brocade_base_gauge import BrocadeGauge
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_base_toolbar import BrocadeToolbar
 from brocade_fru_parser import BrocadeFRUParser
+from brocade_switch_parser import BrocadeSwitchParser
 
 
 class BrocadeFRUToolbar(BrocadeToolbar):
@@ -18,7 +19,10 @@ class BrocadeFRUToolbar(BrocadeToolbar):
         sw_telemetry: set of switch telemetry retrieved from the switch
     """
 
-    fru_id_keys  =  ['chassis-wwn', 'unit-number']
+    # fru_id_keys  =  ['chassis-wwn', 'unit-number']
+
+    fru_id_keys  =  ['chassis-wwn', 'switch-wwn', 'unit-number']
+
     fan_id_keys = fru_id_keys + ['airflow-direction']
     sensor_keys = fru_id_keys + ['slot-number', 'index']
 
@@ -69,6 +73,12 @@ class BrocadeFRUToolbar(BrocadeToolbar):
         # fan chassis name
         self._gauge_fan_chname = BrocadeGauge(name='fan_chname', description='FAN chassis name', 
                                                     unit_keys=BrocadeFRUToolbar.chassis_wwn_key, parameter_key='chassis-name')
+        
+        self._gauge_fan_swname = BrocadeGauge(name='fan_swname', description='FAN switch name', 
+                                                    unit_keys=BrocadeFRUToolbar.switch_wwn_key, parameter_key='switch-name')
+        self._gauge_fan_fabric_name = BrocadeGauge(name='fan_fabric_name', description='FAN fabric name', 
+                                                    unit_keys=BrocadeFRUToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
+
         # fan state gauge
         # 0 - 'absent', 1 - 'ok', 2 - 'below minimum', 3 - 'above maximum', 4- 'unknown', 5 -'not ok', 6 - 'faulty'
         fan_state_description = f'Status of each fan in the system {BrocadeFRUToolbar.FAN_STATE_ID}'
@@ -82,6 +92,10 @@ class BrocadeFRUToolbar(BrocadeToolbar):
         # ps chassis name
         self._gauge_ps_chname = BrocadeGauge(name='ps_chname', description='PS chassis name', 
                                                     unit_keys=BrocadeFRUToolbar.chassis_wwn_key, parameter_key='chassis-name')
+        self._gauge_ps_swname = BrocadeGauge(name='ps_swname', description='PS switch name', 
+                                                    unit_keys=BrocadeFRUToolbar.switch_wwn_key, parameter_key='switch-name')
+        self._gauge_ps_fabric_name = BrocadeGauge(name='ps_fabric_name', description='PS fabric name', 
+                                                    unit_keys=BrocadeFRUToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # ps state gauge
         # 0 - 'absent', 1 - 'ok', 2 - 'predicting failure', 3 - 'unknown', 4 - 'try reseating unit', 5 - 'faulty'
         ps_state_description = f'Status of the switch power supplies {BrocadeFRUToolbar.PS_STATE_ID}'
@@ -91,6 +105,10 @@ class BrocadeFRUToolbar(BrocadeToolbar):
         # sensor chassis name
         self._gauge_sensor_chname = BrocadeGauge(name='sensor_chname', description='Sensor chassis name', 
                                                     unit_keys=BrocadeFRUToolbar.chassis_wwn_key, parameter_key='chassis-name')
+        self._gauge_sensor_swname = BrocadeGauge(name='sensor_swname', description='Sensor switch name', 
+                                                    unit_keys=BrocadeFRUToolbar.switch_wwn_key, parameter_key='switch-name')
+        self._gauge_sensor_fabric_name = BrocadeGauge(name='sensor_fabric_name', description='Sensor fabric name', 
+                                                    unit_keys=BrocadeFRUToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # sensor state gauge
         # 0 - 'absent', 1 - 'ok'
         sensor_state_description = f'The current operational state of the sensor {BrocadeFRUToolbar.SENSOR_STATE_ID}'
@@ -101,35 +119,54 @@ class BrocadeFRUToolbar(BrocadeToolbar):
                                              unit_keys=BrocadeFRUToolbar.sensor_keys, metric_key='temperature')
 
 
-    def fill_toolbar_gauge_metrics(self, fru_parser: BrocadeFRUParser) -> None:
+    def fill_toolbar_gauge_metrics(self, fru_parser: BrocadeFRUParser, sw_parser: BrocadeSwitchParser) -> None:
         """Method to fill the gauge metrics for the toolbar.
 
         Args:
             fru_parser (BrocadeFRUParser): object contains required data to fill the gauge metrics.
+            sw_parser (BrocadeSwitchParser): object contains vf details.
         """
         
-        self.gauge_fan_chame.fill_chassis_gauge_metrics(fru_parser.fru_fan)
-        self.gauge_fan_state.fill_chassis_gauge_metrics(fru_parser.fru_fan)
-        self.gauge_fan_speed.fill_chassis_gauge_metrics(fru_parser.fru_fan)
-        self.gauge_ps_chame.fill_chassis_gauge_metrics(fru_parser.fru_ps)
-        self.gauge_ps_state.fill_chassis_gauge_metrics(fru_parser.fru_ps)
-        self.gauge_sensor_chame.fill_chassis_gauge_metrics(fru_parser.fru_sensor)
-        self.gauge_sensor_state.fill_chassis_gauge_metrics(fru_parser.fru_sensor)
-        self.gauge_sensor_temp.fill_chassis_gauge_metrics(fru_parser.fru_sensor)
+        # copy fru params to all virtual switches
+        fru_ps = BrocadeToolbar.vf_multiplier(fru_parser.fru_ps, sw_parser, component_level=True)
+        fru_fan = BrocadeToolbar.vf_multiplier(fru_parser.fru_fan, sw_parser, component_level=True)
+        fru_sensor = BrocadeToolbar.vf_multiplier(fru_parser.fru_sensor, sw_parser, component_level=True)
 
+        fan_gauge_lst = [self.gauge_fan_chname, self.gauge_fan_swname, self.gauge_fan_fabric_name, 
+                         self.gauge_fan_state, self.gauge_fan_speed]
+        
+        ps_gauge_lst = [self.gauge_ps_chame, self.gauge_ps_swname, self.gauge_ps_fabric_name, 
+                        self.gauge_ps_state]
+        
+        sensor_gauge_lst = [self.gauge_sensor_chame, self.gauge_sensor_swname, self.gauge_sensor_fabric_name, 
+                            self.gauge_sensor_state, self.gauge_sensor_temp]
+
+
+        for gauge in fan_gauge_lst:
+            gauge.fill_port_gauge_metrics(fru_fan)
+
+        for gauge in ps_gauge_lst:
+            gauge.fill_port_gauge_metrics(fru_ps)
+
+        for gauge in sensor_gauge_lst:
+            gauge.fill_port_gauge_metrics(fru_sensor)
+
+        # self.gauge_fan_chname.fill_chassis_components_gauge_metrics(fru_parser.fru_fan)
+        # self.gauge_fan_state.fill_chassis_components_gauge_metrics(fru_parser.fru_fan)
+        # self.gauge_fan_speed.fill_chassis_components_gauge_metrics(fru_parser.fru_fan)
+        # self.gauge_ps_chame.fill_chassis_components_gauge_metrics(fru_parser.fru_ps)
+        # self.gauge_ps_state.fill_chassis_components_gauge_metrics(fru_parser.fru_ps)
+        # self.gauge_sensor_chame.fill_chassis_components_gauge_metrics(fru_parser.fru_sensor)
+        # self.gauge_sensor_state.fill_chassis_components_gauge_metrics(fru_parser.fru_sensor)
+        # self.gauge_sensor_temp.fill_chassis_components_gauge_metrics(fru_parser.fru_sensor)
 
 
     def __repr__(self):
         return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
 
 
-    # @property
-    # def sw_telemetry(self):
-    #     return self._sw_telemetry
-
-
     @property
-    def gauge_fan_chame(self):
+    def gauge_fan_chname(self):
         return self._gauge_fan_chname
 
 
@@ -166,3 +203,33 @@ class BrocadeFRUToolbar(BrocadeToolbar):
     @property
     def gauge_sensor_temp(self):
         return self._gauge_sensor_temp
+    
+
+    @property
+    def gauge_fan_swname(self):
+        return self._gauge_fan_swname
+
+
+    @property
+    def gauge_fan_fabric_name(self):
+        return self._gauge_fan_fabric_name
+    
+
+    @property
+    def gauge_ps_swname(self):
+        return self._gauge_ps_swname
+
+
+    @property
+    def gauge_ps_fabric_name(self):
+        return self._gauge_ps_fabric_name
+    
+
+    @property
+    def gauge_sensor_swname(self):
+        return self._gauge_sensor_swname
+
+
+    @property
+    def gauge_sensor_fabric_name(self):
+        return self._gauge_sensor_fabric_name

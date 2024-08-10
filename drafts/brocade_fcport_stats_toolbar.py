@@ -343,7 +343,7 @@ class BrocadeFCPortStatsToolbar(BrocadeToolbar):
         """
         
 
-        fcport_stats_metrics_lst = [
+        gauge_lst = [
             self.gauge_swname, self.gauge_fabricname, self.gauge_switch_vfid, self.gauge_portname, self.gauge_port_speed_value, 
             self.gauge_port_speed_mode, self.gauge_port_physical_state, self.gauge_port_type, self.gauge_address_errors, 
             self.gauge_address_errors_delta, self.gauge_bad_eofs_received, self.gauge_bad_eofs_received_delta, 
@@ -377,8 +377,8 @@ class BrocadeFCPortStatsToolbar(BrocadeToolbar):
             self.gauge_truncated_frames_delta
             ]
         
-        for metric in fcport_stats_metrics_lst:
-            metric.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats)
+        for gauge in gauge_lst:
+            gauge.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats)
 
 
     def __repr__(self):

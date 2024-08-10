@@ -159,19 +159,55 @@ class BrocadeTelemetryParser:
 
 
 
+
+    @staticmethod
+    def get_changed_chasssis_params(now_dct, prev_dct, changed_keys, const_keys, time_now, time_prev):
+        """
+        Method filters ports where values for changed_keys are differs in ports_vfid_now_dct and ports_vfid_prev_dct.
+        If value is changed then current and previous values are added to the port dictionary. 
+        If changed values are present and dictionary for the port is not empty 
+        then const_keys which are port_id values and timestamps are added to the port dictionary.
+        
+        Args:
+            ports_vfid_now_dct {dict}: ports values of the certain switch vfid retrieved from the current sw_telemetry.
+            ports_vfid_prev_dct {dict}: ports values of the certain switch vfid retrieved from the previous sw_telemetry.
+            changed_keys {list}: keys which are checked for changed values.
+            const_keys {list}: keys which are added to the non-empty port dictionary with changed values.
+            time_now (str): timestamp for the current sw_telemetry.
+            time_prev (str): timestamp for the previous sw_telemetry.
+        
+        Returns:
+            dict: ports of the certain switch vfid with changed values.
+        """
+        
+
+        # find changed values for the changed_keys
+        chassis_changed_dct = BrocadeTelemetryParser.get_changed_values(now_dct, prev_dct, changed_keys)
+        # add constant values to the non-empty port dictionary
+        BrocadeTelemetryParser.copy_dict_values(chassis_changed_dct, now_dct, keys=const_keys)                    
+
+        if chassis_changed_dct:
+            # add time stamps
+            chassis_changed_dct['time-generated-hrf'] = time_now
+            chassis_changed_dct['time-generated-prev-hrf'] = time_prev
+
+        return chassis_changed_dct
+
+
+
     @staticmethod
     def get_changed_values(now_dct: dict, prev_dct: dict, keys: List[str], tag: str='-prev') -> dict:
         """
-        Method detects if port paramters from the FC_PORT_PARAMS_CHANGED list have been changed for the current port.
-        It compares port parameters of the current and previous fc port parameters dicts.
-        All changed parameters are added to to the dictionatry including current and previous values.
+        Method detects if port paramters from the keys list have been changed.
+        It compares values of the current and previous dicts.
+        All changed values are added to to the dictionatry including current and previous values.
         
         Args:
-            fcport_params_port_now_dct {dict}: current fc port parameters dictionary.
-            fcport_params_port_prev_dct {dict}: previous fc port parameters dictionary to find changes with. 
+            now_dct {dict}: current dictionary.
+            prev_dct {dict}: previous dictionary to find changes with. 
         
         Returns:
-            dict: dictionary with changed port parameters.
+            dict: dictionary with changed values.
         """
 
         # dictionary with with changed port parameters 

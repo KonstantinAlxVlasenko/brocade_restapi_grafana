@@ -119,6 +119,19 @@ o3_g630_003_vc01_f1_b.media_rdp[-1]['Response']['media-rdp'][0]['tx-power'] = 13
 o3_g630_003_vc01_f1_b.media_rdp[-1]['Response']['media-rdp'][1]['part-number'] = None
 
 
+# fan spped
+o3_g630_003_vc01_f1_b.fru_fan['Response']['fan'][0]['speed'] = 12000
+o3_g630_003_vc01_f1_b.fru_fan['Response']['fan'][0]['operational-state'] = 'above maximum'
+
+# cpu_usage
+o3_g630_003_vc01_f1_b.system_resources['Response']['system-resources']['cpu-usage'] = 80
+o3_g630_003_vc01_f1_b.system_resources['Response']['system-resources']['memory-usage'] = 95
+
+# ssp report
+o3_g630_003_vc01_f1_b.ssp_report['Response']['switch-status-policy-report']['power-supply-health'] = 'down'
+o3_g630_003_vc01_f1_b.ssp_report['Response']['switch-status-policy-report']['fan-health'] = 'marginal'
+
+
 # previous telemetry
 sw_telemetry_prev = o3_g630_003_vc01_f1_a
 request_status_prev = BrocadeRequestStatus(sw_telemetry_prev)
@@ -130,28 +143,30 @@ fcport_params_parser_prev = BrocadeFCPortParametersParser(sw_telemetry_prev, sw_
 sfp_media_parser_prev = BrocadeSFPMediaParser(sw_telemetry_prev, fcport_params_parser_prev)
 fcport_stats_parser_prev = BrocadeFCPortStatisticsParser(sw_telemetry_prev, fcport_params_parser_prev)
 
+print('now----------------------')
+
 # now telemetry
 sw_telemetry_now = o3_g630_003_vc01_f1_b
 request_status_now = BrocadeRequestStatus(sw_telemetry_now)
 ch_parser_now = BrocadeChassisParser(sw_telemetry_now)
 sw_parser_now = BrocadeSwitchParser(sw_telemetry_now)
-fru_parser_now = BrocadeFRUParser(sw_telemetry_now)
-maps_parser_now = BrocadeMAPSParser(sw_telemetry_now, sw_parser_now)
+fru_parser_now = BrocadeFRUParser(sw_telemetry_now, fru_parser_prev)
+maps_parser_now = BrocadeMAPSParser(sw_telemetry_now, sw_parser_now, maps_parser_prev)
 fcport_params_parser_now = BrocadeFCPortParametersParser(sw_telemetry_now, sw_parser_now, fcport_params_parser_prev)
 sfp_media_parser_now = BrocadeSFPMediaParser(sw_telemetry_now, fcport_params_parser_now, sfp_media_parser_prev)
 fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport_params_parser_now, fcport_stats_parser_prev)
 
 
-request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
-chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
-fru_tb = BrocadeFRUToolbar(sw_telemetry_now)
+# request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
+# chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
+# fru_tb = BrocadeFRUToolbar(sw_telemetry_now)
 maps_system_tb = BrocadeMAPSSystemToolbar(sw_telemetry_now)
-maps_dashboard_tb = BrocadeMAPSDashboardToolbar(sw_telemetry_now)
-switch_tb = BrocadeSwitchToolbar(sw_telemetry_now)
-fabricshow_tb = BrocadeFabricShowToolbar(sw_telemetry_now)
-fcport_params_tb = BrocadeFCPortParamsToolbar(sw_telemetry_now)
-sfp_media_tb = BrocadeSFPMediaToolbar(sw_telemetry_now)
-fcport_stats_tb = BrocadeFCPortStatsToolbar(sw_telemetry_now)
+# maps_dashboard_tb = BrocadeMAPSDashboardToolbar(sw_telemetry_now)
+# switch_tb = BrocadeSwitchToolbar(sw_telemetry_now)
+# fabricshow_tb = BrocadeFabricShowToolbar(sw_telemetry_now)
+# fcport_params_tb = BrocadeFCPortParamsToolbar(sw_telemetry_now)
+# sfp_media_tb = BrocadeSFPMediaToolbar(sw_telemetry_now)
+# fcport_stats_tb = BrocadeFCPortStatsToolbar(sw_telemetry_now)
 log_tb = BrocadeLogToolbar(sw_telemetry_now)
 
 
@@ -160,38 +175,38 @@ if __name__ == '__main__':
     
     while True:
         
-        print('request_status')
-        request_status_tb.fill_toolbar_gauge_metrics(request_status_now)
+        # print('request_status')
+        # request_status_tb.fill_toolbar_gauge_metrics(request_status_now)
         
-        print('chassis')
-        chassis_tb.fill_toolbar_gauge_metrics(ch_parser_now)
+        # print('chassis')
+        # chassis_tb.fill_toolbar_gauge_metrics(ch_parser_now)
 
-        print('fru')
-        fru_tb.fill_toolbar_gauge_metrics(fru_parser_now)
+        # print('fru')
+        # fru_tb.fill_toolbar_gauge_metrics(fru_parser_now, sw_parser_now)
 
         print('maps system resources', 'maps system health')
-        maps_system_tb.fill_toolbar_gauge_metrics(maps_parser_now)
+        maps_system_tb.fill_toolbar_gauge_metrics(maps_parser_now, sw_parser_now)
 
-        print('maps policy, actions','maps dashboard')
-        maps_dashboard_tb.fill_toolbar_gauge_metrics(maps_parser_now)
+        # print('maps policy, actions','maps dashboard')
+        # maps_dashboard_tb.fill_toolbar_gauge_metrics(maps_parser_now)
 
-        print('switch')
-        switch_tb.fill_toolbar_gauge_metrics(sw_parser_now)
+        # print('switch')
+        # switch_tb.fill_toolbar_gauge_metrics(sw_parser_now)
         
-        print('fabrichsow')
-        fabricshow_tb.fill_toolbar_gauge_metrics(sw_parser_now)
+        # print('fabrichsow')
+        # fabricshow_tb.fill_toolbar_gauge_metrics(sw_parser_now)
 
-        print('fcport parameters')
-        fcport_params_tb.fill_toolbar_gauge_metrics(fcport_params_parser_now)
+        # print('fcport parameters')
+        # fcport_params_tb.fill_toolbar_gauge_metrics(fcport_params_parser_now)
 
-        print('sfp media')
-        sfp_media_tb.fill_toolbar_gauge_metrics(sfp_media_parser_now)
+        # print('sfp media')
+        # sfp_media_tb.fill_toolbar_gauge_metrics(sfp_media_parser_now)
 
-        print('fcport_stats')
-        fcport_stats_tb.fill_toolbar_gauge_metrics(fcport_stats_parser_now)
+        # print('fcport_stats')
+        # fcport_stats_tb.fill_toolbar_gauge_metrics(fcport_stats_parser_now)
 
-        print('log')
-        log_tb.fill_toolbar_gauge_metrics(sw_parser_now, fcport_params_parser_now, sfp_media_parser_now, fcport_stats_parser_now)
+        # print('log')
+        # log_tb.fill_toolbar_gauge_metrics(sw_parser_now, fcport_params_parser_now, sfp_media_parser_now, fcport_stats_parser_now, fru_parser_now)
 
         time.sleep(5)
     

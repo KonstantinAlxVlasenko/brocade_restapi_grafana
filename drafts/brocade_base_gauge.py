@@ -48,7 +48,6 @@ class BrocadeGauge:
         self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys))
 
 
-
     def validate_gauge_parameters(self):
         """Method checks if gauge instance is initialized with parameter or metric key.
         Gauge istance must have either parameter_key or metric_key passed as class parameter but not both.
@@ -75,6 +74,24 @@ class BrocadeGauge:
             self.add_gauge_metric(gauge_data)
 
             
+    def fill_chassis_components_gauge_metrics(self, gauge_data: Dict[int, Dict[str, Union[str, int]]]):
+
+        if not gauge_data:
+            return
+        
+
+        for gauge_data_component in gauge_data.values():
+        
+            if not gauge_data_component:
+                continue
+
+            if isinstance(gauge_data_component, dict):
+                self.add_gauge_metric(gauge_data_component)
+        
+        
+
+
+
     def fill_switch_gauge_metrics(self, gauge_data: Dict[int, Dict]):
         
         if not gauge_data:
@@ -95,36 +112,6 @@ class BrocadeGauge:
 
 
 
-    # def fill_port_gauge_metrics(self, gauge_data: Dict[int, Dict]):
-        
-    #     if not gauge_data:
-    #         return
-        
-    #     for gauge_data_switch in gauge_data.values():
-        
-    #         if not gauge_data_switch:
-    #             continue
-
-    #         for gauge_data_port in gauge_data_switch.values():
-                
-    #             if not gauge_data_port:
-    #                 continue
-        
-    #             # if isinstance(gauge_data_port, list):
-    #             #     gauge_data_port_ordered = gauge_data_port[::-1] if self.reverse_filling else gauge_data_port
-
-    #             #     for gauge_data_current in gauge_data_port_ordered:
-    #             #         self.add_gauge_metric(gauge_data_current)
-    #             # elif isinstance(gauge_data_port, dict):
-    #             #     self.add_gauge_metric(gauge_data_port)
-
-    #             if isinstance(gauge_data_port, dict):
-    #                 # print(gauge_data_port['port-number'])
-    #                 self.add_gauge_metric(gauge_data_port)
-    #             else:
-    #                 print('NOT DICT')
-
-
     def fill_port_gauge_metrics(self, gauge_data: Dict[int, Dict], 
                                 prerequisite_keys_all: List[str] = None, prerequisite_keys_any: List[str] = None,  
                                 renamed_keys: dict = None, modified_dict:dict = None) -> None:
@@ -138,6 +125,8 @@ class BrocadeGauge:
                 continue
 
             for gauge_data_port in gauge_data_switch.values():
+
+                print(gauge_data_port)
                 
                 if not gauge_data_port:
                     continue
@@ -167,6 +156,9 @@ class BrocadeGauge:
                         self.add_gauge_metric(gauge_data_port)
                 else:
                     print('NOT DICT')
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-
+from brocade_switch_parser import BrocadeSwitchParser
 
 class BrocadeToolbar:
 
@@ -32,6 +32,45 @@ class BrocadeToolbar:
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry) -> None:
         
         self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+
+
+
+    @staticmethod
+    def vf_multiplier(chassis_level_parser: dict, sw_parser: BrocadeSwitchParser, component_level=False) -> dict:
+        """
+        Method converts chassis_level_parser to switch_level_parser 
+        by adding VF details to the chassis_level_parser.
+        VF details: ['switch-name', 'switch-wwn', 'vf-id', 'fabric-user-friendly-name']
+
+        Args:
+            chassis_level_parser (dict): data to multiply
+            sw_parser (BrocadeSwitchParser): contaains VF details
+        Returns:
+            dict: data multiplied by vf
+        """
+        
+        switch_level_parser = {}
+
+        if chassis_level_parser is None:
+            return
+        elif not chassis_level_parser:
+            return switch_level_parser
+        
+
+        for vf_id, vf_details in sw_parser.vf_details.items():
+            switch_level_parser[vf_id] = {}
+            if component_level:
+                for component_id, chassis_component_dct in chassis_level_parser.items():
+                    mod_chassis_component_dct = chassis_component_dct.copy()
+                    mod_chassis_component_dct.update(vf_details)
+                    switch_level_parser[vf_id][component_id] = mod_chassis_component_dct
+            else:
+                mod_chassis_dct = chassis_level_parser.copy()
+                mod_chassis_dct.update(vf_details)
+                switch_level_parser[vf_id] = mod_chassis_dct
+
+        return switch_level_parser
+
 
     @property
     def sw_telemetry(self):

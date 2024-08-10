@@ -44,8 +44,8 @@ class BrocadeSwitchParser:
         """
         
         self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
-        # self._fc_switch, self._vfid_name = self._get_fc_switch_value()
         self._fc_switch: dict = self._get_fc_switch_value()
+        self._vf_details: dict = self._get_vf_details()
         if self.fc_switch:
             self._set_switch_role()
             self._set_switch_mode()
@@ -133,6 +133,24 @@ class BrocadeSwitchParser:
         else:
             fc_logical_sw_container_lst = []
         return fc_logical_sw_container_lst
+
+
+    def _get_vf_details(self) -> Dict[str, Union[str, int]]:
+        """
+        Method retrieves vf details (values for vf_details_keys).
+        
+        Returns:
+            {dict}: vf details for each virtual switch on the chassis
+        """
+        
+        vf_details_keys = ['switch-name', 'switch-wwn', 'vf-id', 'fabric-user-friendly-name']
+        vf_details_dct = {}
+        if not self.fc_switch:
+            return
+        
+        for vf_id, sw_params_dct in self.fc_switch.items():
+            vf_details_dct[vf_id] = {key: sw_params_dct[key] for key in vf_details_keys}
+        return vf_details_dct
 
 
     def _set_ipaddress_str(self) -> None:
@@ -365,6 +383,14 @@ class BrocadeSwitchParser:
     @property
     def fabric(self):
         return self._fabric
+    
+
+    @property
+    def vf_details(self):
+        return self._vf_details
+
+
+
     
 
     # @property

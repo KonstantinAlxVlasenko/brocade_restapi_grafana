@@ -199,7 +199,7 @@ class BrocadeSwitchTelemetry:
                     container[vf_id] = self._get_sw_telemetry(client, module_name, module_type)
                     BrocadeSwitchTelemetry._get_container_error_message(container[vf_id])
                 
-              # vf mode is enabled with multiple virtual switches   
+            # vf mode is enabled with multiple virtual switches   
             elif self._vfid_lst and len(self._vfid_lst) > 1:
                 
                 for vf_id in self._vfid_lst:

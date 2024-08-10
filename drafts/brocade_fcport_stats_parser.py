@@ -368,8 +368,6 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             None
         """
 
-
-
         # port error status type title
         counter_status_key = severity + BrocadeFCPortStatisticsParser.PORT_ERROR_STATUS_TAG
         # port error status type id title

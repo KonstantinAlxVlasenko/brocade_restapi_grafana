@@ -2,7 +2,7 @@ from brocade_base_gauge import BrocadeGauge
 from brocade_base_toolbar import BrocadeToolbar
 from brocade_maps_parser import BrocadeMAPSParser
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-
+from brocade_switch_parser import BrocadeSwitchParser
 
 class BrocadeMAPSSystemToolbar(BrocadeToolbar):
     """
@@ -74,7 +74,7 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
                                                 unit_keys=BrocadeMAPSSystemToolbar.ssp_report_keys, metric_key='operational-state-id')
 
 
-    def fill_toolbar_gauge_metrics(self, maps_parser: BrocadeMAPSParser) -> None:
+    def fill_toolbar_gauge_metrics(self, maps_parser: BrocadeMAPSParser, sw_parser: BrocadeSwitchParser) -> None:
         """Method to fill the gauge metrics for the toolbar.
 
         Args:
@@ -87,6 +87,10 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
         self.gauge_flash_usage.fill_chassis_gauge_metrics(maps_parser.system_resources)
         self.gauge_memory_usage.fill_chassis_gauge_metrics(maps_parser.system_resources)
         # 'maps system health'
+        ssp_report = BrocadeToolbar.vf_multiplier(maps_parser.ssp_report, sw_parser, component_level=True)
+        print(ssp_report)
+
+
         self.gauge_ssp_report_chname.fill_chassis_gauge_metrics(maps_parser.ssp_report)
         self.gauge_ssp_report.fill_chassis_gauge_metrics(maps_parser.ssp_report)
 
