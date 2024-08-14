@@ -17,6 +17,10 @@ class BrocadeTelemetryParser:
     
     FC_PORT_PATH = ['fabric-user-friendly-name', 'vf-id', 'switch-name', 'switch-wwn', 'port-name', 'name', 'slot-number', 'port-number']
 
+    STATUS_TAG = '-status'
+    STATUS_ID_TAG = '-status-id'
+    PREV_TAG = '-prev'
+
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
         Args:
@@ -161,7 +165,7 @@ class BrocadeTelemetryParser:
 
 
     @staticmethod
-    def get_changed_chasssis_params(now_dct, prev_dct, changed_keys, const_keys, time_now, time_prev):
+    def get_changed_chassis_params(now_dct, prev_dct, changed_keys, const_keys, time_now, time_prev):
         """
         Method filters ports where values for changed_keys are differs in ports_vfid_now_dct and ports_vfid_prev_dct.
         If value is changed then current and previous values are added to the port dictionary. 

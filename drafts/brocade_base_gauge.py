@@ -17,6 +17,7 @@ class BrocadeGauge:
 
     chassis_wwn_key = ['chassis-wwn']
     switch_wwn_key  = ['switch-wwn']
+    
 
 
     # def __init__(self, name: str, description: str, label_keys: List[str], metric_key: str = None, reverse_filling: bool = False):
@@ -92,7 +93,9 @@ class BrocadeGauge:
 
 
 
-    def fill_switch_gauge_metrics(self, gauge_data: Dict[int, Dict]):
+    def fill_switch_gauge_metrics(self, gauge_data: Dict[int, Dict],
+                                  prerequisite_keys_all: List[str] = None, prerequisite_keys_any: List[str] = None,  
+                                  renamed_keys: dict = None, update_dict:dict = None) -> None:
         
         if not gauge_data:
             return
@@ -108,13 +111,22 @@ class BrocadeGauge:
                 for gauge_data_current in gauge_data_switch_ordered:
                     self.add_gauge_metric(gauge_data_current)
             elif isinstance(gauge_data_switch, dict):
-                self.add_gauge_metric(gauge_data_switch)
+
+                if not BrocadeGauge.check_prerequisite_keys(gauge_data_switch, prerequisite_keys_all, prerequisite_keys_any):
+                    continue
+
+                gauge_data_switch_modified = BrocadeGauge.modify_dict(gauge_data_switch, renamed_keys, update_dict)
+
+                self.add_gauge_metric(gauge_data_switch_modified)
+
+
+                # self.add_gauge_metric(gauge_data_switch)
 
 
 
     def fill_port_gauge_metrics(self, gauge_data: Dict[int, Dict], 
                                 prerequisite_keys_all: List[str] = None, prerequisite_keys_any: List[str] = None,  
-                                renamed_keys: dict = None, modified_dict:dict = None) -> None:
+                                renamed_keys: dict = None, add_dict:dict = None) -> None:
         
         if not gauge_data:
             return
@@ -126,7 +138,7 @@ class BrocadeGauge:
 
             for gauge_data_port in gauge_data_switch.values():
 
-                print(gauge_data_port)
+                # print(gauge_data_port)
                 
                 if not gauge_data_port:
                     continue
@@ -134,50 +146,85 @@ class BrocadeGauge:
 
                 if isinstance(gauge_data_port, dict):
 
-                    if prerequisite_keys_any and not any(key in gauge_data_port for key in prerequisite_keys_any):
+                    # if prerequisite_keys_any and not any(key in gauge_data_port for key in prerequisite_keys_any):
+                    #     continue
+
+                    # if prerequisite_keys_all and not all(key in gauge_data_port for key in prerequisite_keys_all):
+                    #     continue
+
+                    if not BrocadeGauge.check_prerequisite_keys(gauge_data_port, prerequisite_keys_all, prerequisite_keys_any):
                         continue
 
-                    if prerequisite_keys_all and not all(key in gauge_data_port for key in prerequisite_keys_all):
-                        continue
 
+                    gauge_data_port_modified = BrocadeGauge.modify_dict(gauge_data_port, renamed_keys, add_dict)
+                    self.add_gauge_metric(gauge_data_port_modified)
 
-                    gauge_data_port_modified = gauge_data_port.copy()
+                    # gauge_data_port_modified = gauge_data_port.copy()
                     
-                    if renamed_keys:
-                        for key_old, key_new in renamed_keys.items():
-                            gauge_data_port_modified[key_new] = gauge_data_port_modified.pop(key_old)
+                    # if renamed_keys:
+                    #     for key_old, key_new in renamed_keys.items():
+                    #         gauge_data_port_modified[key_new] = gauge_data_port_modified.pop(key_old)
 
-                    if modified_dict:
-                        gauge_data_port_modified.update(modified_dict)
+                    # if update_dict:
+                    #     gauge_data_port_modified.update(update_dict)
 
-                    if renamed_keys or modified_dict:
-                        self.add_gauge_metric(gauge_data_port_modified)
-                    else:
-                        self.add_gauge_metric(gauge_data_port)
+                    # if renamed_keys or update_dict:
+                    #     self.add_gauge_metric(gauge_data_port_modified)
+                    # else:
+                    #     self.add_gauge_metric(gauge_data_port)
                 else:
                     print('NOT DICT')
 
 
+    @staticmethod
+    def check_prerequisite_keys(checked_dict: dict, 
+                                prerequisite_keys_all: List[str] = None, 
+                                prerequisite_keys_any: List[str] = None) -> bool:
+        """Method checks if prerequisite keys are in the dictionary.
+
+        Args:
+            checked_dict (dict): dictionary which need to be checked.
+            prerequisite_keys_all (List[str], optional): True if all keys from the list are in the checked_dict. Defaults to None.
+            prerequisite_keys_any (List[str], optional): True if any key from the list are in the checked_dict. Defaults to None.
+
+        Returns:
+            bool: True if all conditions from the parameters are met.
+        """
+
+        prerequisites_met = True
+
+        if prerequisite_keys_any and not any(key in checked_dict for key in prerequisite_keys_any):
+            prerequisites_met = False
+
+        if prerequisite_keys_all and not all(key in checked_dict for key in prerequisite_keys_all):
+            prerequisites_met = False
+
+        return prerequisites_met
 
 
+    @staticmethod
+    def modify_dict(original_dict: dict, renamed_keys: dict = None, add_dict:dict = None):
+        """Method to change original disctionary.
 
+        Args:
+            original_dict (dict): dictionary which need to be changed.
+            renamed_keys (dict, optional): Key is old key name, value is a new key name.
+            modified_dict (dict, optional): Key is a key name, value is a new value for the key.
 
-    # def add_gauge_metric(self, gauge_data):
-    #     label_values = BrocadeGauge.get_ordered_values(gauge_data, self.label_keys)
+        Returns:
+            dict: modified dictionary.
+        """
 
+        modified_dict = original_dict.copy()
+        
+        if renamed_keys:
+            for key_old, key_new in renamed_keys.items():
+                modified_dict[key_new] = modified_dict.pop(key_old)
 
-    #                 self.add_gauge_metric(gauge_data)
-    #             else:
-    #                 print('NOT DICT')
-
-
-    # def add_gauge_metric(self, gauge_data):
-    #     label_values = BrocadeGauge.get_ordered_values(gauge_data, self.label_keys)
-
-
-    #                 self.add_gauge_metric(gauge_data_port)
-    #             else:
-    #                 print('NOT DICT')
+        if add_dict:
+            modified_dict.update(add_dict)
+        
+        return modified_dict
         
 
     def add_gauge_metric(self, gauge_data):
@@ -224,10 +271,6 @@ class BrocadeGauge:
     def description(self):
         return self._description
     
-
-    # @property
-    # def labelkeys(self):
-    #     return self._labelkeys
     
     @property
     def unit_keys(self):

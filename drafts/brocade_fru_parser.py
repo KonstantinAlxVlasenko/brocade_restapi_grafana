@@ -228,7 +228,7 @@ class BrocadeFRUParser(BrocadeTelemetryParser):
                 time_prev = other.telemetry_date + ' ' + other.telemetry_time
                 # get changed params
                 
-                current_changed_dct = BrocadeFRUParser.get_changed_chasssis_params(current_fru, prev_fru, 
+                current_changed_dct = BrocadeFRUParser.get_changed_chassis_params(current_fru, prev_fru, 
                                                                                    changed_keys=changed_keys, 
                                                                                    const_keys=['chassis-name', 'chassis-wwn', 'unit-number'], 
                                                                                    time_now=time_now, time_prev=time_prev)

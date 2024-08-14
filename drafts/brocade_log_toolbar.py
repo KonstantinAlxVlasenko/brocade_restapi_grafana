@@ -6,16 +6,16 @@ from brocade_fcport_stats_parser import BrocadeFCPortStatisticsParser
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_switch_parser import BrocadeSwitchParser
 from brocade_fru_parser import BrocadeFRUParser
+from brocade_maps_parser import BrocadeMAPSParser
 
 
 class BrocadeLogToolbar(BrocadeToolbar):
     """
-    Class to create sfp parameters and metrics toolbar.
-    SFP Media Toolbar is a set of prometheus gauges:
-    sfp vendor, part number, serial number, temperature, poweron time, laser type, speed capabilities,
-    wavelength, rx and tx power in uWatts and dBm, rx and tx power status.
+    Class to create log toolbar to display changes of switch components or port status.
+    Log Toolbar is a set of prometheus gauges: current value and previous value.
 
-    Each unique port identified by 'switch-wwn', 'name', 'slot-number', 'port-number'.
+    Each unique port identified by 'switch-wwn', 'name', 'slot-number', 'port-number' (unit number),
+    changed parameter name and log timestamp.
 
     Attributes:
         sw_telemetry: set of switch telemetry retrieved from the switch.
@@ -60,7 +60,8 @@ class BrocadeLogToolbar(BrocadeToolbar):
                                    fcport_params_parser: BrocadeFCPortParametersParser, 
                                    sfp_media_parser:BrocadeSFPMediaParser, 
                                    fcport_stats_parser: BrocadeFCPortStatisticsParser,
-                                   fru_parser: BrocadeFRUParser) -> None:
+                                   fru_parser: BrocadeFRUParser,
+                                   maps_parser: BrocadeMAPSParser) -> None:
         """Method to fill the gauge metrics for the toolbar.
 
         Args:
@@ -68,6 +69,8 @@ class BrocadeLogToolbar(BrocadeToolbar):
             fcport_params_parser (BrocadeFCPortParametersParser): object contains required data to fill the gauge metrics.
             sfp_media_parser (BrocadeSfpMediaParser): object contains required data to fill the gauge metrics.
             fcport_stats_parser (BrocadeFCPortStatisticsParser): object contains required data to fill the gauge metrics.
+            fru_parser (BrocadeFRUParser): object contains required data to fill the gauge metrics.
+            maps_parser (BrocadeMAPSParser): object contains required data to fill the gauge metrics.
         """
         
         # fill switch related values
@@ -81,9 +84,12 @@ class BrocadeLogToolbar(BrocadeToolbar):
         self._fill_sfp_media_log(sfp_media_parser)
         # fill fc port parameters changed values
         self._fill_fc_port_params_log(fcport_params_parser)
-        # fill fru paramters chaged values
+        # fill fru parameters changed values
         self._fill_fru_log(fru_parser, sw_parser)
-
+        # fill system resources changed values
+        self._fill_system_resources_log(maps_parser, sw_parser)
+        # fill ssp report changed log
+        self._fill_ssp_report_log(maps_parser, sw_parser)
 
 
     def _fill_fcport_stats_log(self, fcport_stats_parser: BrocadeFCPortStatisticsParser) -> None:
@@ -107,29 +113,29 @@ class BrocadeLogToolbar(BrocadeToolbar):
         for key in fc_port_status_changed:
             self.gauge_current_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key],
                                                                  renamed_keys={key: BrocadeLogToolbar.current_value_key}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
             self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key],
                                                                  renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
         # port error deltas if errors in counter_category_keys has changed
         for key in counter_category_keys:
             self.gauge_current_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, 
                                                                  prerequisite_keys_all=[key, key + BrocadeFCPortStatisticsParser.DELTA_TAG],
                                                                  renamed_keys={key + BrocadeFCPortStatisticsParser.DELTA_TAG: BrocadeLogToolbar.current_value_key}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key + BrocadeFCPortStatisticsParser.DELTA_TAG})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key + BrocadeFCPortStatisticsParser.DELTA_TAG})
             self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, 
                                                                   prerequisite_keys_all=[key, key + BrocadeFCPortStatisticsParser.DELTA_TAG],
                                                                  renamed_keys={key + BrocadeFCPortStatisticsParser.DELTA_TAG + '-prev': BrocadeLogToolbar.previous_value_key}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key + BrocadeFCPortStatisticsParser.DELTA_TAG})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key + BrocadeFCPortStatisticsParser.DELTA_TAG})
         # iorate details if iorate status changed
         for key in ['in-rate', 'out-rate']:
             for extension in ['-bits', '-percentage']:
                 self.gauge_current_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key + extension, key + '-status'],
                                                                     renamed_keys={key + extension: BrocadeLogToolbar.current_value_key}, 
-                                                                    modified_dict={BrocadeLogToolbar.modified_parameter_key: key + extension})
+                                                                    add_dict={BrocadeLogToolbar.modified_parameter_key: key + extension})
                 self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key + extension, key + '-status'],
                                                                     renamed_keys={key + extension + '-prev': BrocadeLogToolbar.previous_value_key}, 
-                                                                    modified_dict={BrocadeLogToolbar.modified_parameter_key: key + extension})
+                                                                    add_dict={BrocadeLogToolbar.modified_parameter_key: key + extension})
 
 
     def _fill_fc_port_params_log(self, fcport_params_parser: BrocadeFCPortParametersParser) -> None:
@@ -148,10 +154,10 @@ class BrocadeLogToolbar(BrocadeToolbar):
         for key in BrocadeFCPortParametersParser.FC_PORT_PARAMS_CHANGED:
             self.gauge_current_value_str.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, prerequisite_keys_all=[key],
                                                                  renamed_keys={key: BrocadeLogToolbar.current_value_key}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
             self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, prerequisite_keys_all=[key],
                                                                  renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
 
 
     def _fill_sfp_media_log(self, sfp_media_parser:BrocadeSFPMediaParser) -> None:
@@ -170,18 +176,18 @@ class BrocadeLogToolbar(BrocadeToolbar):
         for key in sfp_media_changed:
             self.gauge_current_value_str.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key],
                                                                 renamed_keys={key: BrocadeLogToolbar.current_value_key}, 
-                                                                modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                add_dict={BrocadeLogToolbar.modified_parameter_key: key})
             self.gauge_previous_value_str.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key],
                                                                  renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
         # sfp media power change if power status has changed
         for key in BrocadeSFPMediaParser.MEDIA_POWER_CHANGED:
             self.gauge_current_value_str.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key, key + '-status'],
                                                                 renamed_keys={key: BrocadeLogToolbar.current_value_key}, 
-                                                                modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                add_dict={BrocadeLogToolbar.modified_parameter_key: key})
             self.gauge_previous_value_str.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key, key + '-status'],
                                                                  renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
 
 
     def _fill_fru_log(self, fru_parser: BrocadeFRUParser, sw_parser: BrocadeSwitchParser) -> None:
@@ -195,35 +201,87 @@ class BrocadeLogToolbar(BrocadeToolbar):
         """
 
         # copy fru params to all virtual switches
-        fru_fan_changed = BrocadeToolbar.vf_multiplier(fru_parser.fru_fan_changed, sw_parser, component_level=True)
-        fru_ps_changed = BrocadeToolbar.vf_multiplier(fru_parser.fru_ps_changed, sw_parser, component_level=True)
-        fru_sensor_changed = BrocadeToolbar.vf_multiplier(fru_parser.fru_sensor_changed, sw_parser, component_level=True)
+        fru_fan_changed = BrocadeToolbar.clone_chassis_to_vf(fru_parser.fru_fan_changed, sw_parser, component_level=True)
+        fru_ps_changed = BrocadeToolbar.clone_chassis_to_vf(fru_parser.fru_ps_changed, sw_parser, component_level=True)
+        fru_sensor_changed = BrocadeToolbar.clone_chassis_to_vf(fru_parser.fru_sensor_changed, sw_parser, component_level=True)
 
         # fan log
         for key in BrocadeFRUParser.FAN_CHANGED:
             self.gauge_current_value_str.fill_port_gauge_metrics(fru_fan_changed, prerequisite_keys_all=BrocadeFRUParser.FAN_CHANGED,
                                                                  renamed_keys={key: BrocadeLogToolbar.current_value_key, 'unit-number': 'port-number'}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
             self.gauge_previous_value_str.fill_port_gauge_metrics(fru_fan_changed, prerequisite_keys_all=BrocadeFRUParser.FAN_CHANGED,
                                                                  renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key, 'unit-number': 'port-number'}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
         # ps log
         for key in BrocadeFRUParser.PS_CHANGED:
             self.gauge_current_value_str.fill_port_gauge_metrics(fru_ps_changed, prerequisite_keys_all=BrocadeFRUParser.PS_CHANGED,
                                                                  renamed_keys={key: BrocadeLogToolbar.current_value_key, 'unit-number': 'port-number'}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
             self.gauge_previous_value_str.fill_port_gauge_metrics(fru_ps_changed, prerequisite_keys_all=BrocadeFRUParser.PS_CHANGED,
                                                                  renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key, 'unit-number': 'port-number'}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
         # sensor log
         for key in BrocadeFRUParser.SENSOR_CHANGED:
             self.gauge_current_value_str.fill_port_gauge_metrics(fru_sensor_changed, prerequisite_keys_all=BrocadeFRUParser.SENSOR_CHANGED,
                                                                  renamed_keys={key: BrocadeLogToolbar.current_value_key, 'unit-number': 'port-number'}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
             self.gauge_previous_value_str.fill_port_gauge_metrics(fru_sensor_changed, prerequisite_keys_all=BrocadeFRUParser.SENSOR_CHANGED,
                                                                  renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key, 'unit-number': 'port-number'}, 
-                                                                 modified_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
 
+
+    def _fill_system_resources_log(self, maps_parser: BrocadeMAPSParser, sw_parser: BrocadeSwitchParser) -> None:
+        """Method to add changed system resources gauge metrics to the log toolbar.
+
+        Args:
+            maps_parser (BrocadeFCPortStatisticsParser): object contains required data to fill the gauge metrics.
+            sw_parser (BrocadeSwitchParser): object contains vf details.
+
+        Returns: None
+        """
+        
+        # copy system resources parameters to all virtual switches
+        system_resources_changed = BrocadeToolbar.clone_chassis_to_vf(maps_parser.system_resources_changed, sw_parser, component_level=False)
+        # changed system resource status 
+        for key in BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS:
+            key += '-status'
+            self.gauge_current_value_str.fill_switch_gauge_metrics(system_resources_changed, prerequisite_keys_all=[key],
+                                                                 renamed_keys={key: BrocadeLogToolbar.current_value_key}, 
+                                                                 update_dict={BrocadeLogToolbar.modified_parameter_key: key})
+            self.gauge_previous_value_str.fill_switch_gauge_metrics(system_resources_changed, prerequisite_keys_all=[key],
+                                                                 renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key}, 
+                                                                 update_dict={BrocadeLogToolbar.modified_parameter_key: key})
+        # system resource metrics if it's status changed
+        for key in BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS:
+            self.gauge_current_value_str.fill_switch_gauge_metrics(system_resources_changed, prerequisite_keys_all=[key, key + '-status'],
+                                                                    renamed_keys={key: BrocadeLogToolbar.current_value_key}, 
+                                                                    update_dict={BrocadeLogToolbar.modified_parameter_key: key})
+            self.gauge_previous_value_str.fill_switch_gauge_metrics(system_resources_changed, prerequisite_keys_all=[key, key + '-status'],
+                                                                    renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key}, 
+                                                                    update_dict={BrocadeLogToolbar.modified_parameter_key: key})
+
+
+    def _fill_ssp_report_log(self, maps_parser: BrocadeMAPSParser, sw_parser: BrocadeSwitchParser) -> None:
+        """Method to add changed ssp report gauge metrics to the log toolbar.
+
+        Args:
+            maps_parser (BrocadeFCPortStatisticsParser): object contains required data to fill the gauge metrics.
+            sw_parser (BrocadeSwitchParser): object contains vf details.
+
+        Returns: None
+        """
+
+        ssp_report_changed = BrocadeToolbar.clone_chassis_to_vf(maps_parser.ssp_report_changed, sw_parser, component_level=False)
+        if ssp_report_changed:
+            for key in maps_parser.ssp_report_parameters:
+                status_key = key + BrocadeMAPSParser.STATUS_TAG
+                self.gauge_current_value_str.fill_switch_gauge_metrics(ssp_report_changed, prerequisite_keys_all=[status_key],
+                                                                    renamed_keys={status_key: BrocadeLogToolbar.current_value_key}, 
+                                                                    update_dict={BrocadeLogToolbar.modified_parameter_key: status_key})
+                self.gauge_previous_value_str.fill_switch_gauge_metrics(ssp_report_changed, prerequisite_keys_all=[status_key],
+                                                                    renamed_keys={status_key + '-prev': BrocadeLogToolbar.previous_value_key}, 
+                                                                    update_dict={BrocadeLogToolbar.modified_parameter_key: status_key + '-prev'})
 
 
     def __repr__(self):

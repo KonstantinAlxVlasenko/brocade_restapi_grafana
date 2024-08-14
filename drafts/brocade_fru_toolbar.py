@@ -128,9 +128,9 @@ class BrocadeFRUToolbar(BrocadeToolbar):
         """
         
         # copy fru params to all virtual switches
-        fru_ps = BrocadeToolbar.vf_multiplier(fru_parser.fru_ps, sw_parser, component_level=True)
-        fru_fan = BrocadeToolbar.vf_multiplier(fru_parser.fru_fan, sw_parser, component_level=True)
-        fru_sensor = BrocadeToolbar.vf_multiplier(fru_parser.fru_sensor, sw_parser, component_level=True)
+        fru_ps = BrocadeToolbar.clone_chassis_to_vf(fru_parser.fru_ps, sw_parser, component_level=True)
+        fru_fan = BrocadeToolbar.clone_chassis_to_vf(fru_parser.fru_fan, sw_parser, component_level=True)
+        fru_sensor = BrocadeToolbar.clone_chassis_to_vf(fru_parser.fru_sensor, sw_parser, component_level=True)
 
         fan_gauge_lst = [self.gauge_fan_chname, self.gauge_fan_swname, self.gauge_fan_fabric_name, 
                          self.gauge_fan_state, self.gauge_fan_speed]

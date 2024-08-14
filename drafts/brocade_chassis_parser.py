@@ -207,6 +207,7 @@ class BrocadeChassisParser(BrocadeTelemetryParser):
             # active ntp server
             ntp_dct['active-server'] = container.get('active-server')
             ntp_dct['chassis-wwn'] = self.ch_wwn
+            ntp_dct['chassis-name'] = self.ch_name
             if container.get('ntp-server-address'):
                 ntp_lst = container['ntp-server-address'].get('server-address')
                 # defined ntp servers
@@ -242,13 +243,13 @@ class BrocadeChassisParser(BrocadeTelemetryParser):
                     exp_date = datetime.strptime(exp_date_str, '%m/%d/%Y').date()
                     # license expired
                     if date.today() > exp_date:
-                        lic_status = 2
+                        lic_status = 3
                     # license is not expired
                     else:
-                        lic_status = 1
+                        lic_status = 2
                 # no expiration date
                 else: 
-                    lic_status = 0
+                    lic_status = 1
                     # exp_date_str = 'No expiration date'
                     exp_date_str = None
                 # license_feature_lst.append([lic_feature, exp_date_str, lic_status])
@@ -260,8 +261,6 @@ class BrocadeChassisParser(BrocadeTelemetryParser):
                                             'license-status-id': lic_status,
                                             'chassis-wwn': self.ch_wwn,
                                             'chassis-name': self.ch_name})
-                print('\n')
-                print(license_feature_lst)
         # license module extracted but container is empty
         else:
             if self.sw_telemetry.sw_license.get('status-code'):
@@ -272,7 +271,7 @@ class BrocadeChassisParser(BrocadeTelemetryParser):
                                             'capacity': None,
                                             'generation-date': None, 
                                             'expiration-date': None, 
-                                            'license-status-id': 0,
+                                            'license-status-id': 1,
                                             'chassis-wwn': self.ch_wwn,
                                             'chassis-name': self.ch_name})
         return license_feature_lst

@@ -77,7 +77,7 @@ ofl_in_2 = o3_g630_003_vc01_f1_b.fc_statistics[-1]['Response']['fibrechannel-sta
 ofl_out_2 = o3_g630_003_vc01_f1_b.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-offline-sequences']
 lr_in_2 = o3_g630_003_vc01_f1_b.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-link-resets']
 
-print(f'{lr_out_2=}, {ofl_in_2=}\n{lr_in_2=}, {ofl_out_2=}')
+# print(f'{lr_out_2=}, {ofl_in_2=}\n{lr_in_2=}, {ofl_out_2=}')
 
 
 
@@ -143,7 +143,7 @@ fcport_params_parser_prev = BrocadeFCPortParametersParser(sw_telemetry_prev, sw_
 sfp_media_parser_prev = BrocadeSFPMediaParser(sw_telemetry_prev, fcport_params_parser_prev)
 fcport_stats_parser_prev = BrocadeFCPortStatisticsParser(sw_telemetry_prev, fcport_params_parser_prev)
 
-print('now----------------------')
+# print('now----------------------')
 
 # now telemetry
 sw_telemetry_now = o3_g630_003_vc01_f1_b
@@ -158,16 +158,16 @@ fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport
 
 
 # request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
-# chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
+chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
 # fru_tb = BrocadeFRUToolbar(sw_telemetry_now)
-maps_system_tb = BrocadeMAPSSystemToolbar(sw_telemetry_now)
+# maps_system_tb = BrocadeMAPSSystemToolbar(sw_telemetry_now)
 # maps_dashboard_tb = BrocadeMAPSDashboardToolbar(sw_telemetry_now)
 # switch_tb = BrocadeSwitchToolbar(sw_telemetry_now)
 # fabricshow_tb = BrocadeFabricShowToolbar(sw_telemetry_now)
 # fcport_params_tb = BrocadeFCPortParamsToolbar(sw_telemetry_now)
 # sfp_media_tb = BrocadeSFPMediaToolbar(sw_telemetry_now)
 # fcport_stats_tb = BrocadeFCPortStatsToolbar(sw_telemetry_now)
-log_tb = BrocadeLogToolbar(sw_telemetry_now)
+# log_tb = BrocadeLogToolbar(sw_telemetry_now)
 
 
 if __name__ == '__main__':
@@ -178,14 +178,14 @@ if __name__ == '__main__':
         # print('request_status')
         # request_status_tb.fill_toolbar_gauge_metrics(request_status_now)
         
-        # print('chassis')
-        # chassis_tb.fill_toolbar_gauge_metrics(ch_parser_now)
+        print('chassis')
+        chassis_tb.fill_toolbar_gauge_metrics(ch_parser_now, sw_parser_now)
 
         # print('fru')
         # fru_tb.fill_toolbar_gauge_metrics(fru_parser_now, sw_parser_now)
 
-        print('maps system resources', 'maps system health')
-        maps_system_tb.fill_toolbar_gauge_metrics(maps_parser_now, sw_parser_now)
+        # print('maps system resources', 'maps system health')
+        # maps_system_tb.fill_toolbar_gauge_metrics(maps_parser_now, sw_parser_now)
 
         # print('maps policy, actions','maps dashboard')
         # maps_dashboard_tb.fill_toolbar_gauge_metrics(maps_parser_now)
@@ -206,7 +206,8 @@ if __name__ == '__main__':
         # fcport_stats_tb.fill_toolbar_gauge_metrics(fcport_stats_parser_now)
 
         # print('log')
-        # log_tb.fill_toolbar_gauge_metrics(sw_parser_now, fcport_params_parser_now, sfp_media_parser_now, fcport_stats_parser_now, fru_parser_now)
+        # log_tb.fill_toolbar_gauge_metrics(sw_parser_now, fcport_params_parser_now, sfp_media_parser_now, 
+        #                                   fcport_stats_parser_now, fru_parser_now, maps_parser_now)
 
         time.sleep(5)
     

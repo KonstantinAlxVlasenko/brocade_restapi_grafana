@@ -10,7 +10,7 @@ class BrocadeToolbar:
     # switch_ip_keys = ['switch-wwn', 'ip-address']
     # switch_fabric_name_keys = ['switch-wwn', 'fabric-user-friendly-name']
     switch_port_keys = ['switch-wwn', 'name', 'slot-number', 'port-number']
-
+    chassis_switch_wwn_keys = ['chassis-wwn', 'switch-wwn']
     
     
     PORT_PHYSICAL_STATE_ID = {0: 'Offline', 1: 'Online', 2: 'Testing', 3: 'Faulty', 4: 'E_Port', 5: 'F_Port', 
@@ -36,15 +36,16 @@ class BrocadeToolbar:
 
 
     @staticmethod
-    def vf_multiplier(chassis_level_parser: dict, sw_parser: BrocadeSwitchParser, component_level=False) -> dict:
+    def clone_chassis_to_vf(chassis_level_parser: dict, sw_parser: BrocadeSwitchParser, component_level=False) -> dict:
         """
         Method converts chassis_level_parser to switch_level_parser 
-        by adding VF details to the chassis_level_parser.
+        by adding VF details to the chassis_level_parser or chassis components parser (fru for example).
         VF details: ['switch-name', 'switch-wwn', 'vf-id', 'fabric-user-friendly-name']
 
         Args:
             chassis_level_parser (dict): data to multiply
-            sw_parser (BrocadeSwitchParser): contaains VF details
+            sw_parser (BrocadeSwitchParser): contains VF details
+            component_level (bool): identify if chassis dictionary contains dictionaries with chassis components parameters
         Returns:
             dict: data multiplied by vf
         """
@@ -57,17 +58,29 @@ class BrocadeToolbar:
             return switch_level_parser
         
 
-        for vf_id, vf_details in sw_parser.vf_details.items():
-            switch_level_parser[vf_id] = {}
-            if component_level:
-                for component_id, chassis_component_dct in chassis_level_parser.items():
+        if isinstance(chassis_level_parser, list):
+
+            for vf_id, vf_details in sw_parser.vf_details.items():
+                switch_level_parser[vf_id] = []
+                for chassis_component_dct in chassis_level_parser:
+                    if not isinstance(chassis_component_dct,dict):
+                        continue
                     mod_chassis_component_dct = chassis_component_dct.copy()
                     mod_chassis_component_dct.update(vf_details)
-                    switch_level_parser[vf_id][component_id] = mod_chassis_component_dct
-            else:
-                mod_chassis_dct = chassis_level_parser.copy()
-                mod_chassis_dct.update(vf_details)
-                switch_level_parser[vf_id] = mod_chassis_dct
+                    switch_level_parser[vf_id].append(mod_chassis_component_dct)
+        
+        elif isinstance(chassis_level_parser, dict):
+            for vf_id, vf_details in sw_parser.vf_details.items():
+                switch_level_parser[vf_id] = {}
+                if component_level:
+                    for component_id, chassis_component_dct in chassis_level_parser.items():
+                        mod_chassis_component_dct = chassis_component_dct.copy()
+                        mod_chassis_component_dct.update(vf_details)
+                        switch_level_parser[vf_id][component_id] = mod_chassis_component_dct
+                else:
+                    mod_chassis_dct = chassis_level_parser.copy()
+                    mod_chassis_dct.update(vf_details)
+                    switch_level_parser[vf_id] = mod_chassis_dct
 
         return switch_level_parser
 

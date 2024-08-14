@@ -57,11 +57,11 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
         """
         
         super().__init__(sw_telemetry)
-        # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._sw_parser: BrocadeSwitchParser = sw_parser
         self._maps_config: dict = self._get_maps_policy_value()
         self._get_maps_actions_value()
         self._ssp_report: dict = self._get_ssp_report_value()
+        self._ssp_report_parameters = self._get_ssp_report_parameters()
         self._ssp_report_changed = self._get_changed_ssp_report(maps_parser_prev)
         self._system_resources: dict = self._get_system_resource_values()
         self._system_resources_changed: dict = self._get_changed_system_resources(maps_parser_prev)
@@ -154,56 +154,103 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
                 self.maps_config[vf_id]['maps-actions'] = maps_actions
 
     
-    def _get_ssp_report_value(self) -> Dict[str, Dict[str, Union[str, int]]]: # List[Dict[str, Union[str, int]]]:
+    # def _get_ssp_report_value(self) -> Dict[str, Dict[str, Union[str, int]]]: # List[Dict[str, Union[str, int]]]:
+    #     """
+    #     Method extracts Switch Status Policy report values from the ssp_report container.
+    #     The SSP report provides the overall health status of the switch.
+        
+    #     Returns:
+    #         List of dictionaries.
+    #         Dictionary keys are object name, its operational status and status id.
+    #         Status id is a numerical status value to identify warning thresholds.
+    #         ROMOVE: If ssp_report container was not retrived from the switch ssp_report contain error-message
+    #         for each object name.
+    #     """        
+        
+    #     # ssp_report_lst = []
+    #     ssp_report_dct = {}
+        
+    #     if self.sw_telemetry.ssp_report.get('Response'):
+    #         container = self.sw_telemetry.ssp_report['Response']['switch-status-policy-report']
+            
+    #         # ssp_report_dct = self.sw_telemetry.ssp_report['Response']['switch-status-policy-report'].copy()
+    #         # missing_ssp_dct = {ssp_leaf: None for ssp_leaf in BrocadeMAPSParser.SSP_LEAFS if ssp_leaf not in ssp_report_dct}
+    #         # ssp_report_dct.update(missing_ssp_dct)
+    #         # ssp_report_dct['chassis-wwn'] = self.ch_wwn
+    #         # ssp_report_dct['chassis-name'] = self.ch_name
+
+    #         for ssp_leaf in BrocadeMAPSParser.SSP_LEAFS:
+    #             if not ssp_leaf in container:
+    #                 continue
+    #             state = container[ssp_leaf]
+    #             # ssp_report_lst.append({'chassis-wwn': self.ch_wwn,
+    #             #                        'chassis-name': self.ch_name,
+    #             #                        'name': ssp_leaf,
+    #             #                        'operational-state': state.upper(),
+    #             #                        'operational-state-id': BrocadeMAPSParser.SSP_STATE[state]})
+    #             ssp_report_dct[ssp_leaf] = {'chassis-wwn': self.ch_wwn,
+    #                                         'chassis-name': self.ch_name,
+    #                                         'name': ssp_leaf,
+    #                                         'operational-state': state.capitalize(),
+    #                                         'operational-state-id': BrocadeMAPSParser.SSP_STATE[state]}
+    #     # elif self.sw_telemetry.ssp_report.get('status-code'):
+    #     #     for ssp_leaf in BrocadeMAPSParser.SSP_LEAFS:
+    #     #         error = self.sw_telemetry.ssp_report['error-message']
+    #     #         error = " (" + error + ")" if error else ''
+    #     #         state = 'unknown'
+    #     #         ssp_report_lst.append({'name': ssp_leaf,
+    #     #                                'operationa-state': state.upper() + error,
+    #     #                                'operational-state-id': BrocadeMAPSParser.SSP_STATE[state]})
+    #     return ssp_report_dct
+    
+
+
+    def _get_ssp_report_value(self) -> Dict[str, Dict[str, Union[str, int]]]:
         """
         Method extracts Switch Status Policy report values from the ssp_report container.
         The SSP report provides the overall health status of the switch.
         
         Returns:
-            List of dictionaries.
-            Dictionary keys are object name, its operational status and status id.
-            Status id is a numerical status value to identify warning thresholds.
-            ROMOVE: If ssp_report container was not retrived from the switch ssp_report contain error-message
-            for each object name.
+            dict: Dictionary keys are parameter name status and status id.
+            Status id is a numerical status value.
         """        
         
-        # ssp_report_lst = []
         ssp_report_dct = {}
         
         if self.sw_telemetry.ssp_report.get('Response'):
-            container = self.sw_telemetry.ssp_report['Response']['switch-status-policy-report']
+            # container = self.sw_telemetry.ssp_report['Response']['switch-status-policy-report']
             
-            # ssp_report_dct = self.sw_telemetry.ssp_report['Response']['switch-status-policy-report'].copy()
-            # missing_ssp_dct = {ssp_leaf: None for ssp_leaf in BrocadeMAPSParser.SSP_LEAFS if ssp_leaf not in ssp_report_dct}
-            # ssp_report_dct.update(missing_ssp_dct)
-            # ssp_report_dct['chassis-wwn'] = self.ch_wwn
-            # ssp_report_dct['chassis-name'] = self.ch_name
-
-            for ssp_leaf in BrocadeMAPSParser.SSP_LEAFS:
-                if not ssp_leaf in container:
-                    continue
-                state = container[ssp_leaf]
-                # ssp_report_lst.append({'chassis-wwn': self.ch_wwn,
-                #                        'chassis-name': self.ch_name,
-                #                        'name': ssp_leaf,
-                #                        'operational-state': state.upper(),
-                #                        'operational-state-id': BrocadeMAPSParser.SSP_STATE[state]})
-                ssp_report_dct[ssp_leaf] = {'chassis-wwn': self.ch_wwn,
-                                            'chassis-name': self.ch_name,
-                                            'name': ssp_leaf,
-                                            'operational-state': state.capitalize(),
-                                            'operational-state-id': BrocadeMAPSParser.SSP_STATE[state]}
-        # elif self.sw_telemetry.ssp_report.get('status-code'):
-        #     for ssp_leaf in BrocadeMAPSParser.SSP_LEAFS:
-        #         error = self.sw_telemetry.ssp_report['error-message']
-        #         error = " (" + error + ")" if error else ''
-        #         state = 'unknown'
-        #         ssp_report_lst.append({'name': ssp_leaf,
-        #                                'operationa-state': state.upper() + error,
-        #                                'operational-state-id': BrocadeMAPSParser.SSP_STATE[state]})
+            ssp_report_dct = self.sw_telemetry.ssp_report['Response']['switch-status-policy-report'].copy()
+            ssp_report_keys = list(ssp_report_dct.keys()).copy()
+            for ssp_report_key in ssp_report_keys:
+                state = ssp_report_dct[ssp_report_key]
+                ssp_report_dct[ssp_report_key + BrocadeMAPSParser.STATUS_TAG] = ssp_report_dct.pop(ssp_report_key)
+                ssp_report_dct[ssp_report_key + BrocadeMAPSParser.STATUS_ID_TAG] = BrocadeMAPSParser.SSP_STATE[state]
+                if state:
+                    ssp_report_dct[ssp_report_key + BrocadeMAPSParser.STATUS_TAG] = state.capitalize()
+            # add chassis info
+            ssp_report_dct['chassis-wwn'] = self.ch_wwn
+            ssp_report_dct['chassis-name'] = self.ch_name
         return ssp_report_dct
-    
-    
+
+
+    def _get_ssp_report_parameters(self) -> List[str]:
+        """
+        Method extracts Switch Status Policy report parameter names from the ssp_report container.
+        The SSP report provides the overall health status of the switch.
+        
+        Returns:
+            List[str]: Parameter names of the SSP report.
+        """     
+
+        if self.sw_telemetry.ssp_report.get('Response'):
+            container = self.sw_telemetry.ssp_report['Response']['switch-status-policy-report']
+            ssp_report_parameters = list(container.keys())
+            
+            return ssp_report_parameters
+
+        
+
     def _get_system_resource_values(self) -> Dict[str, Union[int, str]]:
         """
         Method extracts system resources (such as CPU, RAM, and flash memory usage) values from the system_resources container.
@@ -231,7 +278,7 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
                 elif system_resources_dct[system_resource] < BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS[system_resource]:
                     system_resources_dct[system_resource_status_id] = 1
                 # critical status
-                elif system_resources_dct[system_resource] >= BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS[system_resource]:
+                elif system_resources_dct[system_resource] >= BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS[system_resource] + 10:
                     system_resources_dct[system_resource_status_id] = 4
                 # warning status
                 else:
@@ -344,11 +391,57 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
             # status keys
             system_resource_status_keys = [system_resource + '-status' for system_resource in BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS]
             # changed system resources and statuses 
-            system_resources_changed_dct = BrocadeMAPSParser.get_changed_chasssis_params(self.system_resources, other.system_resources, 
+            system_resources_changed_dct = BrocadeMAPSParser.get_changed_chassis_params(self.system_resources, other.system_resources, 
                                                                                           changed_keys=list(BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS.keys()) + system_resource_status_keys, 
                                                                                           const_keys=['chassis-name', 'chassis-wwn'], 
                                                                                           time_now=time_now, time_prev=time_prev)
         return system_resources_changed_dct
+
+
+    # def _get_changed_ssp_report(self, other) -> Dict[str, Dict[str, Dict[str, Union[str, int]]]]:
+    #     """
+    #     Method detects if ssp report parameters (operational-state) have been changed for each ssp leaf.
+    #     It compares ssp leafs parameters of two instances of BrocadeMAPSParser class.
+    #     All changed parameters are added to to the dictionatry including current and previous values.
+        
+    #     Args:
+    #         other {BrocadeMAPSParser}: class instance retrieved from the previous sw_telemetry.
+        
+    #     Returns:
+    #         dict: ssp report change dictionary. Any ssp leaf with changed parameters are in this dictionary.
+    #     """
+
+    #     # switch ports with changed parameters
+    #     ssp_report_changed_dct = {}
+
+    #     # other is not exist (for examle 1st iteration)
+    #     # other is not BrocadeFCPortParametersParser type
+    #     # other's fcport_params atrribute is empty
+    #     if other is None or str(type(self)) != str(type(other)) or not other.ssp_report:
+    #         return None
+        
+    #     # check if other is for the same switch
+    #     elif self.same_chassis(other):
+    #         for ssp_leaf, ssp_leaf_now_dct in self.ssp_report.items():
+
+    #             # if there is no ssp_leaf in other check next ssp_leaf 
+    #             if ssp_leaf not in other.ssp_report:
+    #                 continue
+
+    #             # ssp leaf parameters from the previous telemetry    
+    #             ssp_leaf_prev_dct = other.ssp_report[ssp_leaf]
+    #             # timestamps
+    #             time_now = self.telemetry_date + ' ' + self.telemetry_time
+    #             time_prev = other.telemetry_date + ' ' + other.telemetry_time
+    #             # change parameters
+    #             ssp_leaf_changed = BrocadeMAPSParser.get_changed_chasssis_params(ssp_leaf_now_dct, ssp_leaf_prev_dct, 
+    #                                                                                 changed_keys=['operational-state'], 
+    #                                                                                 const_keys=['chassis-name', 'chassis-wwn', 'name'], 
+    #                                                                                 time_now=time_now, time_prev=time_prev)
+    #             if ssp_leaf_changed:
+    #                 ssp_report_changed_dct[ssp_leaf] = ssp_leaf_changed
+    #     return ssp_report_changed_dct
+
 
 
     def _get_changed_ssp_report(self, other) -> Dict[str, Dict[str, Dict[str, Union[str, int]]]]:
@@ -375,25 +468,18 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
         
         # check if other is for the same switch
         elif self.same_chassis(other):
-            for ssp_leaf, ssp_leaf_now_dct in self.ssp_report.items():
+            ssp_changed_status_keys = [key for key in self.ssp_report.keys() if key.endswith(BrocadeMAPSParser.STATUS_TAG)]
 
-                # if there is no ssp_leaf in other check next ssp_leaf 
-                if ssp_leaf not in other.ssp_report:
-                    continue
-
-                # ssp leaf parameters from the previous telemetry    
-                ssp_leaf_prev_dct = other.ssp_report[ssp_leaf]
-                # timestamps
-                time_now = self.telemetry_date + ' ' + self.telemetry_time
-                time_prev = other.telemetry_date + ' ' + other.telemetry_time
-                # change parameters
-                ssp_leaf_changed = BrocadeMAPSParser.get_changed_chasssis_params(ssp_leaf_now_dct, ssp_leaf_prev_dct, 
-                                                                                    changed_keys=['operational-state'], 
-                                                                                    const_keys=['chassis-name', 'chassis-wwn', 'name'], 
-                                                                                    time_now=time_now, time_prev=time_prev)
-                if ssp_leaf_changed:
-                    ssp_report_changed_dct[ssp_leaf] = ssp_leaf_changed
+            # timestamps
+            time_now = self.telemetry_date + ' ' + self.telemetry_time
+            time_prev = other.telemetry_date + ' ' + other.telemetry_time
+            # change parameters
+            ssp_report_changed_dct = BrocadeMAPSParser.get_changed_chassis_params(self.ssp_report, other.ssp_report, 
+                                                                                changed_keys=ssp_changed_status_keys, 
+                                                                                const_keys=['chassis-name', 'chassis-wwn'], 
+                                                                                time_now=time_now, time_prev=time_prev)
         return ssp_report_changed_dct
+
 
 
     @property
@@ -409,6 +495,11 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
     @property
     def ssp_report(self):
         return self._ssp_report
+    
+
+    @property
+    def ssp_report_parameters(self):
+        return self._ssp_report_parameters
     
 
     @property
