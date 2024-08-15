@@ -32,10 +32,10 @@ class BrocadeSwitchParser:
     FC_LOGICAL_SWITCH_LEAFS = ['base-switch-enabled',  'default-switch-status',  
                               'fabric-id', 'logical-isl-enabled', 'port-member-list']
     
-    FABRIC_SWITCH_LEAFS = ['domain-id', 'fcid-hex', 'chassis-wwn', 'name', 'ip-address', 
-                          'fcip-address', 'principal', 'chassis-user-friendly-name', 
-                          'switch-user-friendly-name', 'path-count', 'firmware-version']
+    FABRIC_SWITCH_LEAFS = ['domain-id', 'fcid-hex', 'name', 'ip-address', 'fcip-address', 'principal', 
+                           'path-count', 'firmware-version']
 
+    # 'chassis-wwn', 'switch-user-friendly-name', 'chassis-user-friendly-name', 
     
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
@@ -291,6 +291,8 @@ class BrocadeSwitchParser:
             If switch vf mode is disabled vf_id is -1.
         """
         
+        # 'chassis-wwn', 'switch-user-friendly-name', 'chassis-user-friendly-name'
+
         # switches in the fabric (fabricshow) for each vf_id (fabric_id)
         fabric_dct = {}
 
@@ -300,17 +302,25 @@ class BrocadeSwitchParser:
                 fabric_container_lst = fabric_telemetry['Response']['fabric-switch']
                 # list of dictionaries for each switch in the fabric (fabricshow) for vf_id (fabric_id) (required parameters only)
                 current_fabric_lst = []
+                sw_details = self.get_switch_details(vf_id)
 
                 for fc_sw in fabric_container_lst:
                     current_sw_dct = {key: fc_sw[key] for key in BrocadeSwitchParser.FABRIC_SWITCH_LEAFS}
                     current_sw_dct['fabric-id'] = vf_id
-                    current_sw_dct['switch-wwn'] = current_sw_dct['name']
-                    current_sw_dct['switch-name'] = current_sw_dct['switch-user-friendly-name']
-                    # add fabric_name from the fc_switch attribute
-                    if self.fc_switch.get(vf_id):
-                        current_sw_dct['fabric-user-friendly-name'] = self.fc_switch[vf_id]['fabric-user-friendly-name']
-                    else:
-                        current_sw_dct['fabric-user-friendly-name'] = None
+                    # current_sw_dct['switch-wwn'] = current_sw_dct['name']
+                    current_sw_dct['fabric-switch-wwn'] = fc_sw['name']
+                    # current_sw_dct['switch-name'] = current_sw_dct['switch-user-friendly-name']
+                    current_sw_dct['fabric-switch-name'] = fc_sw['switch-user-friendly-name']
+                    current_sw_dct['fabric-chassis-wwn'] = fc_sw['chassis-wwn']
+                    current_sw_dct['fabric-chassis-user-friendly-name'] = fc_sw['chassis-user-friendly-name']
+                    current_sw_dct.update(sw_details)
+                    
+
+                    # # add fabric_name from the fc_switch attribute
+                    # if self.fc_switch.get(vf_id):
+                    #     current_sw_dct['fabric-user-friendly-name'] = self.fc_switch[vf_id]['fabric-user-friendly-name']
+                    # else:
+                    #     current_sw_dct['fabric-user-friendly-name'] = None
                     
                     # if self.vfid_name.get(vf_id):
                     #     current_sw_dct['fabric-name'] = self.vfid_name[vf_id]['fabric-name']
@@ -322,7 +332,7 @@ class BrocadeSwitchParser:
         return fabric_dct
 
 
-    def get_switch_details(self, vf_id: int, keys=['switch-name', 'switch-wwn', 'vf-id']) -> Dict[str, Optional[str]]:
+    def get_switch_details(self, vf_id: int, keys=['switch-name', 'switch-wwn', 'vf-id', 'fabric-user-friendly-name']) -> Dict[str, Optional[str]]:
         """
         Method to get switch details.
         

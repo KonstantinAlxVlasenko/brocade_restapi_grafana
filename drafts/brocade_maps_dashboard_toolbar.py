@@ -70,6 +70,9 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         # maps config switch name gauge
         self._gauge_mapsconfig_swname  = BrocadeGauge(name='mapsconfig_swname', description='MAPS config switchanme', 
                                          unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='switch-name')
+        # maps config fabric name gauge
+        self._gauge_mapsconfig_fabric_name  = BrocadeGauge(name='mapsconfig_fabric_name', description='MAPS config fabric name', 
+                                         unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # mapsconfig switch vf-id gauge
         self._gauge_mapsconfig_vfid  = BrocadeGauge(name='mapsconfig_vfid', description='MAPS config switch VF ID', 
                                          unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
@@ -83,6 +86,9 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         # dashboard rules switch name gauge
         self._gauge_db_swname = BrocadeGauge(name='dashboard_rule_swname', description='Dashboard rules affecting health switchname.',
                                              unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='switch-name')
+        # dashboard rules fabric name gauge
+        self._gauge_db_fabric_name  = BrocadeGauge(name='dashboard_rule_fabric_name', description='Dashboard rules affecting health fabric name', 
+                                         unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # dashboard rules vfid gauge
         self._gauge_db_vfid = BrocadeGauge(name='dashboard_rule_vfid', description='Dashboard rules affecting health switch VF ID.',
                                              unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
@@ -109,16 +115,28 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         """
         
         # 'maps policy, actions'
-        self.gauge_mapsconfig_swname.fill_switch_gauge_metrics(maps_parser.maps_config)
-        self.gauge_mapsconfig_vfid.fill_switch_gauge_metrics(maps_parser.maps_config)
-        self.gauge_maps_policy.fill_switch_gauge_metrics(maps_parser.maps_config)
-        self.gauge_maps_actions.fill_switch_gauge_metrics(maps_parser.maps_config)
+        maps_config_gauges_lst = [self.gauge_mapsconfig_swname, self.gauge_mapsconfig_fabric_name, self.gauge_mapsconfig_vfid, 
+                                  self.gauge_maps_policy, self.gauge_maps_actions]
+        for gauge in maps_config_gauges_lst:
+            gauge.fill_switch_gauge_metrics(maps_parser.maps_config)
+
+        # self.gauge_mapsconfig_swname.fill_switch_gauge_metrics(maps_parser.maps_config)
+        # self.gauge_mapsconfig_vfid.fill_switch_gauge_metrics(maps_parser.maps_config)
+        # self.gauge_maps_policy.fill_switch_gauge_metrics(maps_parser.maps_config)
+        # self.gauge_maps_actions.fill_switch_gauge_metrics(maps_parser.maps_config)
+        
+        
         # 'maps dashboard'
-        self.gauge_db_swname.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
-        self.gauge_db_vfid.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
-        self.gauge_db_repetition_count.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
-        self.gauge_db_triggered_count.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
-        self.gauge_db_severity.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+        dashboard_rules_gauges_lst = [self.gauge_db_swname, self.gauge_db_fabric_name, self.gauge_db_vfid, 
+                                     self.gauge_db_repetition_count, self.gauge_db_triggered_count, self.gauge_db_severity]
+        for gauge in dashboard_rules_gauges_lst:
+            gauge.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+
+        # self.gauge_db_swname.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+        # self.gauge_db_vfid.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+        # self.gauge_db_repetition_count.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+        # self.gauge_db_triggered_count.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
+        # self.gauge_db_severity.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
 
 
     def __repr__(self):
@@ -126,13 +144,18 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
 
 
     @property
-    def gauge_mapsconfig_vfid(self):
-        return self._gauge_mapsconfig_vfid
-
-
-    @property
     def gauge_mapsconfig_swname(self):
         return self._gauge_mapsconfig_swname
+    
+
+    @property
+    def gauge_mapsconfig_fabric_name(self):
+        return self._gauge_mapsconfig_fabric_name
+    
+
+    @property
+    def gauge_mapsconfig_vfid(self):
+        return self._gauge_mapsconfig_vfid    
     
 
     @property
@@ -148,6 +171,11 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
     @property
     def gauge_db_swname(self):
         return self._gauge_db_swname
+    
+
+    @property
+    def gauge_db_fabric_name(self):
+        return self._gauge_db_fabric_name
 
 
     @property

@@ -18,6 +18,8 @@ class BrocadeFabricShowToolbar(BrocadeToolbar):
 
     # fabricshow_fos_keys = ['switch-wwn', 'firmware-version']
 
+    # local and fabric switch wwn keys
+    switch_wwn_pair_keys = ['switch-wwn', 'fabric-switch-wwn']
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
@@ -54,31 +56,34 @@ class BrocadeFabricShowToolbar(BrocadeToolbar):
         #                                       label_keys=BrocadeFabricShowToolbar.switch_wwn_key, metric_key='path-count')
 
 
-        # fabricshow switch name gauge
-        self._gauge_swname = BrocadeGauge(name='fabricshow_switchname', description='Switch name in the fabricshow output', 
-                                          unit_keys=BrocadeFabricShowToolbar.switch_wwn_key, parameter_key='switch-name')
+        # fabricshow remote switch name gauge
+        self._gauge_fabric_swname = BrocadeGauge(name='fabricshow_remote_switchname', description='Switch name in the fabricshow output', 
+                                          unit_keys=BrocadeFabricShowToolbar.switch_wwn_pair_keys, parameter_key='fabric-switch-name')
+        # fabricshow local switch name gauge
+        self._gauge_local_swname = BrocadeGauge(name='fabricshow_local_switchname', description='Local switch name', 
+                                          unit_keys=BrocadeFabricShowToolbar.switch_wwn_pair_keys, parameter_key='switch-name')        
         # fabricshow fabric name gauge
         self._gauge_fabricname = BrocadeGauge(name='fabricshow_fabricname', description='Fabric name in the fabricshow output', 
-                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
+                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_pair_keys, parameter_key='fabric-user-friendly-name')
         # fabricshow ip-address gauge
         self._gauge_switch_ip = BrocadeGauge(name='fabricshow_ip', description='Switch ip-address in the fabricshow output', 
-                                             unit_keys=BrocadeFabricShowToolbar.switch_wwn_key, parameter_key='ip-address')
+                                             unit_keys=BrocadeFabricShowToolbar.switch_wwn_pair_keys, parameter_key='ip-address')
         # fabricshow fos gauge
         self._gauge_switch_fos = BrocadeGauge(name='fabricshow_fos', description='Firmware version in the fabricshow output', 
-                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_key, parameter_key='firmware-version')        
+                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_pair_keys, parameter_key='firmware-version')        
         # fabricshow principal label gauge
         # 1 - ">", 0 - "_"  
         self._gauge_principal_label = BrocadeGauge(name='fabricshow_principal_label', description='Fabricshow principal switch label. {0: "_",  1: ">"}', 
-                                                   unit_keys=BrocadeFabricShowToolbar.switch_wwn_key, metric_key='principal')
+                                                   unit_keys=BrocadeFabricShowToolbar.switch_wwn_pair_keys, metric_key='principal')
         # fabricshow switch did gauge
         self._gauge_switch_did = BrocadeGauge(name='fabricshow_switch_did', description='The switch Domain_ID and embedded port D_ID.', 
-                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_key, metric_key='domain-id')
+                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_pair_keys, metric_key='domain-id')
         # fabricshow switch fid gauge
         self._gauge_switch_fid = BrocadeGauge(name='fabricshow_switch_fid', description='Fabricshow fabric ID', 
-                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_key, metric_key='fabric-id')
+                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_pair_keys, metric_key='fabric-id')
         # fabricshow path-count gauge
         self._gauge_path_count = BrocadeGauge(name='fabricshow_path_count', description='The number of currently available paths to the remote domain.', 
-                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_key, metric_key='path-count')
+                                              unit_keys=BrocadeFabricShowToolbar.switch_wwn_pair_keys, metric_key='path-count')
 
 
     def fill_toolbar_gauge_metrics(self, sw_parser: BrocadeSwitchParser) -> None:
@@ -88,23 +93,36 @@ class BrocadeFabricShowToolbar(BrocadeToolbar):
             sw_parser (BrocadeSwitchParser): object contains required data to fill the gauge metrics.
         """
 
-        self.gauge_swname.fill_switch_gauge_metrics(sw_parser.fabric)
-        self.gauge_fabricname.fill_switch_gauge_metrics(sw_parser.fabric)
-        self.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser.fabric)
-        self.gauge_switch_fos.fill_switch_gauge_metrics(sw_parser.fabric)
-        self.gauge_principal_label.fill_switch_gauge_metrics(sw_parser.fabric)
-        self.gauge_switch_did.fill_switch_gauge_metrics(sw_parser.fabric)
-        self.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser.fabric)
-        self.gauge_path_count.fill_switch_gauge_metrics(sw_parser.fabric)
+        fabricshow_gauges_lst = [self.gauge_fabric_swname, self.gauge_local_swname, self.gauge_fabricname, 
+                                 self.gauge_switch_ip, self.gauge_switch_fos, self.gauge_principal_label, 
+                                 self.gauge_switch_did, self.gauge_switch_fid, self.gauge_path_count]
+        
+        for gauge in fabricshow_gauges_lst:
+            gauge.fill_switch_gauge_metrics(sw_parser.fabric)
+
+        # self.gauge_fabric_swname.fill_switch_gauge_metrics(sw_parser.fabric)
+        # self.gauge_local_swname.fill_switch_gauge_metrics(sw_parser.fabric)
+        # self.gauge_fabricname.fill_switch_gauge_metrics(sw_parser.fabric)
+        # self.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser.fabric)
+        # self.gauge_switch_fos.fill_switch_gauge_metrics(sw_parser.fabric)
+        # self.gauge_principal_label.fill_switch_gauge_metrics(sw_parser.fabric)
+        # self.gauge_switch_did.fill_switch_gauge_metrics(sw_parser.fabric)
+        # self.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser.fabric)
+        # self.gauge_path_count.fill_switch_gauge_metrics(sw_parser.fabric)
 
 
     def __repr__(self):
         return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
+    
+
+    @property
+    def gauge_fabric_swname(self):
+        return self._gauge_fabric_swname
 
 
     @property
-    def gauge_swname(self):
-        return self._gauge_swname
+    def gauge_local_swname(self):
+        return self._gauge_local_swname
 
 
     @property

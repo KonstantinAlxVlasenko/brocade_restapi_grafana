@@ -32,7 +32,7 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
 
         # system resource chassis name gauge
         self._gauge_sys_resource_chname = BrocadeGauge(name='system_resource_chname', description='System resource chassis name',
-                                                       unit_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, parameter_key='chassis-name')
+                                                       unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='chassis-name')
         # switch name
         self._gauge_sys_resource_swname = BrocadeGauge(name='system_resource_swname', description='System resource switch name', 
                                                     unit_keys=BrocadeMAPSSystemToolbar.switch_wwn_key, parameter_key='switch-name')
@@ -86,12 +86,13 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
             sw_parser (BrocadeSwitchParser): object contains vf details.
         """
 
-        # 'maps system resources'
+        
         # self.gauge_sys_resource_chname.fill_chassis_gauge_metrics(maps_parser.system_resources)
         # self.gauge_cpu_usage.fill_chassis_gauge_metrics(maps_parser.system_resources)
         # self.gauge_flash_usage.fill_chassis_gauge_metrics(maps_parser.system_resources)
         # self.gauge_memory_usage.fill_chassis_gauge_metrics(maps_parser.system_resources)
         
+        # 'maps system resources'
         system_resources = BrocadeToolbar.clone_chassis_to_vf(maps_parser.system_resources, sw_parser, component_level=False)
         sys_resource_gauge_lst = [self.gauge_sys_resource_chname, self.gauge_sys_resource_swname, 
                                   self.gauge_sys_resource_fabric_name, self.gauge_sys_resource_vfid, 

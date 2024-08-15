@@ -104,23 +104,23 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
     
 
 
-    def _get_switch_details(self, vf_id: int, keys=['switch-name', 'switch-wwn']) -> Dict[str, Optional[str]]:
-        """
-        Method to get switch details.
+    # def _get_switch_details(self, vf_id: int, keys=['switch-name', 'switch-wwn', 'fabric-user']) -> Dict[str, Optional[str]]:
+    #     """
+    #     Method to get switch details.
         
-        Args:
-            vf_id {int}: switch vf_id.
-            keys {list}: extracted switch parameters titles.
+    #     Args:
+    #         vf_id {int}: switch vf_id.
+    #         keys {list}: extracted switch parameters titles.
         
-        Returns:
-            Dict[str, Optional[str]]: Dictionary with switchparameters values.
-        """
+    #     Returns:
+    #         Dict[str, Optional[str]]: Dictionary with switchparameters values.
+    #     """
         
-        sw_details = self.sw_parser.fc_switch.get(vf_id)
-        if sw_details:
-            return {key: sw_details[key] for key in keys}
-        else:
-            return {key: None for key in keys}
+    #     sw_details = self.sw_parser.fc_switch.get(vf_id)
+    #     if sw_details:
+    #         return {key: sw_details[key] for key in keys}
+    #     else:
+    #         return {key: None for key in keys}
 
 
     def  _get_maps_actions_value(self) -> None:
