@@ -160,41 +160,55 @@ class BrocadeSFPMediaToolbar(BrocadeToolbar):
             sfp_media_parser (BrocadeSfpMediaParser): object contains required data to fill the gauge metrics.
         """
         
-        self.gauge_swname.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_fabricname.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_portname.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_switch_vfid.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_port_speed_value.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_port_speed_mode.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_port_physical_state.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_port_type.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        # self.gauge_enabled_port_type.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_vendor.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_pn.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_sn.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_laser_type.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_speed_capability.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_wavelength.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_power_on_time.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_temperature.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_rx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_rx_power_dbm.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_rx_power_status.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_tx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_tx_power_dbm.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_tx_power_status.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_vendor.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_pn.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_sn.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_laser_type.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_speed_capability.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_temperature.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_rx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_rx_power_dbm.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_rx_power_status.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_tx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_tx_power_dbm.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
-        self.gauge_remote_tx_power_status.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        gauge_lst = [self.gauge_swname, self.gauge_fabricname, self.gauge_portname, self.gauge_switch_vfid, 
+                     self.gauge_port_speed_value, self.gauge_port_speed_mode, self.gauge_port_physical_state, 
+                     self.gauge_port_type, self.gauge_vendor, self.gauge_pn, self.gauge_sn, self.gauge_laser_type, 
+                     self.gauge_speed_capability, self.gauge_wavelength, self.gauge_power_on_time, self.gauge_temperature, 
+                     self.gauge_rx_power_uwatt, self.gauge_rx_power_dbm, self.gauge_rx_power_status, self.gauge_tx_power_uwatt, 
+                     self.gauge_tx_power_dbm, self.gauge_tx_power_status, self.gauge_remote_vendor, self.gauge_remote_pn, 
+                     self.gauge_remote_sn, self.gauge_remote_laser_type, self.gauge_remote_speed_capability, 
+                     self.gauge_remote_temperature, self.gauge_remote_rx_power_uwatt, self.gauge_remote_rx_power_dbm, 
+                     self.gauge_remote_rx_power_status, self.gauge_remote_tx_power_uwatt, self.gauge_remote_tx_power_dbm, 
+                     self.gauge_remote_tx_power_status]
+
+        for gauge in gauge_lst:
+            gauge.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+
+        # self.gauge_swname.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_fabricname.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_portname.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_switch_vfid.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_port_speed_value.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_port_speed_mode.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_port_physical_state.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_port_type.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # # self.gauge_enabled_port_type.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_vendor.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_pn.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_sn.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_laser_type.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_speed_capability.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_wavelength.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_power_on_time.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_temperature.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_rx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_rx_power_dbm.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_rx_power_status.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_tx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_tx_power_dbm.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_tx_power_status.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_vendor.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_pn.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_sn.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_laser_type.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_speed_capability.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_temperature.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_rx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_rx_power_dbm.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_rx_power_status.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_tx_power_uwatt.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_tx_power_dbm.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
+        # self.gauge_remote_tx_power_status.fill_port_gauge_metrics(sfp_media_parser.sfp_media)
 
 
     def __repr__(self):
@@ -374,54 +388,3 @@ class BrocadeSFPMediaToolbar(BrocadeToolbar):
     @property
     def gauge_remote_tx_power_status(self):
         return self._gauge_remote_tx_power_status
-    
-
-
-# switch-name
-# name
-# slot-number
-# port-number
-
-# port-name
-# port-speed-gbps
-
-# physical-state-id
-# port-enable-status-id
-# port-type-id
-
-# vendor-name
-# part-number
-# serial-number
-
-# media-distance
-# media-speed-capability
-# wavelength
-
-# rx-power
-# rx-power-dbm
-# rx-power-status-id
-
-# tx-power
-# tx-power-dbm
-# tx-power-status-id
-
-# power-on-time-hrf
-# temperature
-
-
-# remote-vendor-name
-# remote-part-number
-# remote-serial-number
-
-# remote-laser-type
-# remote-media-speed-capability
-
-# remote-media-rx-power
-# remote-media-rx-power-dbm
-# remote-rx-power-status-id
-
-# remote-media-tx-power
-# remote-media-tx-power-dbm
-# remote-tx-power-status-id
-
-# remote-media-temperature

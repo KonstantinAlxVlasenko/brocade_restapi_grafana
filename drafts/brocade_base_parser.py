@@ -1,8 +1,14 @@
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Literal
 
 
 class BrocadeTelemetryParser:
+    """
+    Class to create switch telemetry parser.
+
+    Attributes:
+        sw_telemetry: set of switch telemetry retrieved from the switch.
+    """
 
     STATUS_VALUE = {'ok': 1, 'unknown': 2, 'warning': 3, 'critical': 4}
 
@@ -24,7 +30,7 @@ class BrocadeTelemetryParser:
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
         """
         Args:
-            sw_telemetry: set of switch telemetry retrieved from the switch
+            sw_telemetry: set of switch telemetry retrieved from the switch.
         """
 
         self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
@@ -39,7 +45,7 @@ class BrocadeTelemetryParser:
         Method extracts chassis wwn from the chassis module.
         
         Returns:
-            Chassis wwn. 
+            str: chassis wwn. 
         """
         
         if self.sw_telemetry.chassis.get('Response'):
@@ -51,18 +57,33 @@ class BrocadeTelemetryParser:
         Method extracts chassis name from the chassis module.
         
         Returns:
-            Chassis name. 
+            str: chassis name. 
         """
         
         if self.sw_telemetry.chassis.get('Response'):
             return self.sw_telemetry.chassis['Response']['chassis']['chassis-user-friendly-name']
         
 
-    def _get_telemetry_datetime(self, key: str) -> str:
+    def _get_telemetry_datetime(self, key: Literal['date'] | Literal['time']) -> str:
+        """
+        Method extracts date or time from the chassis module.
+        
+        Returns:
+            str: date, time. 
+        """
         return self.sw_telemetry.chassis[key]
                 
     
     def same_chassis(self, other: 'BrocadeTelemetryParser') -> bool:
+        """Method detects if two instances of BrocadeTelemetryParser class are from the same chassis.
+
+        Args:
+            other (BrocadeTelemetryParser): BrocadeTelemetryParser class instance retrieved from the previous sw_telemetry.
+
+        Returns:
+            bool: same chassis or not.
+        """
+
         return self.ch_wwn == other.ch_wwn
 
 
@@ -162,8 +183,6 @@ class BrocadeTelemetryParser:
         return ports_vfid_changed_dct
 
 
-
-
     @staticmethod
     def get_changed_chassis_params(now_dct, prev_dct, changed_keys, const_keys, time_now, time_prev):
         """
@@ -183,7 +202,6 @@ class BrocadeTelemetryParser:
         Returns:
             dict: ports of the certain switch vfid with changed values.
         """
-        
 
         # find changed values for the changed_keys
         chassis_changed_dct = BrocadeTelemetryParser.get_changed_values(now_dct, prev_dct, changed_keys)
@@ -196,7 +214,6 @@ class BrocadeTelemetryParser:
             chassis_changed_dct['time-generated-prev-hrf'] = time_prev
 
         return chassis_changed_dct
-
 
 
     @staticmethod
@@ -229,13 +246,25 @@ class BrocadeTelemetryParser:
 
     @staticmethod
     def copy_dict_values(dest_dct: dict, source_dct: dict, keys: List[str], ignore_empty_dest: bool = True) -> None:
+        """Method copies values from source_dct to dest_dct.
+
+        Args:
+            dest_dct (dict): destination dictionary.
+            source_dct (dict): source dictionary.
+            keys (List[str]): keys which values are copied from source_dct to dest_dct.
+            ignore_empty_dest (bool, optional): ignore copying to empty dest_dct. Defaults to True.
+        """
         
         copy = False
 
+        # ignore empty dest_dct flag is on
         if ignore_empty_dest:
+            # copy if dest_dct is not empty
             if dest_dct:
                 copy = True
+        # ignore empty dest_dct flag is off
         else:
+            # copy in any case 
             copy = True
                                 
         if copy:

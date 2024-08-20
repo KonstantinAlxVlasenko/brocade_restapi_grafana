@@ -117,7 +117,7 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
         for ssp_report_parameter in maps_parser.ssp_report_parameters:
             self.gauge_ssp_report_state.fill_switch_gauge_metrics(ssp_report,
                                                                 renamed_keys={ssp_report_parameter + BrocadeMAPSParser.STATUS_ID_TAG: 'status-id'}, 
-                                                                update_dict={'name': ssp_report_parameter})
+                                                                add_dict={'name': ssp_report_parameter})
                 
 
     def __repr__(self):

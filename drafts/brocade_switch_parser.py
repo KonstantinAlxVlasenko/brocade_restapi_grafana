@@ -399,11 +399,4 @@ class BrocadeSwitchParser:
     def vf_details(self):
         return self._vf_details
 
-
-
-    
-
-    # @property
-    # def vfid_name(self):
-    #     return self._vfid_name
     

@@ -248,18 +248,18 @@ class BrocadeLogToolbar(BrocadeToolbar):
             key += '-status'
             self.gauge_current_value_str.fill_switch_gauge_metrics(system_resources_changed, prerequisite_keys_all=[key],
                                                                  renamed_keys={key: BrocadeLogToolbar.current_value_key}, 
-                                                                 update_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
             self.gauge_previous_value_str.fill_switch_gauge_metrics(system_resources_changed, prerequisite_keys_all=[key],
                                                                  renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key}, 
-                                                                 update_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                 add_dict={BrocadeLogToolbar.modified_parameter_key: key})
         # system resource metrics if it's status changed
         for key in BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS:
             self.gauge_current_value_str.fill_switch_gauge_metrics(system_resources_changed, prerequisite_keys_all=[key, key + '-status'],
                                                                     renamed_keys={key: BrocadeLogToolbar.current_value_key}, 
-                                                                    update_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                    add_dict={BrocadeLogToolbar.modified_parameter_key: key})
             self.gauge_previous_value_str.fill_switch_gauge_metrics(system_resources_changed, prerequisite_keys_all=[key, key + '-status'],
                                                                     renamed_keys={key + '-prev': BrocadeLogToolbar.previous_value_key}, 
-                                                                    update_dict={BrocadeLogToolbar.modified_parameter_key: key})
+                                                                    add_dict={BrocadeLogToolbar.modified_parameter_key: key})
 
 
     def _fill_ssp_report_log(self, maps_parser: BrocadeMAPSParser, sw_parser: BrocadeSwitchParser) -> None:
@@ -278,10 +278,10 @@ class BrocadeLogToolbar(BrocadeToolbar):
                 status_key = key + BrocadeMAPSParser.STATUS_TAG
                 self.gauge_current_value_str.fill_switch_gauge_metrics(ssp_report_changed, prerequisite_keys_all=[status_key],
                                                                     renamed_keys={status_key: BrocadeLogToolbar.current_value_key}, 
-                                                                    update_dict={BrocadeLogToolbar.modified_parameter_key: status_key})
+                                                                    add_dict={BrocadeLogToolbar.modified_parameter_key: status_key})
                 self.gauge_previous_value_str.fill_switch_gauge_metrics(ssp_report_changed, prerequisite_keys_all=[status_key],
                                                                     renamed_keys={status_key + '-prev': BrocadeLogToolbar.previous_value_key}, 
-                                                                    update_dict={BrocadeLogToolbar.modified_parameter_key: status_key + '-prev'})
+                                                                    add_dict={BrocadeLogToolbar.modified_parameter_key: status_key + '-prev'})
 
 
     def __repr__(self):
