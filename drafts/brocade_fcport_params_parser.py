@@ -71,6 +71,11 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
     FC_PORT_PARAMS_CHANGED = ['port-speed-hrf', 'long-distance-level', 'neighbor-node-wwn', 'neighbor-port-wwn',
                               'physical-state', 'port-enable-status', 'port-name', 'port-type', 'speed', 'max-speed']
     
+    SPEED_BITES_TO_MBYTES = {8_000_000_000: 810,
+                             16_000_000_000: 1622,
+                             32_000_000_000: 3243,
+                             64_000_000_000: 6487}
+    
     
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser, fcport_params_prev=None):
         """
@@ -200,6 +205,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                         'port-speed-hrf': port_speed_gbps_hrf,
                         'port-speed-gbps': port_speed_gbps,
                         'port-max-speed-gbps': port_max_speed,
+                        'port-throughput-Mbytes': BrocadeFCPortParametersParser.get_port_throughput(fc_interface_container['speed']),
                         'physical-state': physical_state,
                         'physical-state-id': BrocadeFCPortParametersParser.PHYSICAL_STATE_ID.get(fc_interface_container['physical-state'], 100),
                         'port-type-id': fc_interface_container['port-type'],
@@ -224,6 +230,23 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                     # add current port status dictionary to the summary port status dictionary with vf_id and slot_port as consecutive keys
                     fcport_params_dct[vf_id][fc_interface_container['name']] = fcport_params_current_dct
         return fcport_params_dct
+
+
+    @staticmethod
+    def get_port_throughput(port_speed: int):
+        """Method converts port_speed value to throughput in MB/s.
+
+        Args:
+            port_speed (int): port speed in bps
+
+        Returns:
+            int: throughput in MB/s.
+        """
+
+        if BrocadeFCPortParametersParser.SPEED_BITES_TO_MBYTES.get(port_speed):
+            return BrocadeFCPortParametersParser.SPEED_BITES_TO_MBYTES[port_speed]
+        elif port_speed is not None:
+            return port_speed/10_000_000
 
 
     def _get_changed_fcport_params(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:

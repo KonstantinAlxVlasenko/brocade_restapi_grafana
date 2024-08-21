@@ -37,7 +37,7 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
         self._gauge_sys_resource_swname = BrocadeGauge(name='system_resource_swname', description='System resource switch name', 
                                                     unit_keys=BrocadeMAPSSystemToolbar.switch_wwn_key, parameter_key='switch-name')
         # fabric name
-        self._gauge_sys_resource_fabric_name = BrocadeGauge(name='system_resource_fabric_name', description='System resource fabric name', 
+        self._gauge_sys_resource_fabricname = BrocadeGauge(name='system_resource_fabric_name', description='System resource fabric name', 
                                                     unit_keys=BrocadeMAPSSystemToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_sys_resource_vfid = BrocadeGauge(name='ssystem_resource_vfid', description='System resource VF id', 
@@ -66,7 +66,7 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
         self._gauge_ssp_report_swname = BrocadeGauge(name='ssp_report_swname', description='SSP report switch name', 
                                                     unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='switch-name')
         # fabric name
-        self._gauge_ssp_report_fabric_name = BrocadeGauge(name='ssp_report_fabric_name', description='SSP report fabric name', 
+        self._gauge_ssp_report_fabricname = BrocadeGauge(name='ssp_report_fabric_name', description='SSP report fabric name', 
                                                     unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_ssp_report_vfid = BrocadeGauge(name='ssp_report_vfid', description='SSP report VF id', 
@@ -95,7 +95,7 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
         # 'maps system resources'
         system_resources = BrocadeToolbar.clone_chassis_to_vf(maps_parser.system_resources, sw_parser, component_level=False)
         sys_resource_gauge_lst = [self.gauge_sys_resource_chname, self.gauge_sys_resource_swname, 
-                                  self.gauge_sys_resource_fabric_name, self.gauge_sys_resource_vfid, 
+                                  self.gauge_sys_resource_fabricname, self.gauge_sys_resource_vfid, 
                                   self.gauge_cpu_usage, self.gauge_cpu_usage_status,
                                   self.gauge_flash_usage, self.gauge_flash_usage_status,
                                   self.gauge_memory_usage, self.gauge_memory_usage_status]
@@ -104,7 +104,7 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
 
         # 'maps system health'
         ssp_report = BrocadeToolbar.clone_chassis_to_vf(maps_parser.ssp_report, sw_parser, component_level=False)
-        ssp_report_gauge_lst = [self.gauge_ssp_report_chname, self.gauge_ssp_report_swname, self.gauge_ssp_report_fabric_name,
+        ssp_report_gauge_lst = [self.gauge_ssp_report_chname, self.gauge_ssp_report_swname, self.gauge_ssp_report_fabricname,
                                 self.gauge_ssp_report_vfid]
 
         for gauge in ssp_report_gauge_lst:
@@ -135,8 +135,8 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
     
 
     @property
-    def gauge_sys_resource_fabric_name(self):
-        return self._gauge_sys_resource_fabric_name
+    def gauge_sys_resource_fabricname(self):
+        return self._gauge_sys_resource_fabricname
     
 
     @property
@@ -185,8 +185,8 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
 
 
     @property
-    def gauge_ssp_report_fabric_name(self):
-        return self._gauge_ssp_report_fabric_name
+    def gauge_ssp_report_fabricname(self):
+        return self._gauge_ssp_report_fabricname
     
 
     @property

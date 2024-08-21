@@ -105,7 +105,7 @@ o3_g630_003_vc01_f1_b.fc_statistics[-1]['Response']['fibrechannel-statistics'][1
 
 
 # io rate
-o3_g630_003_vc01_f1_b.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-rate'] = 3_875_000_000
+o3_g630_003_vc01_f1_b.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['in-rate'] = 3_275_000_000
 
 o3_g630_003_vc01_f1_b.fc_interface[-1]['Response']['fibrechannel'][0]['user-friendly-name'] = 'FAKE REFS'
 # o3_g630_003_vc01_f1_b.fc_interface[-1]['Response']['fibrechannel'][0]['physical-state'] = 'offline'
@@ -157,13 +157,13 @@ sfp_media_parser_now = BrocadeSFPMediaParser(sw_telemetry_now, fcport_params_par
 fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport_params_parser_now, fcport_stats_parser_prev)
 
 
-# request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
+request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
 # chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
 # fru_tb = BrocadeFRUToolbar(sw_telemetry_now)
 # maps_system_tb = BrocadeMAPSSystemToolbar(sw_telemetry_now)
 # maps_dashboard_tb = BrocadeMAPSDashboardToolbar(sw_telemetry_now)
 # switch_tb = BrocadeSwitchToolbar(sw_telemetry_now)
-fabricshow_tb = BrocadeFabricShowToolbar(sw_telemetry_now)
+# fabricshow_tb = BrocadeFabricShowToolbar(sw_telemetry_now)
 # fcport_params_tb = BrocadeFCPortParamsToolbar(sw_telemetry_now)
 # sfp_media_tb = BrocadeSFPMediaToolbar(sw_telemetry_now)
 # fcport_stats_tb = BrocadeFCPortStatsToolbar(sw_telemetry_now)
@@ -175,8 +175,8 @@ if __name__ == '__main__':
     
     while True:
         
-        # print('request_status')
-        # request_status_tb.fill_toolbar_gauge_metrics(request_status_now)
+        print('request_status')
+        request_status_tb.fill_toolbar_gauge_metrics(request_status_now)
         
         # print('chassis')
         # chassis_tb.fill_toolbar_gauge_metrics(ch_parser_now, sw_parser_now)
@@ -193,8 +193,8 @@ if __name__ == '__main__':
         # print('switch')
         # switch_tb.fill_toolbar_gauge_metrics(sw_parser_now)
         
-        print('fabrichsow')
-        fabricshow_tb.fill_toolbar_gauge_metrics(sw_parser_now)
+        # print('fabrichsow')
+        # fabricshow_tb.fill_toolbar_gauge_metrics(sw_parser_now)
 
         # print('fcport parameters')
         # fcport_params_tb.fill_toolbar_gauge_metrics(fcport_params_parser_now)

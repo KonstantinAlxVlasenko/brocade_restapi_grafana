@@ -35,7 +35,6 @@ class BrocadeChassisToolbar(BrocadeToolbar):
 
         super().__init__(sw_telemetry)
 
-
         # chassis name gauge
         self._gauge_chname = BrocadeGauge(name='chassis_name', description='Chassis name', 
                                           unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='chassis-user-friendly-name')
@@ -52,7 +51,7 @@ class BrocadeChassisToolbar(BrocadeToolbar):
         self._gauge_swname = BrocadeGauge(name='chassis_swname', description='Chassis switch name', 
                                                     unit_keys=BrocadeChassisToolbar.switch_wwn_key, parameter_key='switch-name')
         # fabric name
-        self._gauge_fabric_name = BrocadeGauge(name='chassis_fabric_name', description='Chassis fabric name', 
+        self._gauge_fabricname = BrocadeGauge(name='chassis_fabric_name', description='Chassis fabric name', 
                                                     unit_keys=BrocadeChassisToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_vfid = BrocadeGauge(name='chassis_vfid', description='Chassis VF ids', 
@@ -109,7 +108,7 @@ class BrocadeChassisToolbar(BrocadeToolbar):
         """
 
         chassis_gauges_lst = [self.gauge_chname, self.gauge_sn, self.gauge_model, self.gauge_product_name, 
-                              self.gauge_swname, self.gauge_fabric_name, self.gauge_vfid, self.gauge_fos, 
+                              self.gauge_swname, self.gauge_fabricname, self.gauge_vfid, self.gauge_fos, 
                               self.gauge_date, self.gauge_time, self.gauge_tz, self.gauge_vf_mode, self.gauge_ls_number]
         chassis = BrocadeToolbar.clone_chassis_to_vf(ch_parser.chassis, sw_parser, component_level=False)
         for gauge in chassis_gauges_lst:
@@ -169,8 +168,8 @@ class BrocadeChassisToolbar(BrocadeToolbar):
     
 
     @property
-    def gauge_fabric_name(self):
-        return self._gauge_fabric_name
+    def gauge_fabricname(self):
+        return self._gauge_fabricname
     
 
     @property

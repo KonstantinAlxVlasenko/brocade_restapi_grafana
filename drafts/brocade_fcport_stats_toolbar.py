@@ -292,34 +292,36 @@ class BrocadeFCPortStatsToolbar(BrocadeToolbar):
                                     unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="high-severity-errors_port-status-id")
         
         # in rate gauges
-        self._gauge_in_peak_rate = BrocadeGauge(name="fcport_stats_in_peak_rate", description="The peak byte receive rate.", 
-                                                unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate")
-        self._gauge_in_peak_rate_percentage = BrocadeGauge(name="fcport_stats_in_peak_rate_percentage", description="The percentage of peak receive rate from maximum port speed.", 
+        self._gauge_in_peak_rate = BrocadeGauge(name="fcport_stats_in_peak_rate", description="The peak byte receive rate in MB/s.", 
+                                                unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-Mbytes")
+        self._gauge_in_peak_rate_percentage = BrocadeGauge(name="fcport_stats_in_peak_rate_percentage", description="The percentage of peak receive rate from maximum port throughput.", 
                                                            unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-percentage")
-        self._gauge_in_peak_rate_bits = BrocadeGauge(name="fcport_stats_in_peak_rate_bits", description="The peak bit receive rate.", unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-bits")
-        self._gauge_in_rate = BrocadeGauge(name="fcport_stats_in_rate", description="The instantaneous byte receive rate.", 
-                                           unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-rate")
-        self._gauge_in_rate_percentage = BrocadeGauge(name="fcport_stats_in_rate_percentage", description="The percentage of the instantaneous receive rate from maximum port speed.", 
+        # self._gauge_in_peak_rate_bits = BrocadeGauge(name="fcport_stats_in_peak_rate_bits", description="The peak bit receive rate.", 
+        #                                              unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-bits")
+        self._gauge_in_rate = BrocadeGauge(name="fcport_stats_in_rate", description="The instantaneous byte receive rate in MB/s.", 
+                                           unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-rate-Mbytes")
+        self._gauge_in_rate_percentage = BrocadeGauge(name="fcport_stats_in_rate_percentage", description="The percentage of the instantaneous receive rate from maximum port throughput.", 
                                                       unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-rate-percentage")
-        self._gauge_in_rate_bits = BrocadeGauge(name="fcport_stats_in_rate_bits", description="The instantaneous bit receive rate.", unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-rate-bits")
+        # self._gauge_in_rate_bits = BrocadeGauge(name="fcport_stats_in_rate_bits", description="The instantaneous bit receive rate.", unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-rate-bits")
+        
         # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         description_in_rate_status_id = f"The instantaneous receive rate status id {BrocadeFCPortStatsToolbar.STATUS_ID}."
         self._gauge_in_rate_status_id = BrocadeGauge(name="fcport_stats_in_rate_status_id", description=description_in_rate_status_id, 
                                                      unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-rate-status-id")
         
         # out rate gauges
-        self._gauge_out_peak_rate = BrocadeGauge(name="fcport_stats_out_peak_rate", description="The peak byte transmit rate.", 
-                                                 unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate")
-        self._gauge_out_peak_rate_percentage = BrocadeGauge(name="fcport_stats_out_peak_rate_percentage", description="The percentage of peak transmit rate from maximum port speed.", 
+        self._gauge_out_peak_rate = BrocadeGauge(name="fcport_stats_out_peak_rate", description="The peak byte transmit rate in MB/s.", 
+                                                 unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-Mbytes")
+        self._gauge_out_peak_rate_percentage = BrocadeGauge(name="fcport_stats_out_peak_rate_percentage", description="The percentage of peak transmit rate from maximum port throughput.", 
                                                             unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-percentage")
-        self._gauge_out_peak_rate_bits = BrocadeGauge(name="fcport_stats_out_peak_rate_bits", description="The peak bit transmit rate.", 
-                                                      unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-bits")
-        self._gauge_out_rate = BrocadeGauge(name="fcport_stats_out_rate", description="The instantaneous byte transmit rate.", 
-                                            unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-rate")
-        self._gauge_out_rate_percentage = BrocadeGauge(name="fcport_stats_out_rate_percentage", description="The percentage of the instantaneous transmit rate from maximum port speed.", 
+        # self._gauge_out_peak_rate_bits = BrocadeGauge(name="fcport_stats_out_peak_rate_bits", description="The peak bit transmit rate.", 
+        #                                               unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-bits")
+        self._gauge_out_rate = BrocadeGauge(name="fcport_stats_out_rate", description="The instantaneous byte transmit rate in MB/s.", 
+                                            unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-rate-Mbytes")
+        self._gauge_out_rate_percentage = BrocadeGauge(name="fcport_stats_out_rate_percentage", description="The percentage of the instantaneous transmit rate from maximum port throughput.", 
                                                        unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-rate-percentage")
-        self._gauge_out_rate_bits = BrocadeGauge(name="fcport_stats_out_rate_bits", description="The instantaneous bit transmit rate.", 
-                                                 unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-rate-bits")
+        # self._gauge_out_rate_bits = BrocadeGauge(name="fcport_stats_out_rate_bits", description="The instantaneous bit transmit rate.", 
+        #                                          unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-rate-bits")
         # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         description_out_rate_status_id = f"The instantaneous transmit rate status id {BrocadeFCPortStatsToolbar.STATUS_ID}."
         self._gauge_out_rate_status_id = BrocadeGauge(name="fcport_stats_out_rate_status_id", description=description_out_rate_status_id, 
@@ -359,7 +361,7 @@ class BrocadeFCPortStatsToolbar(BrocadeToolbar):
             self.gauge_high_severity_errors_port_status_id, self.gauge_in_crc_errors, self.gauge_in_crc_errors_delta, self.gauge_in_frames, 
             self.gauge_in_frames_delta, self.gauge_in_frames_hrf, self.gauge_in_lcs, self.gauge_in_lcs_delta, self.gauge_in_link_resets, 
             self.gauge_in_link_resets_delta, self.gauge_in_offline_sequences, self.gauge_in_offline_sequences_delta, self.gauge_in_peak_rate, 
-            self.gauge_in_peak_rate_percentage, self.gauge_in_peak_rate_bits, self.gauge_in_rate, self.gauge_in_rate_percentage, self.gauge_in_rate_bits, 
+            self.gauge_in_peak_rate_percentage, self.gauge_in_rate, self.gauge_in_rate_percentage, 
             self.gauge_in_rate_status_id, self.gauge_invalid_ordered_sets, self.gauge_invalid_ordered_sets_delta, self.gauge_invalid_transmission_words, 
             self.gauge_invalid_transmission_words_delta, self.gauge_link_failures, self.gauge_link_failures_delta, self.gauge_link_level_interrpts, 
             self.gauge_link_level_interrpts_delta, self.gauge_loss_of_signal, self.gauge_loss_of_signal_delta, self.gauge_loss_of_sync, 
@@ -367,7 +369,7 @@ class BrocadeFCPortStatsToolbar(BrocadeToolbar):
             self.gauge_lrout_delta_subtract_olsin_delta, self.gauge_max_speed, self.gauge_medium_severity_errors_port_status_id, self.gauge_multicast_timeouts, 
             self.gauge_multicast_timeouts_delta, self.gauge_out_frames, self.gauge_out_frames_delta, self.gauge_out_frames_hrf, self.gauge_out_link_resets, 
             self.gauge_out_link_resets_delta, self.gauge_out_offline_sequences, self.gauge_out_offline_sequences_delta, self.gauge_out_peak_rate, 
-            self.gauge_out_peak_rate_percentage, self.gauge_out_peak_rate_bits, self.gauge_out_rate, self.gauge_out_rate_percentage, self.gauge_out_rate_bits, 
+            self.gauge_out_peak_rate_percentage, self.gauge_out_rate, self.gauge_out_rate_percentage, 
             self.gauge_out_rate_status_id, self.gauge_pcs_block_errors, self.gauge_pcs_block_errors_delta, self.gauge_primitive_sequence_protocol_error, 
             self.gauge_primitive_sequence_protocol_error_delta, self.gauge_remote_crc_errors, self.gauge_remote_crc_errors_delta, self.gauge_remote_fec_uncorrected, 
             self.gauge_remote_fec_uncorrected_delta, self.gauge_remote_invalid_transmission_words, self.gauge_remote_invalid_transmission_words_delta, 
@@ -675,9 +677,9 @@ class BrocadeFCPortStatsToolbar(BrocadeToolbar):
         return self._gauge_in_peak_rate_percentage
     
 
-    @property
-    def gauge_in_peak_rate_bits(self):
-        return self._gauge_in_peak_rate_bits
+    # @property
+    # def gauge_in_peak_rate_bits(self):
+    #     return self._gauge_in_peak_rate_bits
     
 
     @property
@@ -690,9 +692,9 @@ class BrocadeFCPortStatsToolbar(BrocadeToolbar):
         return self._gauge_in_rate_percentage
     
 
-    @property
-    def gauge_in_rate_bits(self):
-        return self._gauge_in_rate_bits
+    # @property
+    # def gauge_in_rate_bits(self):
+    #     return self._gauge_in_rate_bits
     
 
     @property
@@ -834,9 +836,9 @@ class BrocadeFCPortStatsToolbar(BrocadeToolbar):
         return self._gauge_out_peak_rate_percentage
     
 
-    @property
-    def gauge_out_peak_rate_bits(self):
-        return self._gauge_out_peak_rate_bits
+    # @property
+    # def gauge_out_peak_rate_bits(self):
+    #     return self._gauge_out_peak_rate_bits
     
 
     @property
@@ -849,9 +851,9 @@ class BrocadeFCPortStatsToolbar(BrocadeToolbar):
         return self._gauge_out_rate_percentage
     
 
-    @property
-    def gauge_out_rate_bits(self):
-        return self._gauge_out_rate_bits
+    # @property
+    # def gauge_out_rate_bits(self):
+    #     return self._gauge_out_rate_bits
     
 
     @property

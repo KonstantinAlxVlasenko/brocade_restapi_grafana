@@ -33,45 +33,12 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         """
 
         super().__init__(sw_telemetry)
-
-        # # maps config switch name gauge
-        # self._gauge_mapsconfig_swname  = BrocadeGauge(name='mapsconfig_swname', description='MAPS config switchanme', 
-        #                                  label_keys=BrocadeMAPSDashboardToolbar.switch_name_keys)
-        # # mapsconfig switch vf-id gauge
-        # self._gauge_mapsconfig_vfid  = BrocadeGauge(name='mapsconfig_vfid', description='MAPS config switch VF ID', 
-        #                                  label_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
-        # # maps config switch name gauge
-        # self._gauge_maps_policy  = BrocadeGauge(name='maps_policy', description='MAPS policy name', 
-        #                                  label_keys=BrocadeMAPSDashboardToolbar.maps_policy_keys)
-        # # maps config switch name gauge
-        # self._gauge_maps_actions  = BrocadeGauge(name='maps_actions', description='MAPS actions list', 
-        #                                  label_keys=BrocadeMAPSDashboardToolbar.maps_actions_keys)
-
-        # # dashboard rules switch name gauge
-        # self._gauge_db_swname = BrocadeGauge(name='dashboard_rule_swname', description='Dashboard rules affecting health switchname.',
-        #                                      label_keys=BrocadeMAPSDashboardToolbar.switch_name_keys)
-        # # dashboard rules vfid gauge
-        # self._gauge_db_vfid = BrocadeGauge(name='dashboard_rule_vfid', description='Dashboard rules affecting health switch VF ID.',
-        #                                      label_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, metric_key='vf-id')
-        # # dashboard rules repetition count gauge
-        # self._gauge_db_repetition_count = BrocadeGauge(name='dashboard_rule_repetition_count', description='The number of times a rule was triggered.',
-        #                                      label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='repetition-count')
-        # # dashboard rules triggered count gauge
-        # self._gauge_db_triggered_count = BrocadeGauge(name='dashboard_rule_triggered_count', description='The number of times the rule was triggered for the category.',
-        #                                      label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='triggered-count')
-        # # dashboard rules severity gauge
-        # # 0 - no event triggired or retrieved
-        # # 1 - information that event condition is cleared 
-        # # 2 - warning that event condition detected
-        # self._gauge_db_severity = BrocadeGauge(name='dashboard_rule_severiry', description='Dashboard rules affecting health severity.',
-        #                                      label_keys=BrocadeMAPSDashboardToolbar.db_rule_keys, metric_key='severity')
         
-
         # maps config switch name gauge
         self._gauge_mapsconfig_swname  = BrocadeGauge(name='mapsconfig_swname', description='MAPS config switchanme', 
                                          unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='switch-name')
         # maps config fabric name gauge
-        self._gauge_mapsconfig_fabric_name  = BrocadeGauge(name='mapsconfig_fabric_name', description='MAPS config fabric name', 
+        self._gauge_mapsconfig_fabricname  = BrocadeGauge(name='mapsconfig_fabric_name', description='MAPS config fabric name', 
                                          unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # mapsconfig switch vf-id gauge
         self._gauge_mapsconfig_vfid  = BrocadeGauge(name='mapsconfig_vfid', description='MAPS config switch VF ID', 
@@ -87,7 +54,7 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         self._gauge_db_swname = BrocadeGauge(name='dashboard_rule_swname', description='Dashboard rules affecting health switchname.',
                                              unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='switch-name')
         # dashboard rules fabric name gauge
-        self._gauge_db_fabric_name  = BrocadeGauge(name='dashboard_rule_fabric_name', description='Dashboard rules affecting health fabric name', 
+        self._gauge_db_fabricname  = BrocadeGauge(name='dashboard_rule_fabric_name', description='Dashboard rules affecting health fabric name', 
                                          unit_keys=BrocadeMAPSDashboardToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # dashboard rules vfid gauge
         self._gauge_db_vfid = BrocadeGauge(name='dashboard_rule_vfid', description='Dashboard rules affecting health switch VF ID.',
@@ -115,7 +82,7 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         """
         
         # 'maps policy, actions'
-        maps_config_gauges_lst = [self.gauge_mapsconfig_swname, self.gauge_mapsconfig_fabric_name, self.gauge_mapsconfig_vfid, 
+        maps_config_gauges_lst = [self.gauge_mapsconfig_swname, self.gauge_mapsconfig_fabricname, self.gauge_mapsconfig_vfid, 
                                   self.gauge_maps_policy, self.gauge_maps_actions]
         for gauge in maps_config_gauges_lst:
             gauge.fill_switch_gauge_metrics(maps_parser.maps_config)
@@ -127,7 +94,7 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
         
         
         # 'maps dashboard'
-        dashboard_rules_gauges_lst = [self.gauge_db_swname, self.gauge_db_fabric_name, self.gauge_db_vfid, 
+        dashboard_rules_gauges_lst = [self.gauge_db_swname, self.gauge_db_fabricname, self.gauge_db_vfid, 
                                      self.gauge_db_repetition_count, self.gauge_db_triggered_count, self.gauge_db_severity]
         for gauge in dashboard_rules_gauges_lst:
             gauge.fill_switch_gauge_metrics(maps_parser.dashboard_rule)
@@ -149,8 +116,8 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
     
 
     @property
-    def gauge_mapsconfig_fabric_name(self):
-        return self._gauge_mapsconfig_fabric_name
+    def gauge_mapsconfig_fabricname(self):
+        return self._gauge_mapsconfig_fabricname
     
 
     @property
@@ -174,8 +141,8 @@ class BrocadeMAPSDashboardToolbar(BrocadeToolbar):
     
 
     @property
-    def gauge_db_fabric_name(self):
-        return self._gauge_db_fabric_name
+    def gauge_db_fabricname(self):
+        return self._gauge_db_fabricname
 
 
     @property

@@ -478,7 +478,7 @@ maps_dashboard_tb.gauge_db_severity.fill_switch_gauge_metrics(maps_parser_now.da
 switch_tb = BrocadeSwitchToolbar(sw_telemetry_now)
 switch_tb.gauge_swname.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
 switch_tb.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
-switch_tb.gauge_switch_fabric_name.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
+switch_tb.gauge_switch_fabricname.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
 switch_tb.gauge_switch_uptime.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
 switch_tb.gauge_switch_state.fill_switch_gauge_metrics(sw_parser_now.fc_switch)
 switch_tb.gauge_switch_mode.fill_switch_gauge_metrics(sw_parser_now.fc_switch)

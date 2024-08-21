@@ -92,7 +92,7 @@ class BrocadeSwitchToolbar(BrocadeToolbar):
         self._gauge_switch_ip = BrocadeGauge(name='switch_ip_address', description='Switch IP address', 
                                            unit_keys=BrocadeSwitchToolbar.switch_wwn_key, parameter_key='ip-address')
         # switch fabric name gauge
-        self._gauge_switch_fabric_name = BrocadeGauge(name='switch_fabric_name', description='Switch fabric name', 
+        self._gauge_switch_fabricname = BrocadeGauge(name='switch_fabric_name', description='Switch fabric name', 
                                            unit_keys=BrocadeSwitchToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # switch uptime gauge
         self._gauge_switch_uptime = BrocadeGauge(name='switch_uptime', description='Switch uptime', 
@@ -154,23 +154,32 @@ class BrocadeSwitchToolbar(BrocadeToolbar):
         Args:
             sw_parser (BrocadeSwitchParser): object contains required data to fill the gauge metrics.
         """
+
+        gauge_lst = [self.gauge_swname, self.gauge_switch_ip, self.gauge_switch_fabricname, self.gauge_switch_uptime, 
+                     self.gauge_switch_state, self.gauge_switch_mode, self.gauge_switch_role, self.gauge_switch_did, 
+                     self.gauge_switch_fid, self.gauge_switch_vfid, self.gauge_switch_port_quantity, 
+                     self.gauge_online_port_quantity, self.gauge_uport_gport_enabled_quantity, 
+                     self.gauge_base_switch_status, self.gauge_default_switch_status, self.gauge_logical_isl_status,
+]
+        for gauge in gauge_lst:
+            gauge.fill_switch_gauge_metrics(sw_parser.fc_switch)
         
-        self.gauge_swname.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_fabric_name.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_uptime.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_state.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_mode.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_role.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_did.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_vfid.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_switch_port_quantity.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_online_port_quantity.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_uport_gport_enabled_quantity.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_base_switch_status.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_default_switch_status.fill_switch_gauge_metrics(sw_parser.fc_switch)
-        self.gauge_logical_isl_status.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_swname.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_ip.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_fabricname.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_uptime.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_state.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_mode.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_role.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_did.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_fid.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_vfid.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_switch_port_quantity.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_online_port_quantity.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_uport_gport_enabled_quantity.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_base_switch_status.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_default_switch_status.fill_switch_gauge_metrics(sw_parser.fc_switch)
+        # self.gauge_logical_isl_status.fill_switch_gauge_metrics(sw_parser.fc_switch)
 
 
     def __repr__(self):
@@ -188,8 +197,8 @@ class BrocadeSwitchToolbar(BrocadeToolbar):
 
 
     @property
-    def gauge_switch_fabric_name(self):
-        return self._gauge_switch_fabric_name
+    def gauge_switch_fabricname(self):
+        return self._gauge_switch_fabricname
 
 
     @property
