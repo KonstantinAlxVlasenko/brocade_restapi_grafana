@@ -3,7 +3,7 @@ from brocade_telemetry_request_status import BrocadeRequestStatus
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
-class BrocadeRequestStatusToolbar:
+class RequestStatusToolbar:
     """
     Class to create HTTP request status toolbar for each container.
     Toolbar is a set of prometheus gauges: rs_id, rs_code, rs_error, rs_date, rs_time.
@@ -31,22 +31,22 @@ class BrocadeRequestStatusToolbar:
                                           unit_keys=['ip-address'], parameter_key='chassis-name')
         # request status_id gauge
         # 1 - 'Ok',  2 - 'Warnig', 3 - 'Fail'
-        rs_id_description = f'HTTP request status ID {BrocadeRequestStatusToolbar.REQUEST_STATUS_ID}.'
+        rs_id_description = f'HTTP request status ID {RequestStatusToolbar.REQUEST_STATUS_ID}.'
         self._gauge_rs_id =  BrocadeGauge(name='request_status_id', description=rs_id_description,
-                                          unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, metric_key='status-id')
+                                          unit_keys=RequestStatusToolbar.rs_container_keys, metric_key='status-id')
         # request status_code gauge
         # HTTP Status Code, 200-OK, 400-Bad Request etc
         self._gauge_rs_code =  BrocadeGauge(name='request_status_code', description='HTTP request status code', 
-                                            unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, metric_key='status-code')
+                                            unit_keys=RequestStatusToolbar.rs_container_keys, metric_key='status-code')
         # request status error message guage
         self._gauge_rs_error =  BrocadeGauge(name='request_status_error', description='HTTP request status error message', 
-                                            unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, parameter_key='error-message')
+                                            unit_keys=RequestStatusToolbar.rs_container_keys, parameter_key='error-message')
         # request status date guage
         self._gauge_rs_date =  BrocadeGauge(name='request_status_date', description='HTTP request status date', 
-                                            unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, parameter_key='date')
+                                            unit_keys=RequestStatusToolbar.rs_container_keys, parameter_key='date')
         # request status time guage
         self._gauge_rs_time =  BrocadeGauge(name='request_status_time', description='HTTP request status time', 
-                                            unit_keys=BrocadeRequestStatusToolbar.rs_container_keys, parameter_key='time')
+                                            unit_keys=RequestStatusToolbar.rs_container_keys, parameter_key='time')
 
 
 

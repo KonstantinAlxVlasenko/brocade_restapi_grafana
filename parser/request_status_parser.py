@@ -12,7 +12,7 @@ from typing import Dict, List, Union
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
-class BrocadeRequestStatus:
+class RequestStatusParser:
     """
     Class to create request status dictionaries for all http telemetry requests.
 
@@ -75,46 +75,6 @@ class BrocadeRequestStatus:
         return request_status_lst
     
     
-    # @staticmethod
-    # def _create_status_dct(ip_address: str,
-    #                        chname_ip: dict,
-    #                        telemetry_dct: Dict[str, Union[str, int]], 
-    #                        module: str, container: str, 
-    #                        vf_id=None) -> Dict[str, Union[str, int]]:
-    #     """
-    #     Method creates request status details dictionary of the request result telemetry_dct
-    #     for the module and container name.
-        
-        
-    #     Args:
-    #         telemetry_dct: dictionary with request result
-    #         module: requested module name
-    #         container: requested container name
-    #         vf_id: virtual ID used to perform telemetry reqest
-            
-    #     Returns:
-    #         Request status dictionary for the request result telemetry_dct.
-    #         Dictionary keys are module name, container name, retrieve datetime, status and vf_id.
-    #     """
-        
-    #     # retrive values from the telemetry_dct
-    #     request_keys = ['date', 'time', 'status-code', 'error-message', 'vf-id']
-    #     telemetry_status_dct = {key: telemetry_dct.get(key) for key in request_keys}
-    #     # add module name, container name and vf_id
-    #     telemetry_status_dct['vf-id'] = vf_id
-    #     telemetry_status_dct['module'] = module
-    #     telemetry_status_dct['container'] = container
-    #     # verify request status
-    #     status = BrocadeRequestStatus._get_container_status(telemetry_dct)
-    #     # add status and its id
-    #     telemetry_status_dct['status'] = status
-    #     telemetry_status_dct['status-id'] =  BrocadeRequestStatus.TELEMETRY_STATUS_ID[status]
-    #     telemetry_status_dct['ip-address'] = ip_address
-    #     telemetry_status_dct['chassis-name'] = chname_ip.get(ip_address)
-    #     return telemetry_status_dct
-    
-
-    
     def _create_status_dct(self,
                            telemetry_dct: Dict[str, Union[str, int]], 
                            module: str, container: str, 
@@ -122,7 +82,6 @@ class BrocadeRequestStatus:
         """
         Method creates request status details dictionary of the request result telemetry_dct
         for the module and container name.
-        
         
         Args:
             telemetry_dct: dictionary with request result
@@ -145,10 +104,10 @@ class BrocadeRequestStatus:
         telemetry_status_dct['module'] = module
         telemetry_status_dct['container'] = container
         # verify request status
-        status = BrocadeRequestStatus._get_container_status(telemetry_dct)
+        status = RequestStatusParser._get_container_status(telemetry_dct)
         # add status and its id
         telemetry_status_dct['status'] = status
-        telemetry_status_dct['status-id'] =  BrocadeRequestStatus.TELEMETRY_STATUS_ID[status]
+        telemetry_status_dct['status-id'] =  RequestStatusParser.TELEMETRY_STATUS_ID[status]
         telemetry_status_dct['ip-address'] = ip_address
         telemetry_status_dct['chassis-name'] = self.chname_ip.get(ip_address)
         return telemetry_status_dct
@@ -170,7 +129,7 @@ class BrocadeRequestStatus:
         if container.get('Response'):
             return 'OK'
         # if error-message is in the ignore list
-        elif container.get('error-message') in BrocadeRequestStatus.IGNORED_ERRORS:
+        elif container.get('error-message') in RequestStatusParser.IGNORED_ERRORS:
             return 'OK'
         elif container.get('status-code'):
             if container['status-code'] in [401]: # Unauthorized access

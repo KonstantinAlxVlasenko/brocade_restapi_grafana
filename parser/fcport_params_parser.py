@@ -13,7 +13,7 @@ from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_switch_parser import BrocadeSwitchParser
 
 
-class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
+class FCPortParametersParser(BrocadeTelemetryParser):
     """
     Class to create fc port parameters dictionaries.
 
@@ -146,7 +146,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                     port_max_speed = int(fc_interface_container['max-speed']/1000_000_000)
                     port_speed_gbps = int(fc_interface_container['speed']/1000_000_000)
                     # add leading 'N' or closing 'G' to the port_seed value
-                    port_speed_gbps_hrf = BrocadeFCPortParametersParser._label_auto_fixed_speed_mode(port_speed_gbps, fc_interface_container['auto-negotiate'])
+                    port_speed_gbps_hrf = FCPortParametersParser._label_auto_fixed_speed_mode(port_speed_gbps, fc_interface_container['auto-negotiate'])
                     # The Fibre Channel WWN of the neighbor port
                     # neighbor_port_wwn = ', '.join(fc_interface_container['neighbor']['wwn']) if fc_interface_container['neighbor'] else None
                     neighbor_port_wwn = fc_interface_container['neighbor']['wwn'] if fc_interface_container['neighbor'] else None
@@ -156,11 +156,11 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                     # dynamic or static portname
                     port_name = fc_interface_container['user-friendly-name'].rstrip('.')
                     # port enabled or disabled
-                    port_enable_status, port_enable_status_id = BrocadeFCPortParametersParser._get_port_enable_status(fc_interface_container)
+                    port_enable_status, port_enable_status_id = FCPortParametersParser._get_port_enable_status(fc_interface_container)
                     # online, offline, faulty, no_module, laser_flt, no_light, no_sync, in_sync, mod_inv, mod_val etc
-                    physical_state = BrocadeFCPortParametersParser._get_port_physical_state(fc_interface_container)
+                    physical_state = FCPortParametersParser._get_port_physical_state(fc_interface_container)
                     # flag if fc port is enabled but has no device connected
-                    nodevice_enabled_port_flag = BrocadeFCPortParametersParser._get_nodevice_enabled_port_flag(fc_interface_container)
+                    nodevice_enabled_port_flag = FCPortParametersParser._get_nodevice_enabled_port_flag(fc_interface_container)
                     # uport_gport_enabled_flag = BrocadeFCPortParametersParser._get_uport_gport_enabled_flag(fc_interface_container)
                     uport_gport_enabled_flag = self._get_uport_gport_enabled_flag(fc_interface_container, vf_id)
                     
@@ -170,8 +170,8 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                     if fc_interface_container['physical-state'] == 'online':
                         self.sw_parser.fc_switch[vf_id]['online-port-quantity'] += 1
                     
-                    pod_license_status_id = BrocadeFCPortParametersParser._get_pod_license_id(fc_interface_container)
-                    physical_state_status_id =  BrocadeFCPortParametersParser._get_physical_state_status_id(fc_interface_container)
+                    pod_license_status_id = FCPortParametersParser._get_pod_license_id(fc_interface_container)
+                    physical_state_status_id =  FCPortParametersParser._get_physical_state_status_id(fc_interface_container)
 
                     
                     # create dictionary with current port parameters 
@@ -186,27 +186,27 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                         'port-speed-hrf': port_speed_gbps_hrf,
                         'port-speed-gbps': port_speed_gbps,
                         'port-max-speed-gbps': port_max_speed,
-                        'port-throughput-Mbytes': BrocadeFCPortParametersParser.get_port_throughput(fc_interface_container['speed']),
+                        'port-throughput-Mbytes': FCPortParametersParser.get_port_throughput(fc_interface_container['speed']),
                         'physical-state': physical_state,
-                        'physical-state-id': BrocadeFCPortParametersParser.PHYSICAL_STATE_ID.get(fc_interface_container['physical-state'], 100),
+                        'physical-state-id': FCPortParametersParser.PHYSICAL_STATE_ID.get(fc_interface_container['physical-state'], 100),
                         'port-type-id': fc_interface_container['port-type'],
-                        'port-type': BrocadeFCPortParametersParser.PORT_TYPE_ID.get(fc_interface_container['port-type'], fc_interface_container['port-type']),
-                        'enabled-port-type-id': BrocadeFCPortParametersParser._get_enabled_port_type_id(fc_interface_container),
+                        'port-type': FCPortParametersParser.PORT_TYPE_ID.get(fc_interface_container['port-type'], fc_interface_container['port-type']),
+                        'enabled-port-type-id': FCPortParametersParser._get_enabled_port_type_id(fc_interface_container),
                         'neighbor-port-wwn': neighbor_port_wwn,
                         'neighbor-port-wwn-str': neighbor_port_wwn_str,
                         'port-enable-status': port_enable_status,
                         'port-enable-status-id': port_enable_status_id,
                         'nodevice-enabled-port': nodevice_enabled_port_flag,
                         'uport-gport-enabled': uport_gport_enabled_flag,
-                        'long-distance-level': BrocadeFCPortParametersParser.LONG_DISTANCE_LEVEL.get(fc_interface_container['long-distance']),
+                        'long-distance-level': FCPortParametersParser.LONG_DISTANCE_LEVEL.get(fc_interface_container['long-distance']),
                         'pod-license-status-id': pod_license_status_id,
                         'physical-state-status-id': physical_state_status_id,
-                        'physical-state-status': BrocadeFCPortParametersParser.STATUS_ID.get(physical_state_status_id),
+                        'physical-state-status': FCPortParametersParser.STATUS_ID.get(physical_state_status_id),
                         }
                     
                     fcport_params_current_dct.update(sw_details_dct)
                     # dictionary with unchanged values from fc_interface_container
-                    fcport_params_current_default_dct = {leaf: fc_interface_container.get(leaf) for leaf in BrocadeFCPortParametersParser.FC_INTERFACE_LEAFS}
+                    fcport_params_current_default_dct = {leaf: fc_interface_container.get(leaf) for leaf in FCPortParametersParser.FC_INTERFACE_LEAFS}
                     fcport_params_current_dct.update(fcport_params_current_default_dct)
                     # add current port status dictionary to the summary port status dictionary with vf_id and slot_port as consecutive keys
                     fcport_params_dct[vf_id][fc_interface_container['name']] = fcport_params_current_dct
@@ -224,8 +224,8 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
             int: throughput in MB/s.
         """
 
-        if BrocadeFCPortParametersParser.BITS_TO_MBYTES.get(port_speed):
-            return BrocadeFCPortParametersParser.BITS_TO_MBYTES[port_speed]
+        if FCPortParametersParser.BITS_TO_MBYTES.get(port_speed):
+            return FCPortParametersParser.BITS_TO_MBYTES[port_speed]
         elif port_speed is not None:
             return port_speed/10_000_000
 
@@ -268,9 +268,9 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                 time_now = self.telemetry_date + ' ' + self.telemetry_time
                 time_prev = other.telemetry_date + ' ' + other.telemetry_time
                 # add changed sfp_media ports for the current vf_id
-                fcport_params_changed_dct[vf_id] = BrocadeFCPortParametersParser.get_changed_vfid_ports(fcport_params_vfid_now_dct, fcport_params_vfid_prev_dct, 
-                                                                                        changed_keys=BrocadeFCPortParametersParser.FC_PORT_PARAMS_CHANGED, 
-                                                                                        const_keys=BrocadeFCPortParametersParser.FC_PORT_PATH, 
+                fcport_params_changed_dct[vf_id] = FCPortParametersParser.get_changed_vfid_ports(fcport_params_vfid_now_dct, fcport_params_vfid_prev_dct, 
+                                                                                        changed_keys=FCPortParametersParser.FC_PORT_PARAMS_CHANGED, 
+                                                                                        const_keys=FCPortParametersParser.FC_PORT_PATH, 
                                                                                         time_now=time_now, time_prev=time_prev)
         return fcport_params_changed_dct
 
@@ -508,9 +508,9 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
         return 2
 
 
-    @property
-    def sw_telemetry(self):
-        return self._sw_telemetry
+    # @property
+    # def sw_telemetry(self):
+    #     return self._sw_telemetry
     
     
     @property

@@ -13,7 +13,7 @@ from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_switch_parser import BrocadeSwitchParser
 
 
-class BrocadeSFPMediaParser(BrocadeTelemetryParser):
+class SFPMediaParser(BrocadeTelemetryParser):
     """
     Class to create sfp media parameters dictionaries.
 
@@ -97,7 +97,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                 
                 for sfp_media_container in sfp_media_container_lst:
                     # get sfp media parameters from the container
-                    sfp_media_current_dct = {leaf: sfp_media_container.get(leaf) for leaf in BrocadeSFPMediaParser.MEDIA_RDP_LEAFS}
+                    sfp_media_current_dct = {leaf: sfp_media_container.get(leaf) for leaf in SFPMediaParser.MEDIA_RDP_LEAFS}
                     # convert uW values to the dBm
                     self._add_sfp_dbm_power(sfp_media_current_dct)
                     # slot_port_number in the format 'protocol/slot_number/port_number' (e.g. 'fc/0/1')
@@ -109,14 +109,14 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                     sfp_media_current_dct['port-number'] = int(port_number)
                     sfp_media_current_dct['port-protocol'] = protocol
                     # convert parameters presented as list to a single string
-                    sfp_media_current_dct['media-distance'] = BrocadeSFPMediaParser._convert_list_to_string(sfp_media_current_dct['media-distance'], 'distance')
-                    sfp_media_current_dct['media-speed-capability'] = BrocadeSFPMediaParser._convert_list_to_string(sfp_media_current_dct['media-speed-capability'], 'speed')
-                    sfp_media_current_dct['remote-media-speed-capability'] = BrocadeSFPMediaParser._convert_list_to_string(sfp_media_current_dct['remote-media-speed-capability'], 'speed')
+                    sfp_media_current_dct['media-distance'] = SFPMediaParser._convert_list_to_string(sfp_media_current_dct['media-distance'], 'distance')
+                    sfp_media_current_dct['media-speed-capability'] = SFPMediaParser._convert_list_to_string(sfp_media_current_dct['media-speed-capability'], 'speed')
+                    sfp_media_current_dct['remote-media-speed-capability'] = SFPMediaParser._convert_list_to_string(sfp_media_current_dct['remote-media-speed-capability'], 'speed')
                     # add remote sfp parameters presented as nested dictionary to the outer sfp dictionary
-                    remote_optical_product_dct = BrocadeSFPMediaParser._get_remote_optical_product_data(sfp_media_container)
+                    remote_optical_product_dct = SFPMediaParser._get_remote_optical_product_data(sfp_media_container)
                     sfp_media_current_dct.update(remote_optical_product_dct)
                     # present sfp module power-on-time in human readable format
-                    BrocadeSFPMediaParser._set_poweron_time_hrf(sfp_media_current_dct)
+                    SFPMediaParser._set_poweron_time_hrf(sfp_media_current_dct)
                     # add port parameters to the sfp media dictionary
                     fcport_params_dct = self._get_port_params(vf_id, protocol, slot_port_number)
                     sfp_media_current_dct.update(fcport_params_dct)
@@ -142,9 +142,9 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
 
         if protocol.lower() == 'fc':
             fc_port_params_current = self.fcport_params_parser.fcport_params[vf_id][slot_port_number]
-            fcport_params = {param: fc_port_params_current.get(param) for param in BrocadeSFPMediaParser.FC_PORT_ADD_PARAMS}
+            fcport_params = {param: fc_port_params_current.get(param) for param in SFPMediaParser.FC_PORT_ADD_PARAMS}
         else:
-            fcport_params = {param: None for param in BrocadeSFPMediaParser.FC_PORT_PARAMS}
+            fcport_params = {param: None for param in SFPMediaParser.FC_PORT_PARAMS}
         return fcport_params
 
 
@@ -161,10 +161,10 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
         
         if sfp_media_container.get('remote-optical-product-data'):
             remote_optical_product_dct = {'remote-' + key: sfp_media_container['remote-optical-product-data'].get(key) 
-                                          for key in BrocadeSFPMediaParser.REMOTE_OPTICAL_PRODUCT_LEAFS}
+                                          for key in SFPMediaParser.REMOTE_OPTICAL_PRODUCT_LEAFS}
         else:
             remote_optical_product_dct = {'remote-' + key: None 
-                                          for key in BrocadeSFPMediaParser.REMOTE_OPTICAL_PRODUCT_LEAFS}
+                                          for key in SFPMediaParser.REMOTE_OPTICAL_PRODUCT_LEAFS}
         return remote_optical_product_dct
 
 
@@ -180,7 +180,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
         """
 
         if sfp_media_current_dct['power-on-time']:
-            sfp_media_current_dct['power-on-time-hrf'] = BrocadeSFPMediaParser.hours_to_hrf(sfp_media_current_dct['power-on-time'])
+            sfp_media_current_dct['power-on-time-hrf'] = SFPMediaParser.hours_to_hrf(sfp_media_current_dct['power-on-time'])
         else:
             sfp_media_current_dct['power-on-time-hrf'] = sfp_media_current_dct.get('power-on-time')
 
@@ -261,15 +261,15 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
             if sfp_media_dct.get('rx-power') is not None:
                 rx_power_status_id = 2
                 if sfp_distance == 'sw':
-                    rx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
-                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_rx'])
+                    rx_power_status_id = SFPMediaParser.get_alert_status_id(
+                        sfp_media_dct['rx-power'], SFPMediaParser.SFP_POWER_ALERT['sw_rx'])
 
                 elif sfp_distance == 'lw':
-                    rx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
-                        sfp_media_dct['rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['lw_rx'])
+                    rx_power_status_id = SFPMediaParser.get_alert_status_id(
+                        sfp_media_dct['rx-power'], SFPMediaParser.SFP_POWER_ALERT['lw_rx'])
                 
                 sfp_media_dct['rx-power-status-id'] = rx_power_status_id
-                sfp_media_dct['rx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(rx_power_status_id)
+                sfp_media_dct['rx-power-status'] = SFPMediaParser.STATUS_ID.get(rx_power_status_id)
             else:
                 sfp_media_dct['rx-power-status-id'] = None
                 sfp_media_dct['rx-power-status'] = None
@@ -277,41 +277,41 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
             if sfp_media_dct.get('tx-power') is not None:
                 tx_power_status_id = 2
                 if sfp_distance == 'sw':
-                    tx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
-                        sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_tx'])
+                    tx_power_status_id = SFPMediaParser.get_alert_status_id(
+                        sfp_media_dct['tx-power'], SFPMediaParser.SFP_POWER_ALERT['sw_tx'])
                 elif sfp_distance == 'lw':
-                    sfp_media_dct['tx-power-status-id'] = BrocadeSFPMediaParser.get_alert_status_id(
-                        sfp_media_dct['tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['lw_tx'])
+                    sfp_media_dct['tx-power-status-id'] = SFPMediaParser.get_alert_status_id(
+                        sfp_media_dct['tx-power'], SFPMediaParser.SFP_POWER_ALERT['lw_tx'])
                 sfp_media_dct['tx-power-status-id'] = tx_power_status_id
-                sfp_media_dct['tx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(tx_power_status_id)
+                sfp_media_dct['tx-power-status'] = SFPMediaParser.STATUS_ID.get(tx_power_status_id)
             else:
                 sfp_media_dct['tx-power-status-id'] = None
                 sfp_media_dct['tx-power-status'] = None
 
             if sfp_media_dct.get('remote-media-rx-power') is not None:
                 remote_rx_power_status_id = 2
-                remote_rx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
-                        sfp_media_dct['remote-media-rx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_rx'])
+                remote_rx_power_status_id = SFPMediaParser.get_alert_status_id(
+                        sfp_media_dct['remote-media-rx-power'], SFPMediaParser.SFP_POWER_ALERT['sw_rx'])
                 sfp_media_dct['remote-media-rx-power-status-id'] = remote_rx_power_status_id
-                sfp_media_dct['remote-media-rx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(remote_rx_power_status_id)
+                sfp_media_dct['remote-media-rx-power-status'] = SFPMediaParser.STATUS_ID.get(remote_rx_power_status_id)
             else:
                 sfp_media_dct['remote-media-rx-power-status-id'] = None
                 sfp_media_dct['remote-media-rx-power-status'] = None
 
             if sfp_media_dct.get('remote-media-tx-power'):
                 remote_tx_power_status_id = 2
-                remote_tx_power_status_id = BrocadeSFPMediaParser.get_alert_status_id(
-                        sfp_media_dct['remote-media-tx-power'], BrocadeSFPMediaParser.SFP_POWER_ALERT['sw_tx'])
+                remote_tx_power_status_id = SFPMediaParser.get_alert_status_id(
+                        sfp_media_dct['remote-media-tx-power'], SFPMediaParser.SFP_POWER_ALERT['sw_tx'])
                 sfp_media_dct['remote-media-tx-power-status-id'] = remote_tx_power_status_id
-                sfp_media_dct['remote-media-tx-power-status'] = BrocadeSFPMediaParser.STATUS_ID.get(remote_tx_power_status_id)
+                sfp_media_dct['remote-media-tx-power-status'] = SFPMediaParser.STATUS_ID.get(remote_tx_power_status_id)
             else:
                 sfp_media_dct['remote-media-tx-power-status-id'] = None
                 sfp_media_dct['remote-media-tx-power-status'] = None
 
         # power status and power status id for ports which are not Online
         else:
-            empty_stutus_dct = {key: None for key in BrocadeSFPMediaParser.MEDIA_POWER_STATUS_CHANGED}
-            empty_stutus_id_dct = {key + '-id': None for key in BrocadeSFPMediaParser.MEDIA_POWER_STATUS_CHANGED}
+            empty_stutus_dct = {key: None for key in SFPMediaParser.MEDIA_POWER_STATUS_CHANGED}
+            empty_stutus_id_dct = {key + '-id': None for key in SFPMediaParser.MEDIA_POWER_STATUS_CHANGED}
             sfp_media_dct.update(empty_stutus_dct)
             sfp_media_dct.update(empty_stutus_id_dct)
                 
@@ -357,7 +357,7 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
         for sfp_param in sfp_media_dct:
             if 'x-power' in sfp_param: 
                 if sfp_media_dct[sfp_param] is not None:
-                    sfp_dbm_power_dct[sfp_param + '-dbm'] = BrocadeSFPMediaParser.uW_to_dBm(sfp_media_dct[sfp_param])
+                    sfp_dbm_power_dct[sfp_param + '-dbm'] = SFPMediaParser.uW_to_dBm(sfp_media_dct[sfp_param])
                 else:
                     sfp_dbm_power_dct[sfp_param + '-dbm'] = None
 
@@ -419,17 +419,17 @@ class BrocadeSFPMediaParser(BrocadeTelemetryParser):
                 time_now = self.telemetry_date + ' ' + self.telemetry_time
                 time_prev = other.telemetry_date + ' ' + other.telemetry_time
                 # add changed sfp_media ports for the current vf_id
-                sfp_media_changed_dct[vf_id] = BrocadeSFPMediaParser.get_changed_vfid_ports(
+                sfp_media_changed_dct[vf_id] = SFPMediaParser.get_changed_vfid_ports(
                     sfp_media_vfid_now_dct, sfp_media_vfid_prev_dct, 
-                    changed_keys=BrocadeSFPMediaParser.MEDIA_RDP_CHANGED + BrocadeSFPMediaParser.MEDIA_POWER_CHANGED + BrocadeSFPMediaParser.MEDIA_POWER_STATUS_CHANGED, 
-                    const_keys=BrocadeSFPMediaParser.FC_PORT_PATH, 
+                    changed_keys=SFPMediaParser.MEDIA_RDP_CHANGED + SFPMediaParser.MEDIA_POWER_CHANGED + SFPMediaParser.MEDIA_POWER_STATUS_CHANGED, 
+                    const_keys=SFPMediaParser.FC_PORT_PATH, 
                     time_now=time_now, time_prev=time_prev)
         return sfp_media_changed_dct
 
 
-    @property
-    def sw_telemetry(self):
-        return self._sw_telemetry
+    # @property
+    # def sw_telemetry(self):
+    #     return self._sw_telemetry
     
     
     @property

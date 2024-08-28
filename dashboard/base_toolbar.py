@@ -27,7 +27,6 @@ class BrocadeToolbar:
     
     SPEED_MODE_ID = {0: 'G', 1: 'N'}
 
-    
     STATUS_ID = {1: 'OK', 2: 'Unknown', 3: 'Warning', 4: 'Critical'}
 
     def __init__(self, sw_telemetry: BrocadeSwitchTelemetry) -> None:
@@ -97,10 +96,6 @@ class BrocadeToolbar:
                     # add modified chassis level dictionary to the switch level parser with current vf-id key
                     switch_level_parser[vf_id] = mod_chassis_dct
         return switch_level_parser
-
-
-    def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
 
 
     @property

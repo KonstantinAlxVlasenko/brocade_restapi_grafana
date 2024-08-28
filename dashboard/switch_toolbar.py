@@ -4,7 +4,7 @@ from brocade_switch_parser import BrocadeSwitchParser
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
-class BrocadeSwitchToolbar(BrocadeToolbar):
+class SwitchToolbar(BrocadeToolbar):
     """
     Class to create Switch toolbar.
     Switch Toolbar is a set of prometheus gauges:
@@ -32,65 +32,65 @@ class BrocadeSwitchToolbar(BrocadeToolbar):
 
         # switch name gauge
         self._gauge_swname = BrocadeGauge(name='switch_name', description='Switch name', 
-                                           unit_keys=BrocadeSwitchToolbar.switch_wwn_key, parameter_key='switch-name')
+                                           unit_keys=SwitchToolbar.switch_wwn_key, parameter_key='switch-name')
         # switch ip address gauge
         self._gauge_switch_ip = BrocadeGauge(name='switch_ip_address', description='Switch IP address', 
-                                           unit_keys=BrocadeSwitchToolbar.switch_wwn_key, parameter_key='ip-address')
+                                           unit_keys=SwitchToolbar.switch_wwn_key, parameter_key='ip-address')
         # switch fabric name gauge
         self._gauge_switch_fabricname = BrocadeGauge(name='switch_fabric_name', description='Switch fabric name', 
-                                           unit_keys=BrocadeSwitchToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
+                                           unit_keys=SwitchToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # switch uptime gauge
         self._gauge_switch_uptime = BrocadeGauge(name='switch_uptime', description='Switch uptime', 
-                                           unit_keys=BrocadeSwitchToolbar.switch_wwn_key, parameter_key='up-time-hrf')
+                                           unit_keys=SwitchToolbar.switch_wwn_key, parameter_key='up-time-hrf')
         # switch state gauge
         #  0 - Undefined, 2 - Online. 3 = Offline, 7 - Testing
-        switch_state_description = f'The current state of the switch {BrocadeSwitchToolbar.SWITCH_STATE_ID}.'
+        switch_state_description = f'The current state of the switch {SwitchToolbar.SWITCH_STATE_ID}.'
         self._gauge_switch_state = BrocadeGauge(name='switch_state', description=switch_state_description, 
-                                                unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='operational-status')
+                                                unit_keys=SwitchToolbar.switch_wwn_key, metric_key='operational-status')
         # switch role gauge
         # -1 - Disabled, 0 - Subordinate, 1 - Principal
-        switch_role_description = f'Switch role: Principal, Subordinate, or Disabled {BrocadeSwitchToolbar.SWITCH_ROLE_ID}.'
+        switch_role_description = f'Switch role: Principal, Subordinate, or Disabled {SwitchToolbar.SWITCH_ROLE_ID}.'
         self._gauge_switch_role = BrocadeGauge(name='switch_role', description=switch_role_description, 
-                                               unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='switch-role-id')
+                                               unit_keys=SwitchToolbar.switch_wwn_key, metric_key='switch-role-id')
         # switch mode gauge
         # 0, 1 - Native, 2 - 'Access Gateway'
-        switch_mode_description = f'Switch operation mode: Access Gateway (if AG is enabled) {BrocadeSwitchToolbar.SWITCH_MODE_ID}.'
+        switch_mode_description = f'Switch operation mode: Access Gateway (if AG is enabled) {SwitchToolbar.SWITCH_MODE_ID}.'
         self._gauge_switch_mode = BrocadeGauge(name='switch_mode', description=switch_mode_description, 
-                                               unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='ag-mode')
+                                               unit_keys=SwitchToolbar.switch_wwn_key, metric_key='ag-mode')
         # switch domain id gauge
         self._gauge_switch_did = BrocadeGauge(name='switch_did', description='Switch domain ID', 
-                                              unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='domain-id')
+                                              unit_keys=SwitchToolbar.switch_wwn_key, metric_key='domain-id')
         # switch fabric id gauge
         self._gauge_switch_fid = BrocadeGauge(name='switch_fid', description='Switch fabric ID', 
-                                              unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='fabric-id')
+                                              unit_keys=SwitchToolbar.switch_wwn_key, metric_key='fabric-id')
         # switch VF ID gauge
         self._gauge_switch_vfid = BrocadeGauge(name='switch_vfid', description='Switch virtual fabric ID', 
-                                               unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='vf-id')
+                                               unit_keys=SwitchToolbar.switch_wwn_key, metric_key='vf-id')
         # switch port quantity gauge
         self._gauge_switch_port_quantity = BrocadeGauge(name='switch_port_quantity', description='', 
-                                                        unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='port-member-quantity')
+                                                        unit_keys=SwitchToolbar.switch_wwn_key, metric_key='port-member-quantity')
         # online port quantity gauge
         self._gauge_online_port_quantity = BrocadeGauge(name='online_port_quantity', description='Number of online ports', 
-                                                        unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='online-port-quantity')
+                                                        unit_keys=SwitchToolbar.switch_wwn_key, metric_key='online-port-quantity')
         # uport-gport-enabled-quantity gauge
         self._gauge_uport_gport_enabled_quantity = BrocadeGauge(name='uport_gport_enabled_quantity', 
                                                                 description='Number of enabled ports with no device connected to', 
-                                                                unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='uport-gport-enabled-quantity')
+                                                                unit_keys=SwitchToolbar.switch_wwn_key, metric_key='uport-gport-enabled-quantity')
         # base switch status gauge
         # 0 - Disabled, 1 - Enabled
-        base_switch_status_description = f'Base switch status {BrocadeSwitchToolbar.MODE_STATUS_ID}.'
+        base_switch_status_description = f'Base switch status {SwitchToolbar.MODE_STATUS_ID}.'
         self._gauge_base_switch_status = BrocadeGauge(name='base_switch_status', description=base_switch_status_description, 
-                                                      unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='base-switch-enabled')
+                                                      unit_keys=SwitchToolbar.switch_wwn_key, metric_key='base-switch-enabled')
         # default switch status
         # 0 - Disabled, 1 - Enabled
-        default_switch_status_description = f'Default switch status {BrocadeSwitchToolbar.MODE_STATUS_ID}.'
+        default_switch_status_description = f'Default switch status {SwitchToolbar.MODE_STATUS_ID}.'
         self._gauge_default_switch_status = BrocadeGauge(name='default_switch_status', description=default_switch_status_description, 
-                                                         unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='default-switch-status')
+                                                         unit_keys=SwitchToolbar.switch_wwn_key, metric_key='default-switch-status')
         # logical isl status
         # 0 - Disabled, 1 - Enabled
-        logiacal_isl_status_description = f'Logical isl status {BrocadeSwitchToolbar.MODE_STATUS_ID}.'
+        logiacal_isl_status_description = f'Logical isl status {SwitchToolbar.MODE_STATUS_ID}.'
         self._gauge_logical_isl_status = BrocadeGauge(name='logical_isl_status', description=logiacal_isl_status_description, 
-                                                      unit_keys=BrocadeSwitchToolbar.switch_wwn_key, metric_key='logical-isl-enabled')
+                                                      unit_keys=SwitchToolbar.switch_wwn_key, metric_key='logical-isl-enabled')
         
     
     def fill_toolbar_gauge_metrics(self, sw_parser: BrocadeSwitchParser) -> None:

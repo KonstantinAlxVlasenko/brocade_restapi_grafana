@@ -12,7 +12,7 @@ from typing import Dict, List, Tuple, Union, Optional
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
-class BrocadeSwitchParser:
+class SwitchParser(BrocadeTelemetryParser):
     """
     Class to create switch level parameters dictionaries.
 
@@ -42,8 +42,8 @@ class BrocadeSwitchParser:
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
-        
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        super().__init__(sw_telemetry)
+        # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._fc_switch: dict = self._get_fc_switch_value()
         self._vf_details: dict = self._get_vf_details()
         if self.fc_switch:
@@ -91,7 +91,7 @@ class BrocadeSwitchParser:
                 for fc_sw in fc_sw_container_lst:
                     sw_wwn = fc_sw['name']
                     # vfid_naming_dct[vf_id] = {'switch-name': fc_sw['user-friendly-name'], 'fabric-name': fc_sw['fabric-user-friendly-name']}
-                    current_sw_dct = {key: fc_sw[key] for key in BrocadeSwitchParser.FC_SWITCH_LEAFS}
+                    current_sw_dct = {key: fc_sw[key] for key in SwitchParser.FC_SWITCH_LEAFS}
                     current_sw_dct['switch-wwn'] = fc_sw['name']
                     current_sw_dct['switch-name'] = fc_sw['user-friendly-name']
                     current_sw_dct['uport-gport-enabled-quantity'] = 0
@@ -101,7 +101,7 @@ class BrocadeSwitchParser:
                         # find logical switch dictionary with the same switch wwn
                         for fc_logical_sw in fc_logical_sw_container_lst:
                             if sw_wwn == fc_logical_sw['switch-wwn']:
-                                current_logical_sw_dct = {key: fc_logical_sw[key] for key in BrocadeSwitchParser.FC_LOGICAL_SWITCH_LEAFS}
+                                current_logical_sw_dct = {key: fc_logical_sw[key] for key in SwitchParser.FC_LOGICAL_SWITCH_LEAFS}
                                 # fc_logical_sw 'port-member-list' is a dictionary with single key 'port-member' and value is a list of ports
                                 current_logical_sw_dct['port-member-list'] = fc_logical_sw['port-member-list']['port-member']
                                 current_logical_sw_dct['port-member-quantity'] = len(fc_logical_sw['port-member-list']['port-member'])
@@ -112,7 +112,7 @@ class BrocadeSwitchParser:
                         current_sw_dct['port-member-quantity'] = len(self.sw_telemetry.fc_interface[vf_id]['Response']['fibrechannel'])
                         
                     # fill switch paremeters dictionary with empty values for missing keys (switch parameters)
-                    none_dct = {key: current_sw_dct.get(key) for key in BrocadeSwitchParser.FC_LOGICAL_SWITCH_LEAFS if not current_sw_dct.get(key)}
+                    none_dct = {key: current_sw_dct.get(key) for key in SwitchParser.FC_LOGICAL_SWITCH_LEAFS if not current_sw_dct.get(key)}
                     current_sw_dct.update(none_dct)
                     # add current vf_id switch parameters dictionary to the total switch parameters dictionary
                     fc_switch_dct[vf_id] = current_sw_dct
@@ -176,7 +176,7 @@ class BrocadeSwitchParser:
                 
         for sw_params_dct in self.fc_switch.values():
             if sw_params_dct['up-time'] is not None:
-                up_time_str = BrocadeSwitchParser.seconds_to_hrf(sw_params_dct['up-time'])
+                up_time_str = SwitchParser.seconds_to_hrf(sw_params_dct['up-time'])
             else:
                 up_time_str = None
             sw_params_dct['up-time-hrf'] = up_time_str
@@ -305,7 +305,7 @@ class BrocadeSwitchParser:
                 sw_details = self.get_switch_details(vf_id)
 
                 for fc_sw in fabric_container_lst:
-                    current_sw_dct = {key: fc_sw[key] for key in BrocadeSwitchParser.FABRIC_SWITCH_LEAFS}
+                    current_sw_dct = {key: fc_sw[key] for key in SwitchParser.FABRIC_SWITCH_LEAFS}
                     current_sw_dct['fabric-id'] = vf_id
                     # current_sw_dct['switch-wwn'] = current_sw_dct['name']
                     current_sw_dct['fabric-switch-wwn'] = fc_sw['name']
@@ -369,9 +369,9 @@ class BrocadeSwitchParser:
         return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
         
 
-    @property
-    def sw_telemetry(self):
-        return self._sw_telemetry
+    # @property
+    # def sw_telemetry(self):
+    #     return self._sw_telemetry
     
     
     @property

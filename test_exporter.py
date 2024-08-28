@@ -44,8 +44,6 @@ from brocade_sfp_media_toolbar import BrocadeSFPMediaToolbar
 from brocade_fcport_stats_toolbar import BrocadeFCPortStatsToolbar
 from brocade_log_toolbar import BrocadeLogToolbar
 
-from brocade_parser import BrocadeParser
-from brocade_dashboard import BrocadeDashboard
 
 def load_object(dirname, filename):
     filpath = os.path.join(dirname, filename)
@@ -186,34 +184,16 @@ chname_ip_dct = load_object(db_dir, chname_ip_db_filename)
 print(chname_ip_dct)
 
 sw_telemetry_prev = o3_g630_003_vc01_f1_a
-brocade_parser_prev = BrocadeParser(sw_telemetry_prev, chname_ip_dct)
+request_status_prev = BrocadeRequestStatus(sw_telemetry_prev, chname_ip_dct)
+ch_parser_prev = BrocadeChassisParser(sw_telemetry_prev)
+sw_parser_prev = BrocadeSwitchParser(sw_telemetry_prev)
+fru_parser_prev = BrocadeFRUParser(sw_telemetry_prev)
+maps_parser_prev = BrocadeMAPSParser(sw_telemetry_prev, sw_parser_prev)
+fcport_params_parser_prev = BrocadeFCPortParametersParser(sw_telemetry_prev, sw_parser_prev)
+sfp_media_parser_prev = BrocadeSFPMediaParser(sw_telemetry_prev, fcport_params_parser_prev)
+fcport_stats_parser_prev = BrocadeFCPortStatisticsParser(sw_telemetry_prev, fcport_params_parser_prev)
 
-# request_status_prev = BrocadeRequestStatus(sw_telemetry_prev, chname_ip_dct)
-# ch_parser_prev = BrocadeChassisParser(sw_telemetry_prev)
-# sw_parser_prev = BrocadeSwitchParser(sw_telemetry_prev)
-# fru_parser_prev = BrocadeFRUParser(sw_telemetry_prev)
-# maps_parser_prev = BrocadeMAPSParser(sw_telemetry_prev, sw_parser_prev)
-# fcport_params_parser_prev = BrocadeFCPortParametersParser(sw_telemetry_prev, sw_parser_prev)
-# sfp_media_parser_prev = BrocadeSFPMediaParser(sw_telemetry_prev, fcport_params_parser_prev)
-# fcport_stats_parser_prev = BrocadeFCPortStatisticsParser(sw_telemetry_prev, fcport_params_parser_prev)
-
-update_chname_ip_db(chname_ip_dct, brocade_parser_prev.ch_parser, db_dir, chname_ip_db_filename)
-
-
-
-
-dashboard = BrocadeDashboard(sw_telemetry_prev)
-dashboard.fill_dashboard_gauge_metrics(brocade_parser_prev)
-
-
-# dashboard.fill_dashboard_gauge_metrics(request_status_prev, 
-#                                        ch_parser_prev,
-#                                        fru_parser_prev,
-#                                        maps_parser_prev,
-#                                        sw_parser_prev,
-#                                        fcport_params_parser_prev,
-#                                        sfp_media_parser_prev,
-#                                        fcport_stats_parser_prev)
+update_chname_ip_db(chname_ip_dct, ch_parser_prev, db_dir, chname_ip_db_filename)
 
 # print('now----------------------')
 
@@ -224,23 +204,18 @@ print(chname_ip_dct)
 
 
 sw_telemetry_now = o3_g630_003_vc01_f1_b
-brocade_parser_now = BrocadeParser(sw_telemetry_now, chname_ip_dct)
-# request_status_now = BrocadeRequestStatus(sw_telemetry_now, chname_ip_dct)
-# ch_parser_now = BrocadeChassisParser(sw_telemetry_now)
-# sw_parser_now = BrocadeSwitchParser(sw_telemetry_now)
-# fru_parser_now = BrocadeFRUParser(sw_telemetry_now, fru_parser_prev)
-# maps_parser_now = BrocadeMAPSParser(sw_telemetry_now, sw_parser_now, maps_parser_prev)
-# fcport_params_parser_now = BrocadeFCPortParametersParser(sw_telemetry_now, sw_parser_now, fcport_params_parser_prev)
-# sfp_media_parser_now = BrocadeSFPMediaParser(sw_telemetry_now, fcport_params_parser_now, sfp_media_parser_prev)
-# fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport_params_parser_now, fcport_stats_parser_prev)
+request_status_now = BrocadeRequestStatus(sw_telemetry_now, chname_ip_dct)
+ch_parser_now = BrocadeChassisParser(sw_telemetry_now)
+sw_parser_now = BrocadeSwitchParser(sw_telemetry_now)
+fru_parser_now = BrocadeFRUParser(sw_telemetry_now, fru_parser_prev)
+maps_parser_now = BrocadeMAPSParser(sw_telemetry_now, sw_parser_now, maps_parser_prev)
+fcport_params_parser_now = BrocadeFCPortParametersParser(sw_telemetry_now, sw_parser_now, fcport_params_parser_prev)
+sfp_media_parser_now = BrocadeSFPMediaParser(sw_telemetry_now, fcport_params_parser_now, sfp_media_parser_prev)
+fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport_params_parser_now, fcport_stats_parser_prev)
+update_chname_ip_db(chname_ip_dct, ch_parser_now, db_dir, chname_ip_db_filename)
 
 
-
-update_chname_ip_db(chname_ip_dct, brocade_parser_now.ch_parser, db_dir, chname_ip_db_filename)
-
-
-
-# request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
+request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
 # chassis_tb = BrocadeChassisToolbar(sw_telemetry_now)
 # fru_tb = BrocadeFRUToolbar(sw_telemetry_now)
 # maps_system_tb = BrocadeMAPSSystemToolbar(sw_telemetry_now)
@@ -257,20 +232,9 @@ if __name__ == '__main__':
     start_http_server(13053)
     
     while True:
-
-        dashboard.fill_dashboard_gauge_metrics(brocade_parser_now)
-
-        # dashboard.fill_dashboard_gauge_metrics(request_status_now, 
-        #                                ch_parser_now,
-        #                                fru_parser_now,
-        #                                maps_parser_now,
-        #                                sw_parser_now,
-        #                                fcport_params_parser_now,
-        #                                sfp_media_parser_now,
-        #                                fcport_stats_parser_now)
         
-        # print('request_status')
-        # request_status_tb.fill_toolbar_gauge_metrics(request_status_now)
+        print('request_status')
+        request_status_tb.fill_toolbar_gauge_metrics(request_status_now)
         
         # print('chassis')
         # chassis_tb.fill_toolbar_gauge_metrics(ch_parser_now, sw_parser_now)

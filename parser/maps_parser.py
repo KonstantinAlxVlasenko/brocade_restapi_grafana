@@ -14,7 +14,7 @@ from brocade_switch_parser import BrocadeSwitchParser
 from brocade_base_parser import BrocadeTelemetryParser
 
 
-class BrocadeMAPSParser(BrocadeTelemetryParser):
+class MAPSParser(BrocadeTelemetryParser):
     """
     Class to create maps parameters dictionaries and health status list.
 
@@ -39,7 +39,7 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
                  'marginal': 3, 
                  'down': 4}
     
-    SSP_STATE = defaultdict(lambda: BrocadeMAPSParser._ssp_state['unknown'])
+    SSP_STATE = defaultdict(lambda: MAPSParser._ssp_state['unknown'])
     SSP_STATE.update(_ssp_state)
     
     DB_RULE_LEAFS = ['category', 'name', 'triggered-count',  'time-stamp', 
@@ -153,10 +153,10 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
             ssp_report_keys = list(ssp_report_dct.keys()).copy()
             for ssp_report_key in ssp_report_keys:
                 state = ssp_report_dct[ssp_report_key]
-                ssp_report_dct[ssp_report_key + BrocadeMAPSParser.STATUS_TAG] = ssp_report_dct.pop(ssp_report_key)
-                ssp_report_dct[ssp_report_key + BrocadeMAPSParser.STATUS_ID_TAG] = BrocadeMAPSParser.SSP_STATE[state]
+                ssp_report_dct[ssp_report_key + MAPSParser.STATUS_TAG] = ssp_report_dct.pop(ssp_report_key)
+                ssp_report_dct[ssp_report_key + MAPSParser.STATUS_ID_TAG] = MAPSParser.SSP_STATE[state]
                 if state:
-                    ssp_report_dct[ssp_report_key + BrocadeMAPSParser.STATUS_TAG] = state.capitalize()
+                    ssp_report_dct[ssp_report_key + MAPSParser.STATUS_TAG] = state.capitalize()
             # add chassis info
             ssp_report_dct['chassis-wwn'] = self.ch_wwn
             ssp_report_dct['chassis-name'] = self.ch_name
@@ -197,22 +197,22 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
             system_resources_dct.update(missing_resources_dct)
             system_resources_dct['chassis-wwn'] = self.ch_wwn
             system_resources_dct['chassis-name'] = self.ch_name
-            for system_resource in BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS:
+            for system_resource in MAPSParser.SYSTEM_RESOURCE_THRESHOLDS:
                 system_resource_status = system_resource + '-status'
                 system_resource_status_id = system_resource_status + '-id'
                 # 'unknown
                 if system_resources_dct[system_resource] is None:
                     system_resources_dct[system_resource_status_id] = 2
                 # ok status
-                elif system_resources_dct[system_resource] < BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS[system_resource]:
+                elif system_resources_dct[system_resource] < MAPSParser.SYSTEM_RESOURCE_THRESHOLDS[system_resource]:
                     system_resources_dct[system_resource_status_id] = 1
                 # critical status
-                elif system_resources_dct[system_resource] >= BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS[system_resource] + 10:
+                elif system_resources_dct[system_resource] >= MAPSParser.SYSTEM_RESOURCE_THRESHOLDS[system_resource] + 10:
                     system_resources_dct[system_resource_status_id] = 4
                 # warning status
                 else:
                     system_resources_dct[system_resource_status_id] = 3
-                system_resources_dct[system_resource_status] = BrocadeMAPSParser.STATUS_ID[system_resources_dct[system_resource_status_id]]
+                system_resources_dct[system_resource_status] = MAPSParser.STATUS_ID[system_resources_dct[system_resource_status_id]]
 
             return system_resources_dct
         else:
@@ -259,11 +259,11 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
                     db_rule_name = db_rule['name']
                     # check if rule name contains any event from the ignored list (means that event condition is cleared)
                     db_rule_ignore_flag = any([bool(re.search(f'.+?_{ignored_pattern}$', db_rule_name)) 
-                                               for ignored_pattern in BrocadeMAPSParser.DB_RULE_IGNORE])
+                                               for ignored_pattern in MAPSParser.DB_RULE_IGNORE])
                     # event severity level (if event is in the ignored group then severity is 1 otherwise 2)
                     db_rule_severity = 1 if db_rule_ignore_flag else 2
                     # create dictionary containing triggered event details
-                    current_db_rule_dct = {leaf: db_rule.get(leaf) for leaf in BrocadeMAPSParser.DB_RULE_LEAFS}
+                    current_db_rule_dct = {leaf: db_rule.get(leaf) for leaf in MAPSParser.DB_RULE_LEAFS}
                     current_db_rule_dct['severity'] = db_rule_severity
                     # add sw_name, sw_wwn, vf-id
                     current_db_rule_dct.update(sw_details)
@@ -279,7 +279,7 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
             # if no events were triggered add error-message to the event dictionary with severity 0
             elif dashboard_rule_telemetry.get('status-code'):
                 dashboard_rule_dct[vf_id] = []
-                current_db_rule_dct = dict.fromkeys(BrocadeMAPSParser.DB_RULE_LEAFS)
+                current_db_rule_dct = dict.fromkeys(MAPSParser.DB_RULE_LEAFS)
                 error_msg = dashboard_rule_telemetry['error-message']
                 current_db_rule_dct['name'] = error_msg
                 current_db_rule_dct['category'] = error_msg
@@ -318,10 +318,10 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
             time_now = self.telemetry_date + ' ' + self.telemetry_time
             time_prev = other.telemetry_date + ' ' + other.telemetry_time
             # status keys
-            system_resource_status_keys = [system_resource + '-status' for system_resource in BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS]
+            system_resource_status_keys = [system_resource + '-status' for system_resource in MAPSParser.SYSTEM_RESOURCE_THRESHOLDS]
             # changed system resources and statuses 
-            system_resources_changed_dct = BrocadeMAPSParser.get_changed_chassis_params(self.system_resources, other.system_resources, 
-                                                                                          changed_keys=list(BrocadeMAPSParser.SYSTEM_RESOURCE_THRESHOLDS.keys()) + system_resource_status_keys, 
+            system_resources_changed_dct = MAPSParser.get_changed_chassis_params(self.system_resources, other.system_resources, 
+                                                                                          changed_keys=list(MAPSParser.SYSTEM_RESOURCE_THRESHOLDS.keys()) + system_resource_status_keys, 
                                                                                           const_keys=['chassis-name', 'chassis-wwn'], 
                                                                                           time_now=time_now, time_prev=time_prev)
         return system_resources_changed_dct
@@ -397,13 +397,13 @@ class BrocadeMAPSParser(BrocadeTelemetryParser):
         
         # check if other is for the same switch
         elif self.same_chassis(other):
-            ssp_changed_status_keys = [key for key in self.ssp_report.keys() if key.endswith(BrocadeMAPSParser.STATUS_TAG)]
+            ssp_changed_status_keys = [key for key in self.ssp_report.keys() if key.endswith(MAPSParser.STATUS_TAG)]
 
             # timestamps
             time_now = self.telemetry_date + ' ' + self.telemetry_time
             time_prev = other.telemetry_date + ' ' + other.telemetry_time
             # change parameters
-            ssp_report_changed_dct = BrocadeMAPSParser.get_changed_chassis_params(self.ssp_report, other.ssp_report, 
+            ssp_report_changed_dct = MAPSParser.get_changed_chassis_params(self.ssp_report, other.ssp_report, 
                                                                                 changed_keys=ssp_changed_status_keys, 
                                                                                 const_keys=['chassis-name', 'chassis-wwn'], 
                                                                                 time_now=time_now, time_prev=time_prev)

@@ -1,3 +1,4 @@
+from .base_gauge import BaseGauge
 from brocade_base_gauge import BrocadeGauge
 from brocade_base_toolbar import BrocadeToolbar
 from brocade_chassis_parser import BrocadeChassisParser
@@ -5,7 +6,7 @@ from brocade_switch_parser import BrocadeSwitchParser
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 
 
-class BrocadeChassisToolbar(BrocadeToolbar):
+class ChassisToolbar(BrocadeToolbar):
     """
     Class to create Chassis toolbar.
     Chassis Toolbar is a set of prometheus gauges:
@@ -36,67 +37,67 @@ class BrocadeChassisToolbar(BrocadeToolbar):
         super().__init__(sw_telemetry)
 
         # chassis name gauge
-        self._gauge_chname = BrocadeGauge(name='chassis_name', description='Chassis name', 
-                                          unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='chassis-user-friendly-name')
+        self._gauge_chname = BaseGauge(name='chassis_name', description='Chassis name', 
+                                          unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='chassis-user-friendly-name')
         # switch serial numbaer gauge
-        self._gauge_sn = BrocadeGauge(name='chassis_sn', description='Chassis serial number', 
-                                          unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='switch-serial-number')
+        self._gauge_sn = BaseGauge(name='chassis_sn', description='Chassis serial number', 
+                                          unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='switch-serial-number')
         # switct type gauge
-        self._gauge_model = BrocadeGauge(name='switch_type', description='Switch type', 
-                                          unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='model')
+        self._gauge_model = BaseGauge(name='switch_type', description='Switch type', 
+                                          unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='model')
         # switch product name gauge
-        self._gauge_product_name = BrocadeGauge(name='switch_product_name', description='Switch product name', 
-                                          unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='product-name')
+        self._gauge_product_name = BaseGauge(name='switch_product_name', description='Switch product name', 
+                                          unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='product-name')
         # switch name
-        self._gauge_swname = BrocadeGauge(name='chassis_swname', description='Chassis switch name', 
-                                                    unit_keys=BrocadeChassisToolbar.switch_wwn_key, parameter_key='switch-name')
+        self._gauge_swname = BaseGauge(name='chassis_swname', description='Chassis switch name', 
+                                                    unit_keys=ChassisToolbar.switch_wwn_key, parameter_key='switch-name')
         # fabric name
-        self._gauge_fabricname = BrocadeGauge(name='chassis_fabric_name', description='Chassis fabric name', 
-                                                    unit_keys=BrocadeChassisToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
+        self._gauge_fabricname = BaseGauge(name='chassis_fabric_name', description='Chassis fabric name', 
+                                                    unit_keys=ChassisToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # vf id
-        self._gauge_vfid = BrocadeGauge(name='chassis_vfid', description='Chassis VF ids', 
-                                                    unit_keys=BrocadeChassisToolbar.switch_wwn_key, parameter_key='vf-id')
+        self._gauge_vfid = BaseGauge(name='chassis_vfid', description='Chassis VF ids', 
+                                                    unit_keys=ChassisToolbar.switch_wwn_key, parameter_key='vf-id')
         # fos version gauge
-        self._gauge_fos =  BrocadeGauge(name='chassis_fos', description='Chassis firmware version', 
-                                        unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='firmware-version')
+        self._gauge_fos =  BaseGauge(name='chassis_fos', description='Chassis firmware version', 
+                                        unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='firmware-version')
         # date gauge
-        self._gauge_date =  BrocadeGauge(name='chassis_date', description='Chassis date', 
-                                         unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='date')
+        self._gauge_date =  BaseGauge(name='chassis_date', description='Chassis date', 
+                                         unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='date')
         # time gauge
-        self._gauge_time =  BrocadeGauge(name='chassis_time', description='Chassis time', 
-                                         unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='time')
+        self._gauge_time =  BaseGauge(name='chassis_time', description='Chassis time', 
+                                         unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='time')
         # timezone gauge
-        self._gauge_tz =  BrocadeGauge(name='chassis_tz', description='Chassis timezone', 
-                                       unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='time-zone')
+        self._gauge_tz =  BaseGauge(name='chassis_tz', description='Chassis timezone', 
+                                       unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='time-zone')
 
         # vf mode gauge
         # -1 - 'Not Applicable',  1 - 'Enabled', 0 - 'Disabled'
-        vf_mode_description = f'Chassis virtual fabrics mode {BrocadeChassisToolbar.VF_MODE_STATUS_ID}.'
-        self._gauge_vf_mode =  BrocadeGauge(name='chassis_vf_mode', description=vf_mode_description, 
-                                            unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, metric_key='virtual-fabrics-mode-id')
+        vf_mode_description = f'Chassis virtual fabrics mode {ChassisToolbar.VF_MODE_STATUS_ID}.'
+        self._gauge_vf_mode =  BaseGauge(name='chassis_vf_mode', description=vf_mode_description, 
+                                            unit_keys=ChassisToolbar.chassis_switch_wwn_keys, metric_key='virtual-fabrics-mode-id')
         # ls quantity gauge
-        self._gauge_ls_number =  BrocadeGauge(name='chassis_ls_number', description='Chassis logical switch qunatity', 
-                                              unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, metric_key='ls-number')
+        self._gauge_ls_number =  BaseGauge(name='chassis_ls_number', description='Chassis logical switch qunatity', 
+                                              unit_keys=ChassisToolbar.chassis_switch_wwn_keys, metric_key='ls-number')
         
         # active ntp
-        self._gauge_ntp_active = BrocadeGauge(name='ntp_server', description='Active NTP Address', 
-                                              unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='active-server')
+        self._gauge_ntp_active = BaseGauge(name='ntp_server', description='Active NTP Address', 
+                                              unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='active-server')
         # configured ntp
-        self._gauge_ntp_configured = BrocadeGauge(name='ntp_list', description='Configured NTP Address(es)', 
-                                                  unit_keys=BrocadeChassisToolbar.chassis_switch_wwn_keys, parameter_key='ntp-server-address')
+        self._gauge_ntp_configured = BaseGauge(name='ntp_list', description='Configured NTP Address(es)', 
+                                                  unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='ntp-server-address')
         # license status gauge
         # 1 - No expiration date
         # 2 - Expiration date has not arrived
         # 3 - Expiration date has arrived
-        license_status_description = f'Switch licenses status {BrocadeChassisToolbar.LICENSE_STATUS_ID}.'
-        self._gauge_license_status = BrocadeGauge(name='license_status', description=license_status_description, 
-                                            unit_keys=BrocadeChassisToolbar.license_keys, metric_key='license-status-id')
+        license_status_description = f'Switch licenses status {ChassisToolbar.LICENSE_STATUS_ID}.'
+        self._gauge_license_status = BaseGauge(name='license_status', description=license_status_description, 
+                                            unit_keys=ChassisToolbar.license_keys, metric_key='license-status-id')
         # license capacity gauge
-        self._gauge_license_capacity = BrocadeGauge(name='license_capacity', description='POD license capacity', 
-                                            unit_keys=BrocadeChassisToolbar.license_keys, metric_key='capacity')        
+        self._gauge_license_capacity = BaseGauge(name='license_capacity', description='POD license capacity', 
+                                            unit_keys=ChassisToolbar.license_keys, metric_key='capacity')        
         # license exp date gauge
-        self._gauge_license_exp_date = BrocadeGauge(name='license_exp_date', description='License expiration date', 
-                                            unit_keys=BrocadeChassisToolbar.license_keys, parameter_key='expiration-date')
+        self._gauge_license_exp_date = BaseGauge(name='license_exp_date', description='License expiration date', 
+                                            unit_keys=ChassisToolbar.license_keys, parameter_key='expiration-date')
 
 
     def fill_toolbar_gauge_metrics(self, ch_parser: BrocadeChassisParser , sw_parser: BrocadeSwitchParser) -> None:

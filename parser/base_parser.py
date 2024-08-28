@@ -4,7 +4,7 @@ from typing import Dict, List, Optional, Tuple, Union, Literal
 
 class BrocadeTelemetryParser:
     """
-    Base Class to create switch telemetry parser.
+    Class to create switch telemetry parser.
 
     Attributes:
         sw_telemetry: set of switch telemetry retrieved from the switch.
@@ -92,52 +92,6 @@ class BrocadeTelemetryParser:
                 f"ip_address: {self.sw_telemetry.sw_ipaddress}, "
                 f"date: {self.telemetry_date if self.telemetry_date else 'None'}, "
                 f"time: {self.telemetry_time if self.telemetry_time else 'None'}")
-    
-
-    # def _get_changed_sw_ports(self, other: 'BrocadeTelemetryParser', 
-    #                           ports_now_dct: dict, ports_prev_dct: dict, 
-    #                           changed_keys: list, const_keys: list) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
-    #     """
-    #     Method detects if error port status, error catecories members, io thresholds from the FC_PORT_STATS_CHANGED list have been changed for each switch port.
-    #     It compares port parameters of two instances of BrocadeFCPortStatisticsParser class.
-    #     All changed parameters are added to to the dictionatry including current and previous values.
-        
-    #     Args:
-    #         other {BrocadeFCPortStatisticsParser}: fc port statistics class instance retrieved from the previous sw_telemetry.
-        
-    #     Returns:
-    #         dict: FC ports statistics change dictionary. Any port with changed parameters are in this dictionary.
-    #     """
-
-    #     # switch ports with changed parameters
-    #     ports_changed_dct = {}
-
-    #     # other is not exist (for examle 1st iteration)
-    #     # other is not BrocadeFCPortParametersParser type
-    #     # other's fcport_params atrribute is empty
-    #     if other is None or str(type(self)) != str(type(other)) or not ports_prev_dct:
-    #         return None
-        
-    #     # check if other is for the same switch
-    #     elif self.same_chassis(other):
-    #         for vf_id, ports_vfid_now_dct in ports_now_dct.items():
-
-    #             ports_changed_dct[vf_id] = {}
-
-    #             # if there is no vf_id in other check next vf_id 
-    #             if vf_id not in ports_prev_dct:
-    #                 continue
-
-    #             # fc port statistics of the vf_id switch of the previous telemetry    
-    #             ports_vfid_prev_dct = ports_prev_dct[vf_id]
-    #             # timestamps
-    #             time_now = self.telemetry_date + ' ' + self.telemetry_time
-    #             time_prev = other.telemetry_date + ' ' + other.telemetry_time
-    #             # add changed fcport stats ports for the current vf_id
-    #             ports_changed_dct[vf_id] = BrocadeTelemetryParser.get_changed_vfid_ports(ports_vfid_now_dct, ports_vfid_prev_dct, 
-    #                                                                                      changed_keys, const_keys, 
-    #                                                                                      time_now=time_now, time_prev=time_prev)
-    #     return ports_changed_dct
 
 
     @staticmethod
@@ -271,10 +225,6 @@ class BrocadeTelemetryParser:
             for key in  keys:
                 dest_dct[key] = source_dct[key]
         
-
-    def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
-
 
     @property
     def sw_telemetry(self):

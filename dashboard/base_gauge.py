@@ -11,7 +11,7 @@ from typing import Dict, List, Union
 from prometheus_client import Gauge, start_http_server, CollectorRegistry
 
 
-class BrocadeGauge:
+class BaseGauge:
     """
     Class to create a prometheus gauge for Brocade switch.
     Each gauge must have either parameter_key or metric_key passed as class parameter but not both.
@@ -54,7 +54,7 @@ class BrocadeGauge:
         self.validate_gauge_parameters()
         self._reverse_filling = reverse_filling
         self._label_keys = self._unit_keys + [self._parameter_key] if self._parameter_key else self._unit_keys
-        self._gauge = Gauge(self.name, self.description, BrocadeGauge.replace_underscore(self._label_keys))
+        self._gauge = Gauge(self.name, self.description, BaseGauge.replace_underscore(self._label_keys))
 
 
     def validate_gauge_parameters(self) -> None:
@@ -121,10 +121,10 @@ class BrocadeGauge:
             # gauge_data_switch is a switch level dictionary
             elif isinstance(gauge_data_switch, dict):
                 # check if dictionary contains required keys
-                if not BrocadeGauge.check_prerequisite_keys(gauge_data_switch, prerequisite_keys_all, prerequisite_keys_any):
+                if not BaseGauge.check_prerequisite_keys(gauge_data_switch, prerequisite_keys_all, prerequisite_keys_any):
                     continue
                 # rename existing keys or add new key, value pairs
-                gauge_data_switch_modified = BrocadeGauge.modify_dict(gauge_data_switch, renamed_keys, add_dict)
+                gauge_data_switch_modified = BaseGauge.modify_dict(gauge_data_switch, renamed_keys, add_dict)
                 self.add_gauge_metric(gauge_data_switch_modified)
 
 
@@ -156,10 +156,10 @@ class BrocadeGauge:
                 # gauge_data_port is a port level dictionary
                 if isinstance(gauge_data_port, dict):
                     # check if dictionary contains required keys
-                    if not BrocadeGauge.check_prerequisite_keys(gauge_data_port, prerequisite_keys_all, prerequisite_keys_any):
+                    if not BaseGauge.check_prerequisite_keys(gauge_data_port, prerequisite_keys_all, prerequisite_keys_any):
                         continue
                     # rename existing keys or add new key, value pairs
-                    gauge_data_port_modified = BrocadeGauge.modify_dict(gauge_data_port, renamed_keys, add_dict)
+                    gauge_data_port_modified = BaseGauge.modify_dict(gauge_data_port, renamed_keys, add_dict)
                     self.add_gauge_metric(gauge_data_port_modified)
                 else:
                     print('NOT DICT')
@@ -224,7 +224,7 @@ class BrocadeGauge:
         """
 
         # get values for gauge labels from gauge_data
-        label_values = BrocadeGauge.get_ordered_values(gauge_data, self.label_keys)
+        label_values = BaseGauge.get_ordered_values(gauge_data, self.label_keys)
 
         # get gauge metric numeric value from gauge_data
         if self.metric_key:
@@ -296,10 +296,6 @@ class BrocadeGauge:
     # @property
     # def registry(self):
     #     return self._registry
-
-
-    def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
     
 
     @property

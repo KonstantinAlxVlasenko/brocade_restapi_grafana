@@ -4,7 +4,7 @@ from brocade_maps_parser import BrocadeMAPSParser
 from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
 from brocade_switch_parser import BrocadeSwitchParser
 
-class BrocadeMAPSSystemToolbar(BrocadeToolbar):
+class MAPSSystemToolbar(BrocadeToolbar):
     """
     Class to create Monitoring and Alerting Policy Suite (MAPS) system resource and system health toolbar.
     MAPS System Toolbar is a set of prometheus gauges:
@@ -32,50 +32,50 @@ class BrocadeMAPSSystemToolbar(BrocadeToolbar):
 
         # system resource chassis name gauge
         self._gauge_sys_resource_chname = BrocadeGauge(name='system_resource_chname', description='System resource chassis name',
-                                                       unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='chassis-name')
+                                                       unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='chassis-name')
         # switch name
         self._gauge_sys_resource_swname = BrocadeGauge(name='system_resource_swname', description='System resource switch name', 
-                                                    unit_keys=BrocadeMAPSSystemToolbar.switch_wwn_key, parameter_key='switch-name')
+                                                    unit_keys=MAPSSystemToolbar.switch_wwn_key, parameter_key='switch-name')
         # fabric name
         self._gauge_sys_resource_fabricname = BrocadeGauge(name='system_resource_fabric_name', description='System resource fabric name', 
-                                                    unit_keys=BrocadeMAPSSystemToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
+                                                    unit_keys=MAPSSystemToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_sys_resource_vfid = BrocadeGauge(name='ssystem_resource_vfid', description='System resource VF id', 
-                                                    unit_keys=BrocadeMAPSSystemToolbar.switch_wwn_key, parameter_key='vf-id')
+                                                    unit_keys=MAPSSystemToolbar.switch_wwn_key, parameter_key='vf-id')
 
         # cpu usage gauge
         self._gauge_cpu_usage = BrocadeGauge(name='cpu_usage', description='CPU usage', 
-                                            unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='cpu-usage')
-        self._gauge_cpu_usage_status = BrocadeGauge(name='cpu_usage_status', description=f'CPU usage status {BrocadeMAPSSystemToolbar.STATUS_ID}',
-                                                    unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='cpu-usage-status-id')
+                                            unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='cpu-usage')
+        self._gauge_cpu_usage_status = BrocadeGauge(name='cpu_usage_status', description=f'CPU usage status {MAPSSystemToolbar.STATUS_ID}',
+                                                    unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='cpu-usage-status-id')
         # flash usage gauge
         self._gauge_flash_usage = BrocadeGauge(name='flash_usage', description='Flash usage', 
-                                            unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='flash-usage')
-        self._gauge_flash_usage_status = BrocadeGauge(name='flash_usage_status', description=f'Flash usage status {BrocadeMAPSSystemToolbar.STATUS_ID}',
-                                                    unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='flash-usage-status-id')
+                                            unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='flash-usage')
+        self._gauge_flash_usage_status = BrocadeGauge(name='flash_usage_status', description=f'Flash usage status {MAPSSystemToolbar.STATUS_ID}',
+                                                    unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='flash-usage-status-id')
         # memory usage gauge
         self._gauge_memory_usage = BrocadeGauge(name='memory_usage', description='Memory usage', 
-                                                unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='memory-usage')
-        self._gauge_memory_usage_status = BrocadeGauge(name='memory_usage_status', description=f'Memory usage status {BrocadeMAPSSystemToolbar.STATUS_ID}',
-                                                    unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='memory-usage-status-id')
+                                                unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='memory-usage')
+        self._gauge_memory_usage_status = BrocadeGauge(name='memory_usage_status', description=f'Memory usage status {MAPSSystemToolbar.STATUS_ID}',
+                                                    unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='memory-usage-status-id')
         
         # ssp report chname gauge
         self._gauge_ssp_report_chname = BrocadeGauge(name='ssp_report_chname', description='SSP report chassis name',
-                                                    unit_keys=BrocadeMAPSSystemToolbar.chassis_wwn_key, parameter_key='chassis-name')
+                                                    unit_keys=MAPSSystemToolbar.chassis_wwn_key, parameter_key='chassis-name')
         # switch name
         self._gauge_ssp_report_swname = BrocadeGauge(name='ssp_report_swname', description='SSP report switch name', 
-                                                    unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='switch-name')
+                                                    unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='switch-name')
         # fabric name
         self._gauge_ssp_report_fabricname = BrocadeGauge(name='ssp_report_fabric_name', description='SSP report fabric name', 
-                                                    unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='fabric-user-friendly-name')
+                                                    unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_ssp_report_vfid = BrocadeGauge(name='ssp_report_vfid', description='SSP report VF id', 
-                                                    unit_keys=BrocadeMAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='vf-id')
+                                                    unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='vf-id')
         # ssp report gauge
         # 1 - 'healthy', 2 - 'unknown', 3 - 'marginal', 4 - 'down'
-        ssp_report_description = f'The switch status policy report state {BrocadeMAPSSystemToolbar.SSP_REPORT_STATUS_ID}'
+        ssp_report_description = f'The switch status policy report state {MAPSSystemToolbar.SSP_REPORT_STATUS_ID}'
         self._gauge_ssp_report_state  = BrocadeGauge(name='ssp_report_state', description=ssp_report_description, 
-                                                unit_keys=BrocadeMAPSSystemToolbar.ssp_report_keys, metric_key='status-id')
+                                                unit_keys=MAPSSystemToolbar.ssp_report_keys, metric_key='status-id')
 
 
     def fill_toolbar_gauge_metrics(self, maps_parser: BrocadeMAPSParser, sw_parser: BrocadeSwitchParser) -> None:
