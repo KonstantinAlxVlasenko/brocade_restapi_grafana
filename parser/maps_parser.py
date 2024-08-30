@@ -7,14 +7,14 @@ Created on Wed Jan 31 17:35:13 2024
 
 import re
 from collections import defaultdict
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Self
 
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_switch_parser import BrocadeSwitchParser
-from brocade_base_parser import BrocadeTelemetryParser
+from switch_telemetry_request import SwitchTelemetryRequest
+from switch_parser import SwitchParser
+from base_parser import BaseParser
 
 
-class MAPSParser(BrocadeTelemetryParser):
+class MAPSParser(BaseParser):
     """
     Class to create maps parameters dictionaries and health status list.
 
@@ -50,14 +50,16 @@ class MAPSParser(BrocadeTelemetryParser):
     SYSTEM_RESOURCE_THRESHOLDS = {'cpu-usage': 80, 'flash-usage': 85, 'memory-usage': 75}
 
     
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser, maps_parser_prev=None):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest, sw_parser: SwitchParser, maps_parser_prev: Self = None):
         """
         Args:
-            sw_telemetry: set of switch telemetry retrieved from the switch
+            sw_telemetry: set of switch telemetry retrieved from the switch.
+            sw_parser (BrocadeSwitchParser): switch parser object.
+            maps_parser_prev (): previous MAPSParser object.
         """
         
         super().__init__(sw_telemetry)
-        self._sw_parser: BrocadeSwitchParser = sw_parser
+        self._sw_parser: SwitchParser = sw_parser
         self._maps_config: dict = self._get_maps_policy_value()
         self._get_maps_actions_value()
         self._ssp_report: dict = self._get_ssp_report_value()

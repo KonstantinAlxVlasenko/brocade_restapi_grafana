@@ -6,14 +6,15 @@ Created on Thu Mar  7 12:17:39 2024
 """
 
 import math
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Self, Tuple, Union
 
-from brocade_base_parser import BrocadeTelemetryParser
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_switch_parser import BrocadeSwitchParser
+from base_parser import BaseParser
+from fcport_params_parser import FCPortParametersParser
+
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
-class SFPMediaParser(BrocadeTelemetryParser):
+class SFPMediaParser(BaseParser):
     """
     Class to create sfp media parameters dictionaries.
 
@@ -60,18 +61,21 @@ class SFPMediaParser(BrocadeTelemetryParser):
     SFP_TEMPERATURE_ALERT = {'high-alarm': 75, 'low-alarm': -5, 'high-warning': 70, 'low-warning': 0}
     
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, fcport_params_parser: BrocadeSwitchParser, sfp_media_parser=None):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest, 
+                 fcport_params_parser: FCPortParametersParser, 
+                 sfp_media_parser_prev: Self = None):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
+            fcport_params_parser (BrocadeSwitchParser):
+            sfp_media_parser_prev (SFPMediaParser):
         """
         
         super().__init__(sw_telemetry)
-        # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
-        self._fcport_params_parser: BrocadeSwitchParser = fcport_params_parser
+        self._fcport_params_parser: FCPortParametersParser = fcport_params_parser
         self._sfp_media = self._get_sfp_media_values()
         if self.sfp_media:
-            self._sfp_media_changed = self._get_changed_sfpmedia(sfp_media_parser)
+            self._sfp_media_changed = self._get_changed_sfpmedia(sfp_media_parser_prev)
         else:
             self._sfp_media_changed = {}
 

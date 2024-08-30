@@ -9,10 +9,12 @@ import re
 from collections import defaultdict
 from typing import Dict, List, Tuple, Union, Optional
 
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+from switch_telemetry_request import SwitchTelemetryRequest
+from base_parser import BaseParser
 
 
-class SwitchParser(BrocadeTelemetryParser):
+
+class SwitchParser(BaseParser):
     """
     Class to create switch level parameters dictionaries.
 
@@ -37,13 +39,12 @@ class SwitchParser(BrocadeTelemetryParser):
 
     # 'chassis-wwn', 'switch-user-friendly-name', 'chassis-user-friendly-name', 
     
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
         super().__init__(sw_telemetry)
-        # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._fc_switch: dict = self._get_fc_switch_value()
         self._vf_details: dict = self._get_vf_details()
         if self.fc_switch:

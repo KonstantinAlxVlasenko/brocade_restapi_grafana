@@ -4,13 +4,13 @@ Created on Tue Jan 30 17:45:30 2024
 
 @author: kavlasenko
 """
-from typing import Dict, List, Tuple, Union, Optional
+from typing import Dict, List, Tuple, Union, Optional, Self
 
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_base_parser import BrocadeTelemetryParser
+from switch_telemetry_request import SwitchTelemetryRequest
+from base_parser import BaseParser
 
 
-class FRUParser(BrocadeTelemetryParser):
+class FRUParser(BaseParser):
     """
     Class to create sensor (ps and fan) readings lists.
 
@@ -48,10 +48,11 @@ class FRUParser(BrocadeTelemetryParser):
     SENSOR_CHANGED = ['operational-state', 'temperature']
     
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, fru_prev=None):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest, fru_prev: Self = None):
         """
         Args:
-            sw_telemetry: set of switch telemetry retrieved from the switch
+            sw_telemetry (BrocadeSwitchTelemetry): set of switch telemetry retrieved from the switch.
+            fru_prev (FRUParser): previous fru readings.
         """
         
         super().__init__(sw_telemetry)

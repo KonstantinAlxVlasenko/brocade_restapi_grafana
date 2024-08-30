@@ -1,11 +1,13 @@
-from brocade_base_gauge import BrocadeGauge
 
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_base_toolbar import BrocadeToolbar
-from brocade_fcport_params_parser import BrocadeFCPortParametersParser
+from parser import FCPortParametersParser
+
+from base_gauge import BaseGauge
+from base_toolbar import BaseToolbar
+
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
-class FCPortParamsToolbar(BrocadeToolbar):
+class FCPortParamsToolbar(BaseToolbar):
     """
     Class to create port parameters, state and status toolbar.
     Port parameters Toolbar is a set of prometheus gauges:
@@ -16,7 +18,7 @@ class FCPortParamsToolbar(BrocadeToolbar):
         sw_telemetry: set of switch telemetry retrieved from the switch.
     """
 
-    switch_port_extended_keys  = BrocadeToolbar.switch_port_keys + ['port-index', 'port-id']
+    switch_port_extended_keys  = BaseToolbar.switch_port_keys + ['port-index', 'port-id']
     # switch_port_name_keys = switch_port_extended_keys + ['port-name']
 
     PORT_PHYSICAL_STATE_ID = {0: 'Offline', 1: 'Online', 2: 'Testing', 3: 'Faulty', 4: 'E_Port', 5: 'F_Port', 
@@ -44,7 +46,7 @@ class FCPortParamsToolbar(BrocadeToolbar):
     POD_LICENSE_STATUS_ID = {0: 'POD Released', 1: 'POD Reserved', 2: 'POD Disabled', 3: 'POD Enabled', 4: 'POD Unknown'}
 
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
@@ -53,27 +55,27 @@ class FCPortParamsToolbar(BrocadeToolbar):
         super().__init__(sw_telemetry)
 
         # fcport params switch name gauge
-        self._gauge_swname = BrocadeGauge(name='fcport_params_switchname', description='Switch name in the FC port parameters output.', 
+        self._gauge_swname = BaseGauge(name='fcport_params_switchname', description='Switch name in the FC port parameters output.', 
                                           unit_keys=FCPortParamsToolbar.switch_wwn_key, parameter_key='switch-name')
         # fcport params fabric name gauge
-        self._gauge_fabricname = BrocadeGauge(name='fcport_params_fabricname', description='Fabric name in the FC port parameters output.', 
+        self._gauge_fabricname = BaseGauge(name='fcport_params_fabricname', description='Fabric name in the FC port parameters output.', 
                                               unit_keys=FCPortParamsToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # fcport params port name gauge
-        self._gauge_portname = BrocadeGauge(name='fcport_params_portname', description='Port name in the FC port parameters output.',
+        self._gauge_portname = BaseGauge(name='fcport_params_portname', description='Port name in the FC port parameters output.',
                                              unit_keys=FCPortParamsToolbar.switch_port_extended_keys, parameter_key='port-name')
         # fcport params neighbor wwpn gauge
-        self._gauge_neighbor_wwpn = BrocadeGauge(name='fcport_params_neighbor_wwpn', description='The Fibre Channel WWN of the neighbor port.',
+        self._gauge_neighbor_wwpn = BaseGauge(name='fcport_params_neighbor_wwpn', description='The Fibre Channel WWN of the neighbor port.',
                                                 unit_keys=FCPortParamsToolbar.switch_port_extended_keys, parameter_key='neighbor-port-wwn-str')        
         # fcport params switch VF ID gauge
-        self._gauge_switch_vfid = BrocadeGauge(name='fcport_params_switch_vfid', description='Switch virtual fabric ID in the FC port parameters output.', 
+        self._gauge_switch_vfid = BaseGauge(name='fcport_params_switch_vfid', description='Switch virtual fabric ID in the FC port parameters output.', 
                                                unit_keys=FCPortParamsToolbar.switch_wwn_key, metric_key='vf-id')
         # fcport params port speed gbps gauge
-        self._gauge_port_speed_value = BrocadeGauge(name='fcport_params_port_speed_value', description='The speed for of the port.', 
+        self._gauge_port_speed_value = BaseGauge(name='fcport_params_port_speed_value', description='The speed for of the port.', 
                                                unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='port-speed-gbps')
         # fcport params port speed mode gauge
         # 0 - 'G', 1 - 'N'
         speed_mode_description = f'Whether the port speed is auto-negotiated on the specified port {FCPortParamsToolbar.SPEED_MODE_ID}.'
-        self._gauge_port_speed_mode = BrocadeGauge(name='fcport_params_port_speed_mode', description=speed_mode_description, 
+        self._gauge_port_speed_mode = BaseGauge(name='fcport_params_port_speed_mode', description=speed_mode_description, 
                                                unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='auto-negotiate')
         # fcport params long distance mode gauge
         # 0 - Long-distance is disabled for this port.
@@ -85,7 +87,7 @@ class FCPortParamsToolbar(BrocadeToolbar):
         # 6 - LD configures the value as automatic long distance.
         # 7 - LS mode configures the value as a static long-distance link with a fixed buffer allocation greater than 10 km.'
         ld_mode_description = f'The long-distance level {FCPortParamsToolbar.LONG_DISTANCE_LEVEL_ID}.'
-        self._gauge_port_ld_mode = BrocadeGauge(name='fcport_params_long_distace_mode', description=ld_mode_description, 
+        self._gauge_port_ld_mode = BaseGauge(name='fcport_params_long_distace_mode', description=ld_mode_description, 
                                                unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='long-distance')
         # fcport params physical state gauge
         # 0 - 'Offline', 1 - 'Online', 2 - 'Testing', 3 - 'Faulty', 4 - 'E_port', 5 - 'F_port', 
@@ -94,11 +96,11 @@ class FCPortParamsToolbar(BrocadeToolbar):
         # 16 - 'Diag_flt', 17 - 'Lock_ref', 18 - 'Mod_inv', 19 - 'Mod_val', 20 - 'No_sigdet'
         # 100 - 'Unknown_ID'
         port_physical_state_description = f'The physical state of a port {FCPortParamsToolbar.PORT_PHYSICAL_STATE_ID}.'
-        self._gauge_port_physical_state = BrocadeGauge(name='fcport_params_physical_state', description=port_physical_state_description,
+        self._gauge_port_physical_state = BaseGauge(name='fcport_params_physical_state', description=port_physical_state_description,
                                                        unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='physical-state-id')
         # port physical state status gauge
         port_physical_state_status_description = f'Port physical state status depending on port enable state {FCPortParamsToolbar.STATUS_ID}.'
-        self._gauge_port_physical_state_status = BrocadeGauge(name='fcport_params_port_physical_state_status', description=port_physical_state_status_description,
+        self._gauge_port_physical_state_status = BaseGauge(name='fcport_params_port_physical_state_status', description=port_physical_state_status_description,
                                                               unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='physical-state-status-id')
         # fcport params port type gauge
         # 0 - 'Unknown', 7 - 'E_Port', 10 - 'G_Port', 11 - 'U_Port', 15 - 'F_Port',
@@ -106,35 +108,35 @@ class FCPortParamsToolbar(BrocadeToolbar):
         # 22 - 'AF_Port', 23 - 'AE_Port', 25 - 'VE_Port', 26 - 'Ethernet Flex Port',
         # 29 - 'Flex Port', 30 - 'N_Port', 32768 - 'LB_Port'
         port_type_description = f'The port type currently enabled for the specified port {FCPortParamsToolbar.PORT_TYPE_ID}.'
-        self._gauge_port_type = BrocadeGauge(name='fcport_params_port_type', description=port_type_description,
+        self._gauge_port_type = BaseGauge(name='fcport_params_port_type', description=port_type_description,
                                                        unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='port-type-id')
         # fcport params port type for enabled ports gauge
         enabled_port_type_description = f'The port type for the specified port if its port status is "Enabled" {FCPortParamsToolbar.PORT_TYPE_ID}.'
-        self._gauge_enabled_port_type = BrocadeGauge(name='fcport_params_enabled_port_type', description=enabled_port_type_description,
+        self._gauge_enabled_port_type = BaseGauge(name='fcport_params_enabled_port_type', description=enabled_port_type_description,
                                                        unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='enabled-port-type-id')
         # fcport params port status gauge
         # -1 - 'Disabled (Persistent)', 0 - 'Disabled', 1 - 'Enabled'
         port_status_description = f'The physical state of a port {FCPortParamsToolbar.PORT_STATUS_ID}.'
-        self._gauge_port_status = BrocadeGauge(name='fcport_params_port_status', description=port_status_description,
+        self._gauge_port_status = BaseGauge(name='fcport_params_port_status', description=port_status_description,
                                                        unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='port-enable-status-id')
         # fcport params enabled port wo device connected gauge
         # 0 - '_', 1 - 'Enabled'
         nodevice_enabled_port_description = f'Enabled port with no device connected flag {FCPortParamsToolbar.NO_DEVICE_ENABLED_PORT_ID}.'
-        self._gauge_nodevice_enabled_port = BrocadeGauge(name='fcport_params_nodevice_enabled_port', description=nodevice_enabled_port_description,
+        self._gauge_nodevice_enabled_port = BaseGauge(name='fcport_params_nodevice_enabled_port', description=nodevice_enabled_port_description,
                                                        unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='nodevice-enabled-port')
         # fcport params enabled port with U-Port or G-Port type gauge
         # 0 - '_', 1 - 'Enabled U-Port ', 'Enabled G-Port'
         uport_gport_enabled_description = f'Enabled port with U-Port or G-Port type {FCPortParamsToolbar.UPORT_GPORT_ENABLED_ID}.'
-        self._gauge_uport_gport_enabled_port = BrocadeGauge(name='fcport_params_uport_gport_enabled_port', description=uport_gport_enabled_description,
+        self._gauge_uport_gport_enabled_port = BaseGauge(name='fcport_params_uport_gport_enabled_port', description=uport_gport_enabled_description,
                                                        unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='uport-gport-enabled')
         # fcport params pod license status gauge
         # 0 - 'POD Released', 1 - 'POD Reserved', 2 - 'POD Disabled', 3 - 'POD Enabled', 4 - 'POD Unknown'
         pod_license_state_description = f'The POD license status for a port. {FCPortParamsToolbar.POD_LICENSE_STATUS_ID}.'
-        self._gauge_pod_license_state = BrocadeGauge(name='fcport_params_pod_license_state', description=pod_license_state_description,
+        self._gauge_pod_license_state = BaseGauge(name='fcport_params_pod_license_state', description=pod_license_state_description,
                                                        unit_keys=FCPortParamsToolbar.switch_port_extended_keys, metric_key='pod-license-status-id') 
 
 
-    def fill_toolbar_gauge_metrics(self, fcport_params_parser: BrocadeFCPortParametersParser) -> None:
+    def fill_toolbar_gauge_metrics(self, fcport_params_parser: FCPortParametersParser) -> None:
         """Method to fill the gauge metrics for the toolbar.
 
         Args:

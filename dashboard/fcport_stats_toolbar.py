@@ -1,10 +1,12 @@
-from brocade_base_gauge import BrocadeGauge
-from brocade_base_toolbar import BrocadeToolbar
-from brocade_fcport_stats_parser import BrocadeFCPortStatisticsParser
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+from parser import FCPortStatisticsParser
+
+from base_gauge import BaseGauge
+from base_toolbar import BaseToolbar
+
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
-class FCPortStatsToolbar(BrocadeToolbar):
+class FCPortStatsToolbar(BaseToolbar):
     """
     Class to create fc port statistics toolbar.
     FC port statistics Toolbar is a set of prometheus gauges:
@@ -19,7 +21,7 @@ class FCPortStatsToolbar(BrocadeToolbar):
     """
 
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
@@ -28,24 +30,24 @@ class FCPortStatsToolbar(BrocadeToolbar):
         super().__init__(sw_telemetry)
 
         # sfp media switch name gauge
-        self._gauge_swname = BrocadeGauge(name='fcport_stats_switchname', description='Switch name in the SFP media output.', 
+        self._gauge_swname = BaseGauge(name='fcport_stats_switchname', description='Switch name in the SFP media output.', 
                                           unit_keys=FCPortStatsToolbar.switch_wwn_key, parameter_key='switch-name')
         # sfp media fabric name gauge
-        self._gauge_fabricname = BrocadeGauge(name='fcport_stats_fabricname', description='Fabric name in the SFP media output.', 
+        self._gauge_fabricname = BaseGauge(name='fcport_stats_fabricname', description='Fabric name in the SFP media output.', 
                                               unit_keys=FCPortStatsToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # sfp media port name gauge
-        self._gauge_portname = BrocadeGauge(name='fcport_stats_portname', description='Port name in the SFP media output.',
+        self._gauge_portname = BaseGauge(name='fcport_stats_portname', description='Port name in the SFP media output.',
                                              unit_keys=FCPortStatsToolbar.switch_port_keys, parameter_key='port-name')  
         # sfp media switch VF ID gauge
-        self._gauge_switch_vfid = BrocadeGauge(name='fcport_stats_switch_vfid', description='Switch virtual fabric ID in the SFP media output.', 
+        self._gauge_switch_vfid = BaseGauge(name='fcport_stats_switch_vfid', description='Switch virtual fabric ID in the SFP media output.', 
                                                unit_keys=FCPortStatsToolbar.switch_wwn_key, metric_key='vf-id')
         # sfp media port speed gbps gauge
-        self._gauge_port_speed_value = BrocadeGauge(name='fcport_stats_port_speed_value', description='The speed of the port.', 
+        self._gauge_port_speed_value = BaseGauge(name='fcport_stats_port_speed_value', description='The speed of the port.', 
                                                unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key='port-speed-gbps')
         # sfp media port speed mode gauge
         # 0 - 'G', 1 - 'N'
         speed_mode_description = f'Whether the port speed is auto-negotiated on the specified port {FCPortStatsToolbar.SPEED_MODE_ID}.'
-        self._gauge_port_speed_mode = BrocadeGauge(name='fcport_stats_port_speed_mode', description=speed_mode_description, 
+        self._gauge_port_speed_mode = BaseGauge(name='fcport_stats_port_speed_mode', description=speed_mode_description, 
                                                unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key='auto-negotiate')
         # sfp media physical state gauge
         # 0 - 'Offline', 1 - 'Online', 2 - 'Testing', 3 - 'Faulty', 4 - 'E_port', 5 - 'F_port', 
@@ -54,7 +56,7 @@ class FCPortStatsToolbar(BrocadeToolbar):
         # 16 - 'Diag_flt', 17 - 'Lock_ref', 18 - 'Mod_inv', 19 - 'Mod_val', 20 - 'No_sigdet'
         # 100 - 'Unknown_ID'
         port_physical_state_description = f'The physical state of a port {FCPortStatsToolbar.PORT_PHYSICAL_STATE_ID}.'
-        self._gauge_port_physical_state = BrocadeGauge(name='fcport_stats_physical_state', description=port_physical_state_description,
+        self._gauge_port_physical_state = BaseGauge(name='fcport_stats_physical_state', description=port_physical_state_description,
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key='physical-state-id')
         # sfp media port type gauge
         # 0 - 'Unknown', 7 - 'E_Port', 10 - 'G_Port', 11 - 'U_Port', 15 - 'F_Port',
@@ -62,282 +64,282 @@ class FCPortStatsToolbar(BrocadeToolbar):
         # 22 - 'AF_Port', 23 - 'AE_Port', 25 - 'VE_Port', 26 - 'Ethernet Flex Port',
         # 29 - 'Flex Port', 30 - 'N_Port', 32768 - 'LB_Port'
         port_type_description = f'The port type currently enabled for the specified port {FCPortStatsToolbar.PORT_TYPE_ID}.'
-        self._gauge_port_type = BrocadeGauge(name='fcport_stats_port_type', description=port_type_description,
+        self._gauge_port_type = BaseGauge(name='fcport_stats_port_type', description=port_type_description,
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key='port-type-id')
         # port max speed gauge
-        self._gauge_max_speed = BrocadeGauge(name="fcport_stats_max_speed", description="The maximum speed the port is capable of supporting in bits per second.", 
+        self._gauge_max_speed = BaseGauge(name="fcport_stats_max_speed", description="The maximum speed the port is capable of supporting in bits per second.", 
                                              unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="max-speed")
 
         # number of received frames
-        self._gauge_class_3_frames = BrocadeGauge(name="fcport_stats_class_3_frames", description="The number of Class 3 frames received at this port (stat_c3_frx).", 
+        self._gauge_class_3_frames = BaseGauge(name="fcport_stats_class_3_frames", description="The number of Class 3 frames received at this port (stat_c3_frx).", 
                                                   unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="class-3-frames")
-        self._gauge_class_3_frames_delta = BrocadeGauge(name="fcport_stats_class_3_frames_delta", description="Delta of Class 3 frames received at this port (stat_c3_frx).", 
+        self._gauge_class_3_frames_delta = BaseGauge(name="fcport_stats_class_3_frames_delta", description="Delta of Class 3 frames received at this port (stat_c3_frx).", 
                                                         unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="class-3-frames-delta")
-        self._gauge_in_frames = BrocadeGauge(name="fcport_stats_in_frames", description="The number of frames received at this port (stat_frx).", 
+        self._gauge_in_frames = BaseGauge(name="fcport_stats_in_frames", description="The number of frames received at this port (stat_frx).", 
                                              unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-frames")
-        self._gauge_in_frames_delta = BrocadeGauge(name="fcport_stats_in_frames_delta", description="Delta of frames received at this port (stat_frx).", 
+        self._gauge_in_frames_delta = BaseGauge(name="fcport_stats_in_frames_delta", description="Delta of frames received at this port (stat_frx).", 
                                                    unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-frames-delta")
         # number of transmitted frames
-        self._gauge_out_frames = BrocadeGauge(name="fcport_stats_out_frames", description="The number of frames transmitted from this port (stat_ftx).", 
+        self._gauge_out_frames = BaseGauge(name="fcport_stats_out_frames", description="The number of frames transmitted from this port (stat_ftx).", 
                                               unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-frames")
-        self._gauge_out_frames_delta = BrocadeGauge(name="fcport_stats_out_frames_delta", description="Delta of frames transmitted from this port (stat_ftx).", 
+        self._gauge_out_frames_delta = BaseGauge(name="fcport_stats_out_frames_delta", description="Delta of frames transmitted from this port (stat_ftx).", 
                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-frames-delta")
         # port errors
-        self._gauge_address_errors = BrocadeGauge(name="fcport_stats_address_errors", description="Count of frames received with unknown addressing (portshow Address_err).", 
+        self._gauge_address_errors = BaseGauge(name="fcport_stats_address_errors", description="Count of frames received with unknown addressing (portshow Address_err).", 
                                                   unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="address-errors")
-        self._gauge_address_errors_delta = BrocadeGauge(name="fcport_stats_address_errors_delta", description="Delta of frames received with unknown addressing (portshow Address_err).", 
+        self._gauge_address_errors_delta = BaseGauge(name="fcport_stats_address_errors_delta", description="Delta of frames received with unknown addressing (portshow Address_err).", 
                                                         unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="address-errors-delta")
-        self._gauge_bad_eofs_received = BrocadeGauge(name="fcport_stats_bad_eofs_received", description="The number of bad EOF frames received (er_bad_os).", 
+        self._gauge_bad_eofs_received = BaseGauge(name="fcport_stats_bad_eofs_received", description="The number of bad EOF frames received (er_bad_os).", 
                                                      unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="bad-eofs-received")
-        self._gauge_bad_eofs_received_delta = BrocadeGauge(name="fcport_stats_bad_eofs_received_delta", description="Delta of bad EOF frames received (er_bad_os).", 
+        self._gauge_bad_eofs_received_delta = BaseGauge(name="fcport_stats_bad_eofs_received_delta", description="Delta of bad EOF frames received (er_bad_os).", 
                                                            unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="bad-eofs-received-delta")
-        self._gauge_bb_credit_zero = BrocadeGauge(name="fcport_stats_bb_credit_zero", description="The number of transitions in and out of the BB credit zero state (tim_txcrd_z).", 
+        self._gauge_bb_credit_zero = BaseGauge(name="fcport_stats_bb_credit_zero", description="The number of transitions in and out of the BB credit zero state (tim_txcrd_z).", 
                                                   unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="bb-credit-zero")
-        self._gauge_bb_credit_zero_delta = BrocadeGauge(name="fcport_stats_bb_credit_zero_delta", description="Delta of transitions in and out of the BB credit zero state (tim_txcrd_z).", 
+        self._gauge_bb_credit_zero_delta = BaseGauge(name="fcport_stats_bb_credit_zero_delta", description="Delta of transitions in and out of the BB credit zero state (tim_txcrd_z).", 
                                                         unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="bb-credit-zero-delta")
-        self._gauge_class3_in_discards = BrocadeGauge(name="fcport_stats_class3_in_discards", description="The number of class 3 receive frames discarded due to timeout (er_rx_c3_timeout).", 
+        self._gauge_class3_in_discards = BaseGauge(name="fcport_stats_class3_in_discards", description="The number of class 3 receive frames discarded due to timeout (er_rx_c3_timeout).", 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="class3-in-discards")
-        self._gauge_class3_in_discards_delta = BrocadeGauge(name="fcport_stats_class3_in_discards_delta", description="Delta of class 3 receive frames discarded due to timeout (er_rx_c3_timeout).", 
+        self._gauge_class3_in_discards_delta = BaseGauge(name="fcport_stats_class3_in_discards_delta", description="Delta of class 3 receive frames discarded due to timeout (er_rx_c3_timeout).", 
                                                             unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="class3-in-discards-delta")
-        self._gauge_class3_out_discards = BrocadeGauge(name="fcport_stats_class3_out_discards", description="The number of class 3 transmit frames discarded due to timeout (er_tx_c3_timeout).", 
+        self._gauge_class3_out_discards = BaseGauge(name="fcport_stats_class3_out_discards", description="The number of class 3 transmit frames discarded due to timeout (er_tx_c3_timeout).", 
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="class3-out-discards")
-        self._gauge_class3_out_discards_delta = BrocadeGauge(name="fcport_stats_class3_out_discards_delta", description="Delta of class 3 transmit frames discarded due to timeout (er_tx_c3_timeout).", 
+        self._gauge_class3_out_discards_delta = BaseGauge(name="fcport_stats_class3_out_discards_delta", description="Delta of class 3 transmit frames discarded due to timeout (er_tx_c3_timeout).", 
                                                              unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="class3-out-discards-delta")
-        self._gauge_class_3_discards = BrocadeGauge(name="fcport_stats_class_3_discards", description="The number of Class 3 frames discarded by this port (er_rx_c3_timeout + er_tx_c3_timeout).", 
+        self._gauge_class_3_discards = BaseGauge(name="fcport_stats_class_3_discards", description="The number of Class 3 frames discarded by this port (er_rx_c3_timeout + er_tx_c3_timeout).", 
                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="class-3-discards")
-        self._gauge_class_3_discards_delta = BrocadeGauge(name="fcport_stats_class_3_discards_delta", description="Delta of Class 3 frames discarded by this port (er_rx_c3_timeout + er_tx_c3_timeout).", 
+        self._gauge_class_3_discards_delta = BaseGauge(name="fcport_stats_class_3_discards_delta", description="Delta of Class 3 frames discarded by this port (er_rx_c3_timeout + er_tx_c3_timeout).", 
                                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="class-3-discards-delta")
-        self._gauge_crc_errors = BrocadeGauge(name="fcport_stats_crc_errors", description="The number of times that the CRC in a frame does not match the CRC that is computed by the receiver (er_crc).", 
+        self._gauge_crc_errors = BaseGauge(name="fcport_stats_crc_errors", description="The number of times that the CRC in a frame does not match the CRC that is computed by the receiver (er_crc).", 
                                               unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="crc-errors")
-        self._gauge_crc_errors_delta = BrocadeGauge(name="fcport_stats_crc_errors_delta", description="Delta of times that the CRC in a frame does not match the CRC that is computed by the receiver (er_crc).", 
+        self._gauge_crc_errors_delta = BaseGauge(name="fcport_stats_crc_errors_delta", description="Delta of times that the CRC in a frame does not match the CRC that is computed by the receiver (er_crc).", 
                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="crc-errors-delta")
-        self._gauge_delimiter_errors = BrocadeGauge(name="fcport_stats_delimiter_errors", 
+        self._gauge_delimiter_errors = BaseGauge(name="fcport_stats_delimiter_errors", 
                                                     description="Count of invalid frame delimiters that are received at this port. An example would be a frame that has a class 2 at the start and a class 3 at the end (portshow Delim_err).", 
                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="delimiter-errors")
-        self._gauge_delimiter_errors_delta = BrocadeGauge(name="fcport_stats_delimiter_errors_delta", 
+        self._gauge_delimiter_errors_delta = BaseGauge(name="fcport_stats_delimiter_errors_delta", 
                                                           description="Delta of invalid frame delimiters that are received at this port. An example would be a frame that has a class 2 at the start and a class 3 at the end (portshow Delim_err).", 
                                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="delimiter-errors-delta")
-        self._gauge_encoding_disparity_errors = BrocadeGauge(name="fcport_stats_encoding_disparity_errors", description="The total number of disparity errors received at this port (er_enc_in).", 
+        self._gauge_encoding_disparity_errors = BaseGauge(name="fcport_stats_encoding_disparity_errors", description="The total number of disparity errors received at this port (er_enc_in).", 
                                                              unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="encoding-disparity-errors")
-        self._gauge_encoding_disparity_errors_delta = BrocadeGauge(name="fcport_stats_encoding_disparity_errors_delta", description="Delta number of disparity errors received at this port (er_enc_in).", 
+        self._gauge_encoding_disparity_errors_delta = BaseGauge(name="fcport_stats_encoding_disparity_errors_delta", description="Delta number of disparity errors received at this port (er_enc_in).", 
                                                                    unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="encoding-disparity-errors-delta")
-        self._gauge_encoding_errors_outside_frame = BrocadeGauge(name="fcport_stats_encoding_errors_outside_frame", description="The number of encoding-error or disparity-error outside frames received (er_enc_out).", 
+        self._gauge_encoding_errors_outside_frame = BaseGauge(name="fcport_stats_encoding_errors_outside_frame", description="The number of encoding-error or disparity-error outside frames received (er_enc_out).", 
                                                                  unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="encoding-errors-outside-frame")
-        self._gauge_encoding_errors_outside_frame_delta = BrocadeGauge(name="fcport_stats_encoding_errors_outside_frame_delta", description="Delta of encoding-error or disparity-error outside frames received (er_enc_out).", 
+        self._gauge_encoding_errors_outside_frame_delta = BaseGauge(name="fcport_stats_encoding_errors_outside_frame_delta", description="Delta of encoding-error or disparity-error outside frames received (er_enc_out).", 
                                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="encoding-errors-outside-frame-delta")
-        self._gauge_f_busy_frames = BrocadeGauge(name="fcport_stats_f_busy_frames", description="The number of F_BSY (fabric busy) frames generated (portshow Fbsy).", 
+        self._gauge_f_busy_frames = BaseGauge(name="fcport_stats_f_busy_frames", description="The number of F_BSY (fabric busy) frames generated (portshow Fbsy).", 
                                                  unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="f-busy-frames")
-        self._gauge_f_busy_frames_delta = BrocadeGauge(name="fcport_stats_f_busy_frames_delta", description="Delta of F_BSY (fabric busy) frames generated (portshow Fbsy).", 
+        self._gauge_f_busy_frames_delta = BaseGauge(name="fcport_stats_f_busy_frames_delta", description="Delta of F_BSY (fabric busy) frames generated (portshow Fbsy).", 
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="f-busy-frames-delta")
-        self._gauge_f_rjt_frames = BrocadeGauge(name="fcport_stats_f_rjt_frames", description="The number of F_RJT (fabric frame reject) frames generated (portshow Frjt).", 
+        self._gauge_f_rjt_frames = BaseGauge(name="fcport_stats_f_rjt_frames", description="The number of F_RJT (fabric frame reject) frames generated (portshow Frjt).", 
                                                 unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="f-rjt-frames")
-        self._gauge_f_rjt_frames_delta = BrocadeGauge(name="fcport_stats_f_rjt_frames_delta", description="Delta of F_RJT (fabric frame reject) frames generated (portshow Frjt).", 
+        self._gauge_f_rjt_frames_delta = BaseGauge(name="fcport_stats_f_rjt_frames_delta", description="Delta of F_RJT (fabric frame reject) frames generated (portshow Frjt).", 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="f-rjt-frames-delta")
-        self._gauge_frames_processing_required = BrocadeGauge(name="fcport_stats_frames_processing_required", description="The number of frames which required processing on the port (portshow Proc_rqrd).", 
+        self._gauge_frames_processing_required = BaseGauge(name="fcport_stats_frames_processing_required", description="The number of frames which required processing on the port (portshow Proc_rqrd).", 
                                                               unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="frames-processing-required")
-        self._gauge_frames_processing_required_delta = BrocadeGauge(name="fcport_stats_frames_processing_required_delta", description="Delta of frames which required processing on the port (portshow Proc_rqrd).", 
+        self._gauge_frames_processing_required_delta = BaseGauge(name="fcport_stats_frames_processing_required_delta", description="Delta of frames which required processing on the port (portshow Proc_rqrd).", 
                                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="frames-processing-required-delta")
-        self._gauge_frames_timed_out = BrocadeGauge(name="fcport_stats_frames_timed_out", description="The number of frames which timed out during transmit on the port (portshow Timed_out).", 
+        self._gauge_frames_timed_out = BaseGauge(name="fcport_stats_frames_timed_out", description="The number of frames which timed out during transmit on the port (portshow Timed_out).", 
                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="frames-timed-out")
-        self._gauge_frames_timed_out_delta = BrocadeGauge(name="fcport_stats_frames_timed_out_delta", description="Delta of frames which timed out during transmit on the port (portshow Timed_out).", 
+        self._gauge_frames_timed_out_delta = BaseGauge(name="fcport_stats_frames_timed_out_delta", description="Delta of frames which timed out during transmit on the port (portshow Timed_out).", 
                                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="frames-timed-out-delta")
-        self._gauge_frames_too_long = BrocadeGauge(name="fcport_stats_frames_too_long", description="The number of frames longer than the maximum frame length (er_toolong).", 
+        self._gauge_frames_too_long = BaseGauge(name="fcport_stats_frames_too_long", description="The number of frames longer than the maximum frame length (er_toolong).", 
                                                    unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="frames-too-long")
-        self._gauge_frames_too_long_delta = BrocadeGauge(name="fcport_stats_frames_too_long_delta", description="Delta of frames longer than the maximum frame length (er_toolong).", 
+        self._gauge_frames_too_long_delta = BaseGauge(name="fcport_stats_frames_too_long_delta", description="Delta of frames longer than the maximum frame length (er_toolong).", 
                                                          unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="frames-too-long-delta")
-        self._gauge_frames_transmitter_unavailable_errors = BrocadeGauge(name="fcport_stats_frames_transmitter_unavailable_errors", description="The number of frames returned by an unavailable transmitter (portshow Tx_unavail).", 
+        self._gauge_frames_transmitter_unavailable_errors = BaseGauge(name="fcport_stats_frames_transmitter_unavailable_errors", description="The number of frames returned by an unavailable transmitter (portshow Tx_unavail).", 
                                                                          unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="frames-transmitter-unavailable-errors")
-        self._gauge_frames_transmitter_unavailable_errors_delta = BrocadeGauge(name="fcport_stats_frames_transmitter_unavailable_errors_delta", description="Delta of frames returned by an unavailable transmitter (portshow Tx_unavail).", 
+        self._gauge_frames_transmitter_unavailable_errors_delta = BaseGauge(name="fcport_stats_frames_transmitter_unavailable_errors_delta", description="Delta of frames returned by an unavailable transmitter (portshow Tx_unavail).", 
                                                                                unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="frames-transmitter-unavailable-errors-delta")
-        self._gauge_in_crc_errors = BrocadeGauge(name="fcport_stats_in_crc_errors", description="The number of CRC errors for all frames received (portshow Invalid_crc).", 
+        self._gauge_in_crc_errors = BaseGauge(name="fcport_stats_in_crc_errors", description="The number of CRC errors for all frames received (portshow Invalid_crc).", 
                                                  unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-crc-errors")
-        self._gauge_in_crc_errors_delta = BrocadeGauge(name="fcport_stats_in_crc_errors_delta", description="Delta of CRC errors for all frames received (portshow Invalid_crc).", 
+        self._gauge_in_crc_errors_delta = BaseGauge(name="fcport_stats_in_crc_errors_delta", description="Delta of CRC errors for all frames received (portshow Invalid_crc).", 
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-crc-errors-delta")
-        self._gauge_in_lcs = BrocadeGauge(name="fcport_stats_in_lcs", description="The number of link control (lcs) frames received (stat_lc_rx).", 
+        self._gauge_in_lcs = BaseGauge(name="fcport_stats_in_lcs", description="The number of link control (lcs) frames received (stat_lc_rx).", 
                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-lcs")
-        self._gauge_in_lcs_delta = BrocadeGauge(name="fcport_stats_in_lcs_delta", description="Delta of link control (lcs) frames received (stat_lc_rx).", 
+        self._gauge_in_lcs_delta = BaseGauge(name="fcport_stats_in_lcs_delta", description="Delta of link control (lcs) frames received (stat_lc_rx).", 
                                                 unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-lcs-delta")
-        self._gauge_invalid_ordered_sets = BrocadeGauge(name="fcport_stats_invalid_ordered_sets", description="The total number of invalid ordered sets received (er_bad_os).", 
+        self._gauge_invalid_ordered_sets = BaseGauge(name="fcport_stats_invalid_ordered_sets", description="The total number of invalid ordered sets received (er_bad_os).", 
                                                         unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="invalid-ordered-sets")
-        self._gauge_invalid_ordered_sets_delta = BrocadeGauge(name="fcport_stats_invalid_ordered_sets_delta", description="Delta of invalid ordered sets received (er_bad_os).", 
+        self._gauge_invalid_ordered_sets_delta = BaseGauge(name="fcport_stats_invalid_ordered_sets_delta", description="Delta of invalid ordered sets received (er_bad_os).", 
                                                               unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="invalid-ordered-sets-delta")
-        self._gauge_invalid_transmission_words = BrocadeGauge(name="fcport_stats_invalid_transmission_words", description="The number of invalid transmission words received at this port (portshow Invalid_word).", 
+        self._gauge_invalid_transmission_words = BaseGauge(name="fcport_stats_invalid_transmission_words", description="The number of invalid transmission words received at this port (portshow Invalid_word).", 
                                                               unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="invalid-transmission-words")
-        self._gauge_invalid_transmission_words_delta = BrocadeGauge(name="fcport_stats_invalid_transmission_words_delta", description="Delta of invalid transmission words received at this port (portshow Invalid_word).", 
+        self._gauge_invalid_transmission_words_delta = BaseGauge(name="fcport_stats_invalid_transmission_words_delta", description="Delta of invalid transmission words received at this port (portshow Invalid_word).", 
                                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="invalid-transmission-words-delta")
-        self._gauge_link_level_interrpts = BrocadeGauge(name="fcport_stats_link_level_interrpts", description="Total number of interrupts (portshow Interrupts).", 
+        self._gauge_link_level_interrpts = BaseGauge(name="fcport_stats_link_level_interrpts", description="Total number of interrupts (portshow Interrupts).", 
                                                         unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="link-level-interrpts")
-        self._gauge_link_level_interrpts_delta = BrocadeGauge(name="fcport_stats_link_level_interrpts_delta", description="Delta of interrupts (portshow Interrupts).", 
+        self._gauge_link_level_interrpts_delta = BaseGauge(name="fcport_stats_link_level_interrpts_delta", description="Delta of interrupts (portshow Interrupts).", 
                                                               unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="link-level-interrpts-delta")
-        self._gauge_multicast_timeouts = BrocadeGauge(name="fcport_stats_multicast_timeouts", description="The number of multicast frames that have timed out (er_multi_credit_loss).", 
+        self._gauge_multicast_timeouts = BaseGauge(name="fcport_stats_multicast_timeouts", description="The number of multicast frames that have timed out (er_multi_credit_loss).", 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="multicast-timeouts")
-        self._gauge_multicast_timeouts_delta = BrocadeGauge(name="fcport_stats_multicast_timeouts_delta", description="Delta of multicast frames that have timed out (er_multi_credit_loss).", 
+        self._gauge_multicast_timeouts_delta = BaseGauge(name="fcport_stats_multicast_timeouts_delta", description="Delta of multicast frames that have timed out (er_multi_credit_loss).", 
                                                             unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="multicast-timeouts-delta")
-        self._gauge_pcs_block_errors = BrocadeGauge(name="fcport_stats_pcs_block_errors", 
+        self._gauge_pcs_block_errors = BaseGauge(name="fcport_stats_pcs_block_errors", 
                                                     description="The number of physical coding sublayer (PCS) block errors. This counter records encoding violations on 10-Gb/s or 16-Gb/s ports (er_pcs_blk).", 
                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="pcs-block-errors")
-        self._gauge_pcs_block_errors_delta = BrocadeGauge(name="fcport_stats_pcs_block_errors_delta", 
+        self._gauge_pcs_block_errors_delta = BaseGauge(name="fcport_stats_pcs_block_errors_delta", 
                                                           description="Delta of physical coding sublayer (PCS) block errors. This counter records encoding violations on 10-Gb/s or 16-Gb/s ports (er_pcs_blk).", 
                                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="pcs-block-errors-delta")
-        self._gauge_primitive_sequence_protocol_error = BrocadeGauge(name="fcport_stats_primitive_sequence_protocol_error", 
+        self._gauge_primitive_sequence_protocol_error = BaseGauge(name="fcport_stats_primitive_sequence_protocol_error", 
                                                                      description="The number of primitive sequence protocol errors detected at this port (portshow Protocol_err).", 
                                                                      unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="primitive-sequence-protocol-error")
-        self._gauge_primitive_sequence_protocol_error_delta = BrocadeGauge(name="fcport_stats_primitive_sequence_protocol_error_delta", 
+        self._gauge_primitive_sequence_protocol_error_delta = BaseGauge(name="fcport_stats_primitive_sequence_protocol_error_delta", 
                                                                            description="Delta of primitive sequence protocol errors detected at this port (portshow Protocol_err).", 
                                                                            unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="primitive-sequence-protocol-error-delta")
         
         # Link reset on the remote switch (Lr_in)
-        self._gauge_in_link_resets = BrocadeGauge(name="fcport_stats_in_link_resets", description="The number of link resets received (portshow Lr_in).", 
+        self._gauge_in_link_resets = BaseGauge(name="fcport_stats_in_link_resets", description="The number of link resets received (portshow Lr_in).", 
                                                   unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-link-resets")
-        self._gauge_in_link_resets_delta = BrocadeGauge(name="fcport_stats_in_link_resets_delta", description="Delta of link resets received (portshow Lr_in).", 
+        self._gauge_in_link_resets_delta = BaseGauge(name="fcport_stats_in_link_resets_delta", description="Delta of link resets received (portshow Lr_in).", 
                                                         unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-link-resets-delta")
         # Number of Offline Primitive OLS received (Ols_in)
-        self._gauge_in_offline_sequences = BrocadeGauge(name="fcport_stats_in_offline_sequences", description="The total number of offline sequences received (portshow Ols_in).", 
+        self._gauge_in_offline_sequences = BaseGauge(name="fcport_stats_in_offline_sequences", description="The total number of offline sequences received (portshow Ols_in).", 
                                                         unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-offline-sequences")
-        self._gauge_in_offline_sequences_delta = BrocadeGauge(name="fcport_stats_in_offline_sequences_delta", description="Delta of offline sequences received (portshow Ols_in).", 
+        self._gauge_in_offline_sequences_delta = BaseGauge(name="fcport_stats_in_offline_sequences_delta", description="Delta of offline sequences received (portshow Ols_in).", 
                                                               unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-offline-sequences-delta")
         # Link reset on the local switch (Lr_out)
-        self._gauge_out_link_resets = BrocadeGauge(name="fcport_stats_out_link_resets", description="The total number of link resets transmitted (portshow Lr_out).", 
+        self._gauge_out_link_resets = BaseGauge(name="fcport_stats_out_link_resets", description="The total number of link resets transmitted (portshow Lr_out).", 
                                                    unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-link-resets")
-        self._gauge_out_link_resets_delta = BrocadeGauge(name="fcport_stats_out_link_resets_delta", description="Delta of link resets transmitted (portshow Lr_out).", 
+        self._gauge_out_link_resets_delta = BaseGauge(name="fcport_stats_out_link_resets_delta", description="Delta of link resets transmitted (portshow Lr_out).", 
                                                          unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-link-resets-delta")
         # Number of Offline Primitive OLS transmitted (Ols_out)
-        self._gauge_out_offline_sequences = BrocadeGauge(name="fcport_stats_out_offline_sequences", description="The total number of offline sequences transmitted (portshow Ols_out).", 
+        self._gauge_out_offline_sequences = BaseGauge(name="fcport_stats_out_offline_sequences", description="The total number of offline sequences transmitted (portshow Ols_out).", 
                                                          unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-offline-sequences")
-        self._gauge_out_offline_sequences_delta = BrocadeGauge(name="fcport_stats_out_offline_sequences_delta", description="Delta of offline sequences transmitted (portshow Ols_out).", 
+        self._gauge_out_offline_sequences_delta = BaseGauge(name="fcport_stats_out_offline_sequences_delta", description="Delta of offline sequences transmitted (portshow Ols_out).", 
                                                                unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-offline-sequences-delta")
         # Difference between delta Lr_in and delta Ols_out
-        self._gauge_lrin_delta_subtract_olsout_delta = BrocadeGauge(name="fcport_stats_lrin_delta_subtract_olsout_delta", 
+        self._gauge_lrin_delta_subtract_olsout_delta = BaseGauge(name="fcport_stats_lrin_delta_subtract_olsout_delta", 
                                                                     description="Difference between delta of link resets received (portshow Lr_in) and delta of offline sequences transmitted (portshow Ols_out).", 
                                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="lrin-delta_subtract_olsout-delta")
         # Difference between delta Lr_out and delta Ols_in
-        self._gauge_lrout_delta_subtract_olsin_delta = BrocadeGauge(name="fcport_stats_lrout_delta_subtract_olsin_delta", 
+        self._gauge_lrout_delta_subtract_olsin_delta = BaseGauge(name="fcport_stats_lrout_delta_subtract_olsin_delta", 
                                                                     description="Difference between delta of link resets transmitted (portshow Lr_out) and delta of offline sequences received (portshow Ols_in).", 
                                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="lrout-delta_subtract_olsin-delta")
         # Number of link failures (Link_failure)
-        self._gauge_link_failures = BrocadeGauge(name="fcport_stats_link_failures", description="The number of link failures at this port (portshow, porterrshow Link_failure).", 
+        self._gauge_link_failures = BaseGauge(name="fcport_stats_link_failures", description="The number of link failures at this port (portshow, porterrshow Link_failure).", 
                                                  unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="link-failures")
-        self._gauge_link_failures_delta = BrocadeGauge(name="fcport_stats_link_failures_delta", description="Delta of link failures at this port (portshow, porterrshow Link_failure).", 
+        self._gauge_link_failures_delta = BaseGauge(name="fcport_stats_link_failures_delta", description="Delta of link failures at this port (portshow, porterrshow Link_failure).", 
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="link-failures-delta")
         # Number of instances of signal loss detected (Loss_of_sig)
-        self._gauge_loss_of_signal = BrocadeGauge(name="fcport_stats_loss_of_signal", description="The number of signal loss instances detected at this port (portshow, porterrshow Loss_of_sig).", 
+        self._gauge_loss_of_signal = BaseGauge(name="fcport_stats_loss_of_signal", description="The number of signal loss instances detected at this port (portshow, porterrshow Loss_of_sig).", 
                                                   unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="loss-of-signal")
-        self._gauge_loss_of_signal_delta = BrocadeGauge(name="fcport_stats_loss_of_signal_delta", description="Delta of signal loss instances detected at this port (portshow, porterrshow Loss_of_sig).", 
+        self._gauge_loss_of_signal_delta = BaseGauge(name="fcport_stats_loss_of_signal_delta", description="Delta of signal loss instances detected at this port (portshow, porterrshow Loss_of_sig).", 
                                                         unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="loss-of-signal-delta")
         # Number of instances of synchronization loss detected (Loss_of_sync)
-        self._gauge_loss_of_sync = BrocadeGauge(name="fcport_stats_loss_of_sync", description="The number of instances of synchronization loss detected at this port (portshow, porterrshow Loss_of_sync).", 
+        self._gauge_loss_of_sync = BaseGauge(name="fcport_stats_loss_of_sync", description="The number of instances of synchronization loss detected at this port (portshow, porterrshow Loss_of_sync).", 
                                                 unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="loss-of-sync")
-        self._gauge_loss_of_sync_delta = BrocadeGauge(name="fcport_stats_loss_of_sync_delta", description="Delta of instances of synchronization loss detected at this port (portshow, porterrshow Loss_of_sync).", 
+        self._gauge_loss_of_sync_delta = BaseGauge(name="fcport_stats_loss_of_sync_delta", description="Delta of instances of synchronization loss detected at this port (portshow, porterrshow Loss_of_sync).", 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="loss-of-sync-delta")
 
         # remote port errors
-        self._gauge_remote_crc_errors = BrocadeGauge(name="fcport_stats_remote_crc_errors", description="The number of frames received with invalid CRC at the remote F_Port (remote_er_crc).", 
+        self._gauge_remote_crc_errors = BaseGauge(name="fcport_stats_remote_crc_errors", description="The number of frames received with invalid CRC at the remote F_Port (remote_er_crc).", 
                                                      unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-crc-errors")
-        self._gauge_remote_crc_errors_delta = BrocadeGauge(name="fcport_stats_remote_crc_errors_delta", description="Delta of frames received with invalid CRC at the remote F_Port (remote_er_crc).", 
+        self._gauge_remote_crc_errors_delta = BaseGauge(name="fcport_stats_remote_crc_errors_delta", description="Delta of frames received with invalid CRC at the remote F_Port (remote_er_crc).", 
                                                            unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-crc-errors-delta")
-        self._gauge_remote_fec_uncorrected = BrocadeGauge(name="fcport_stats_remote_fec_uncorrected", description="The number of frames uncorrected by the FEC block at the remote F_Port (remote_uncor_err).", 
+        self._gauge_remote_fec_uncorrected = BaseGauge(name="fcport_stats_remote_fec_uncorrected", description="The number of frames uncorrected by the FEC block at the remote F_Port (remote_uncor_err).", 
                                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-fec-uncorrected")
-        self._gauge_remote_fec_uncorrected_delta = BrocadeGauge(name="fcport_stats_remote_fec_uncorrected_delta", description="Delta of frames uncorrected by the FEC block at the remote F_Port (remote_uncor_err).", 
+        self._gauge_remote_fec_uncorrected_delta = BaseGauge(name="fcport_stats_remote_fec_uncorrected_delta", description="Delta of frames uncorrected by the FEC block at the remote F_Port (remote_uncor_err).", 
                                                                 unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-fec-uncorrected-delta")
-        self._gauge_remote_invalid_transmission_words = BrocadeGauge(name="fcport_stats_remote_invalid_transmission_words", 
+        self._gauge_remote_invalid_transmission_words = BaseGauge(name="fcport_stats_remote_invalid_transmission_words", 
                                                                      description="The number of invalid transmission words received at the remote F_Port (portshow remote_Invalid_word).", 
                                                                      unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-invalid-transmission-words")
-        self._gauge_remote_invalid_transmission_words_delta = BrocadeGauge(name="fcport_stats_remote_invalid_transmission_words_delta", 
+        self._gauge_remote_invalid_transmission_words_delta = BaseGauge(name="fcport_stats_remote_invalid_transmission_words_delta", 
                                                                            description="Delta of invalid transmission words received at the remote F_Port (portshow remote_Invalid_word).", 
                                                                            unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-invalid-transmission-words-delta")
-        self._gauge_remote_link_failures = BrocadeGauge(name="fcport_stats_remote_link_failures", description="The number of link failures at the remote F-port (portshow, porterrshow remote_Link_failure).", 
+        self._gauge_remote_link_failures = BaseGauge(name="fcport_stats_remote_link_failures", description="The number of link failures at the remote F-port (portshow, porterrshow remote_Link_failure).", 
                                                         unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-link-failures")
-        self._gauge_remote_link_failures_delta = BrocadeGauge(name="fcport_stats_remote_link_failures_delta", description="Delta of link failures at the remote F-port (portshow, porterrshow remote_Link_failure).", 
+        self._gauge_remote_link_failures_delta = BaseGauge(name="fcport_stats_remote_link_failures_delta", description="Delta of link failures at the remote F-port (portshow, porterrshow remote_Link_failure).", 
                                                               unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-link-failures-delta")
-        self._gauge_remote_loss_of_signal = BrocadeGauge(name="fcport_stats_remote_loss_of_signal", 
+        self._gauge_remote_loss_of_signal = BaseGauge(name="fcport_stats_remote_loss_of_signal", 
                                                          description="The number of instances of signal loss detected at the remote F_Port (portshow, porterrshow remote_Loss_of_sig).", 
                                                          unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-loss-of-signal")
-        self._gauge_remote_loss_of_signal_delta = BrocadeGauge(name="fcport_stats_remote_loss_of_signal_delta", 
+        self._gauge_remote_loss_of_signal_delta = BaseGauge(name="fcport_stats_remote_loss_of_signal_delta", 
                                                                description="Delta of instances of signal loss detected at the remote F_Port (portshow, porterrshow remote_Loss_of_sig).", 
                                                                unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-loss-of-signal-delta")
-        self._gauge_remote_loss_of_sync = BrocadeGauge(name="fcport_stats_remote_loss_of_sync", 
+        self._gauge_remote_loss_of_sync = BaseGauge(name="fcport_stats_remote_loss_of_sync", 
                                                        description="The number of instances of synchronization loss detected at the remote F_Port (portshow, porterrshow remote_Loss_of_sync).", 
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-loss-of-sync")
-        self._gauge_remote_loss_of_sync_delta = BrocadeGauge(name="fcport_stats_remote_loss_of_sync_delta", 
+        self._gauge_remote_loss_of_sync_delta = BaseGauge(name="fcport_stats_remote_loss_of_sync_delta", 
                                                              description="Delta of instances of synchronization loss detected at the remote F_Port (portshow, porterrshow remote_Loss_of_sync).", 
                                                              unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-loss-of-sync-delta")
-        self._gauge_remote_primitive_sequence_protocol_error = BrocadeGauge(name="fcport_stats_remote_primitive_sequence_protocol_error", 
+        self._gauge_remote_primitive_sequence_protocol_error = BaseGauge(name="fcport_stats_remote_primitive_sequence_protocol_error", 
                                                                             description="The number of primitive sequence protocol errors detected at the remote F_Port (portshow remote_Protocol_err).", 
                                                                             unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-primitive-sequence-protocol-error")
-        self._gauge_remote_primitive_sequence_protocol_error_delta = BrocadeGauge(name="fcport_stats_remote_primitive_sequence_protocol_error_delta", 
+        self._gauge_remote_primitive_sequence_protocol_error_delta = BaseGauge(name="fcport_stats_remote_primitive_sequence_protocol_error_delta", 
                                                                                   description="Delta of primitive sequence protocol errors detected at the remote F_Port (portshow remote_Protocol_err).", 
                                                                                   unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="remote-primitive-sequence-protocol-error-delta")
-        self._gauge_too_many_rdys = BrocadeGauge(name="fcport_stats_too_many_rdys", description="The number of instances in which the number of RDYs (readys) exceeded the number of frames received (tim_rdy_pri).", 
+        self._gauge_too_many_rdys = BaseGauge(name="fcport_stats_too_many_rdys", description="The number of instances in which the number of RDYs (readys) exceeded the number of frames received (tim_rdy_pri).", 
                                                  unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="too-many-rdys")
-        self._gauge_too_many_rdys_delta = BrocadeGauge(name="fcport_stats_too_many_rdys_delta", description="Delta of instances in which the number of RDYs (readys) exceeded the number of frames received (tim_rdy_pri).", 
+        self._gauge_too_many_rdys_delta = BaseGauge(name="fcport_stats_too_many_rdys_delta", description="Delta of instances in which the number of RDYs (readys) exceeded the number of frames received (tim_rdy_pri).", 
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="too-many-rdys-delta")
-        self._gauge_truncated_frames = BrocadeGauge(name="fcport_stats_truncated_frames", description="The total number of truncated frames received (er_trunc).", 
+        self._gauge_truncated_frames = BaseGauge(name="fcport_stats_truncated_frames", description="The total number of truncated frames received (er_trunc).", 
                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="truncated-frames")
-        self._gauge_truncated_frames_delta = BrocadeGauge(name="fcport_stats_truncated_frames_delta", description="Delta of truncated frames received (er_trunc).", 
+        self._gauge_truncated_frames_delta = BaseGauge(name="fcport_stats_truncated_frames_delta", description="Delta of truncated frames received (er_trunc).", 
                                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="truncated-frames-delta")
 
         # summary port error status id
         # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         # low severiry errors port status id
-        description_low_severity_errors_port_status_id = f"Port error status ID {FCPortStatsToolbar.STATUS_ID} for the LOW severity errors {BrocadeFCPortStatisticsParser.LOW_SEVERITY_ERROR_LEAFS}."
-        self._gauge_low_severity_errors_port_status_id = BrocadeGauge(name="fcport_stats_low_severity_errors_port_status_id", description=description_low_severity_errors_port_status_id, 
+        description_low_severity_errors_port_status_id = f"Port error status ID {FCPortStatsToolbar.STATUS_ID} for the LOW severity errors {FCPortStatisticsParser.LOW_SEVERITY_ERROR_LEAFS}."
+        self._gauge_low_severity_errors_port_status_id = BaseGauge(name="fcport_stats_low_severity_errors_port_status_id", description=description_low_severity_errors_port_status_id, 
                                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="low-severity-errors_port-status-id")
         # medium severiry errors port status id
-        description_medium_severity_errors_port_status_id = f"Port error status ID {FCPortStatsToolbar.STATUS_ID} for the MEDIUM severity errors {BrocadeFCPortStatisticsParser.MEDIUM_SEVERITY_ERROR_LEAFS}."
-        self._gauge_medium_severity_errors_port_status_id = BrocadeGauge(name="fcport_stats_medium_severity_errors_port_status_id", description=description_medium_severity_errors_port_status_id, 
+        description_medium_severity_errors_port_status_id = f"Port error status ID {FCPortStatsToolbar.STATUS_ID} for the MEDIUM severity errors {FCPortStatisticsParser.MEDIUM_SEVERITY_ERROR_LEAFS}."
+        self._gauge_medium_severity_errors_port_status_id = BaseGauge(name="fcport_stats_medium_severity_errors_port_status_id", description=description_medium_severity_errors_port_status_id, 
                                                                          unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="medium-severity-errors_port-status-id")
         # high severiry errors port status id
-        description_high_severity_errors_port_status_id = f"Port error status ID {FCPortStatsToolbar.STATUS_ID} for the HIGH severity errors {BrocadeFCPortStatisticsParser.HIGH_SEVERITY_ERROR_LEAFS}."
-        self._gauge_high_severity_errors_port_status_id = BrocadeGauge(name="fcport_stats_high_severity_errors_port_status_id", description=description_high_severity_errors_port_status_id, 
+        description_high_severity_errors_port_status_id = f"Port error status ID {FCPortStatsToolbar.STATUS_ID} for the HIGH severity errors {FCPortStatisticsParser.HIGH_SEVERITY_ERROR_LEAFS}."
+        self._gauge_high_severity_errors_port_status_id = BaseGauge(name="fcport_stats_high_severity_errors_port_status_id", description=description_high_severity_errors_port_status_id, 
                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="high-severity-errors_port-status-id")
         
         # in rate gauges
-        self._gauge_in_peak_rate = BrocadeGauge(name="fcport_stats_in_peak_rate", description="The peak byte receive rate in MB/s.", 
+        self._gauge_in_peak_rate = BaseGauge(name="fcport_stats_in_peak_rate", description="The peak byte receive rate in MB/s.", 
                                                 unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-Mbytes")
-        self._gauge_in_peak_rate_percentage = BrocadeGauge(name="fcport_stats_in_peak_rate_percentage", description="The percentage of peak receive rate from maximum port throughput.", 
+        self._gauge_in_peak_rate_percentage = BaseGauge(name="fcport_stats_in_peak_rate_percentage", description="The percentage of peak receive rate from maximum port throughput.", 
                                                            unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-percentage")
-        # self._gauge_in_peak_rate_bits = BrocadeGauge(name="fcport_stats_in_peak_rate_bits", description="The peak bit receive rate.", 
+        # self._gauge_in_peak_rate_bits = BaseGauge(name="fcport_stats_in_peak_rate_bits", description="The peak bit receive rate.", 
         #                                              unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-bits")
-        self._gauge_in_rate = BrocadeGauge(name="fcport_stats_in_rate", description="The instantaneous byte receive rate in MB/s.", 
+        self._gauge_in_rate = BaseGauge(name="fcport_stats_in_rate", description="The instantaneous byte receive rate in MB/s.", 
                                            unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-rate-Mbytes")
-        self._gauge_in_rate_percentage = BrocadeGauge(name="fcport_stats_in_rate_percentage", description="The percentage of the instantaneous receive rate from maximum port throughput.", 
+        self._gauge_in_rate_percentage = BaseGauge(name="fcport_stats_in_rate_percentage", description="The percentage of the instantaneous receive rate from maximum port throughput.", 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-rate-percentage")
-        # self._gauge_in_rate_bits = BrocadeGauge(name="fcport_stats_in_rate_bits", description="The instantaneous bit receive rate.", unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-rate-bits")
+        # self._gauge_in_rate_bits = BaseGauge(name="fcport_stats_in_rate_bits", description="The instantaneous bit receive rate.", unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-rate-bits")
         
         # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         description_in_rate_status_id = f"The instantaneous receive rate status id {FCPortStatsToolbar.STATUS_ID}."
-        self._gauge_in_rate_status_id = BrocadeGauge(name="fcport_stats_in_rate_status_id", description=description_in_rate_status_id, 
+        self._gauge_in_rate_status_id = BaseGauge(name="fcport_stats_in_rate_status_id", description=description_in_rate_status_id, 
                                                      unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-rate-status-id")
         
         # out rate gauges
-        self._gauge_out_peak_rate = BrocadeGauge(name="fcport_stats_out_peak_rate", description="The peak byte transmit rate in MB/s.", 
+        self._gauge_out_peak_rate = BaseGauge(name="fcport_stats_out_peak_rate", description="The peak byte transmit rate in MB/s.", 
                                                  unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-Mbytes")
-        self._gauge_out_peak_rate_percentage = BrocadeGauge(name="fcport_stats_out_peak_rate_percentage", description="The percentage of peak transmit rate from maximum port throughput.", 
+        self._gauge_out_peak_rate_percentage = BaseGauge(name="fcport_stats_out_peak_rate_percentage", description="The percentage of peak transmit rate from maximum port throughput.", 
                                                             unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-percentage")
-        # self._gauge_out_peak_rate_bits = BrocadeGauge(name="fcport_stats_out_peak_rate_bits", description="The peak bit transmit rate.", 
+        # self._gauge_out_peak_rate_bits = BaseGauge(name="fcport_stats_out_peak_rate_bits", description="The peak bit transmit rate.", 
         #                                               unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-bits")
-        self._gauge_out_rate = BrocadeGauge(name="fcport_stats_out_rate", description="The instantaneous byte transmit rate in MB/s.", 
+        self._gauge_out_rate = BaseGauge(name="fcport_stats_out_rate", description="The instantaneous byte transmit rate in MB/s.", 
                                             unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-rate-Mbytes")
-        self._gauge_out_rate_percentage = BrocadeGauge(name="fcport_stats_out_rate_percentage", description="The percentage of the instantaneous transmit rate from maximum port throughput.", 
+        self._gauge_out_rate_percentage = BaseGauge(name="fcport_stats_out_rate_percentage", description="The percentage of the instantaneous transmit rate from maximum port throughput.", 
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-rate-percentage")
-        # self._gauge_out_rate_bits = BrocadeGauge(name="fcport_stats_out_rate_bits", description="The instantaneous bit transmit rate.", 
+        # self._gauge_out_rate_bits = BaseGauge(name="fcport_stats_out_rate_bits", description="The instantaneous bit transmit rate.", 
         #                                          unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-rate-bits")
         # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         description_out_rate_status_id = f"The instantaneous transmit rate status id {FCPortStatsToolbar.STATUS_ID}."
-        self._gauge_out_rate_status_id = BrocadeGauge(name="fcport_stats_out_rate_status_id", description=description_out_rate_status_id, 
+        self._gauge_out_rate_status_id = BaseGauge(name="fcport_stats_out_rate_status_id", description=description_out_rate_status_id, 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-rate-status-id")
 
         # total number of frames in human-readable format counters gauges
-        self._gauge_class_3_frames_hrf = BrocadeGauge(name="fcport_stats_class_3_frames_hrf", description="The number of Class 3 frames received at this port (stat_c3_frx) in human-readable format.", 
+        self._gauge_class_3_frames_hrf = BaseGauge(name="fcport_stats_class_3_frames_hrf", description="The number of Class 3 frames received at this port (stat_c3_frx) in human-readable format.", 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, parameter_key="class-3-frames-hrf")
-        self._gauge_in_frames_hrf = BrocadeGauge(name="fcport_stats_in_frames_hrf", description="The number of frames received at this port (stat_frx) in human-readable format.", 
+        self._gauge_in_frames_hrf = BaseGauge(name="fcport_stats_in_frames_hrf", description="The number of frames received at this port (stat_frx) in human-readable format.", 
                                                  unit_keys=FCPortStatsToolbar.switch_port_keys, parameter_key="in-frames-hrf")
-        self._gauge_out_frames_hrf = BrocadeGauge(name="fcport_stats_out_frames_hrf", description="The number of frames transmitted from this port (stat_ftx) in human-readable format.", 
+        self._gauge_out_frames_hrf = BaseGauge(name="fcport_stats_out_frames_hrf", description="The number of frames transmitted from this port (stat_ftx) in human-readable format.", 
                                                   unit_keys=FCPortStatsToolbar.switch_port_keys, parameter_key="out-frames-hrf")
 
 
 
-    def fill_toolbar_gauge_metrics(self, fcport_stats_parser: BrocadeFCPortStatisticsParser) -> None:
+    def fill_toolbar_gauge_metrics(self, fcport_stats_parser: FCPortStatisticsParser) -> None:
         """Method to fill the gauge metrics for the toolbar.
 
         Args:

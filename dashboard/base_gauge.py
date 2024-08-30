@@ -8,7 +8,7 @@ Created on Sun Jun 23 01:19:28 2024
 
 from typing import Dict, List, Union
 
-from prometheus_client import Gauge, start_http_server, CollectorRegistry
+from prometheus_client import Gauge
 
 
 class BaseGauge:
@@ -276,26 +276,6 @@ class BaseGauge:
         """
 
         return [key.replace('-', char) for key in keys]
-    
-
-            
-    # def fill_chassis_components_gauge_metrics(self, gauge_data: Dict[int, Dict[str, Union[str, int]]]):
-
-    #     if not gauge_data:
-    #         return
-        
-
-    #     for gauge_data_component in gauge_data.values():
-        
-    #         if not gauge_data_component:
-    #             continue
-
-    #         if isinstance(gauge_data_component, dict):
-    #             self.add_gauge_metric(gauge_data_component)
-
-    # @property
-    # def registry(self):
-    #     return self._registry
     
 
     @property

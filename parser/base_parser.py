@@ -1,8 +1,8 @@
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+from switch_telemetry_request import SwitchTelemetryRequest
 from typing import Dict, List, Optional, Tuple, Union, Literal
 
 
-class BrocadeTelemetryParser:
+class BaseParser:
     """
     Class to create switch telemetry parser.
 
@@ -27,13 +27,13 @@ class BrocadeTelemetryParser:
     STATUS_ID_TAG = '-status-id'
     PREV_TAG = '-prev'
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch.
         """
 
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        self._sw_telemetry: SwitchTelemetryRequest = sw_telemetry
         self._ch_wwn = self._get_chassis_wwn()
         self._ch_name = self._get_chassis_name()
         self._telemetry_date = self._get_telemetry_datetime('date')
@@ -74,7 +74,7 @@ class BrocadeTelemetryParser:
         return self.sw_telemetry.chassis[key]
                 
     
-    def same_chassis(self, other: 'BrocadeTelemetryParser') -> bool:
+    def same_chassis(self, other: 'BaseParser') -> bool:
         """Method detects if two instances of BrocadeTelemetryParser class are from the same chassis.
 
         Args:
@@ -124,9 +124,9 @@ class BrocadeTelemetryParser:
             # slot_port port values from the previous
             port_prev_dct = ports_vfid_prev_dct[slot_port]
             # find changed values for the changed_keys
-            port_changed_dct = BrocadeTelemetryParser.get_changed_values(port_now_dct, port_prev_dct, changed_keys)
+            port_changed_dct = BaseParser.get_changed_values(port_now_dct, port_prev_dct, changed_keys)
             # add slot_port constant values to the non-empty port dictionary
-            BrocadeTelemetryParser.copy_dict_values(port_changed_dct, port_now_dct, keys=const_keys)                    
+            BaseParser.copy_dict_values(port_changed_dct, port_now_dct, keys=const_keys)                    
 
             if port_changed_dct:
                 # add time stamps
@@ -158,9 +158,9 @@ class BrocadeTelemetryParser:
         """
 
         # find changed values for the changed_keys
-        chassis_changed_dct = BrocadeTelemetryParser.get_changed_values(now_dct, prev_dct, changed_keys)
+        chassis_changed_dct = BaseParser.get_changed_values(now_dct, prev_dct, changed_keys)
         # add constant values to the non-empty port dictionary
-        BrocadeTelemetryParser.copy_dict_values(chassis_changed_dct, now_dct, keys=const_keys)                    
+        BaseParser.copy_dict_values(chassis_changed_dct, now_dct, keys=const_keys)                    
 
         if chassis_changed_dct:
             # add time stamps

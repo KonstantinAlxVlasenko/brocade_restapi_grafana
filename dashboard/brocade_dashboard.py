@@ -1,24 +1,12 @@
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_request_status_toolbar import BrocadeRequestStatusToolbar
-from brocade_chassis_toolbar import BrocadeChassisToolbar
-from brocade_fru_toolbar import BrocadeFRUToolbar
-from brocade_maps_system_toolbar import BrocadeMAPSSystemToolbar
-from brocade_maps_dashboard_toolbar import BrocadeMAPSDashboardToolbar
-from brocade_switch_toolbar import BrocadeSwitchToolbar
-from brocade_fabricshow_toolbar import BrocadeFabricShowToolbar
-from brocade_fcport_params_toolbar import BrocadeFCPortParamsToolbar
-from brocade_sfp_media_toolbar import BrocadeSFPMediaToolbar
-from brocade_fcport_stats_toolbar import BrocadeFCPortStatsToolbar
-from brocade_log_toolbar import BrocadeLogToolbar
+from parser import (ChassisParser, FCPortParametersParser,
+                    FCPortStatisticsParser, FRUParser, MAPSParser,
+                    RequestStatusParser, SFPMediaParser, SwitchParser)
 
-from brocade_telemetry_request_status import BrocadeRequestStatus
-from brocade_chassis_parser import BrocadeChassisParser
-from brocade_fru_parser import BrocadeFRUParser
-from brocade_maps_parser import BrocadeMAPSParser
-from brocade_switch_parser import BrocadeSwitchParser
-from brocade_fcport_params_parser import BrocadeFCPortParametersParser
-from brocade_sfp_media_parser import BrocadeSFPMediaParser
-from brocade_fcport_stats_parser import BrocadeFCPortStatisticsParser
+from dashboard import (ChassisToolbar, FabricShowToolbar, FCPortParamsToolbar,
+                       FCPortStatsToolbar, FRUToolbar, LogToolbar,
+                       MAPSDashboardToolbar, MAPSSystemToolbar,
+                       RequestStatusToolbar, SFPMediaToolbar, SwitchToolbar)
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
 class BrocadeDashboard:
@@ -31,36 +19,36 @@ class BrocadeDashboard:
     """
 
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry) -> None:
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest) -> None:
         """  
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
 
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        self._sw_telemetry: SwitchTelemetryRequest = sw_telemetry
 
-        self._request_status_tb = BrocadeRequestStatusToolbar(self.sw_telemetry)
-        # self._chassis_tb = BrocadeChassisToolbar(self.sw_telemetry)
-        # self._fru_tb = BrocadeFRUToolbar(self.sw_telemetry)
-        # self._maps_system_tb = BrocadeMAPSSystemToolbar(self.sw_telemetry)
-        # self._maps_dashboard_tb = BrocadeMAPSDashboardToolbar(self.sw_telemetry)
-        # self._switch_tb = BrocadeSwitchToolbar(self.sw_telemetry)
-        # self._fabricshow_tb = BrocadeFabricShowToolbar(self.sw_telemetry)
-        # self._fcport_params_tb = BrocadeFCPortParamsToolbar(self.sw_telemetry)
-        # self._sfp_media_tb = BrocadeSFPMediaToolbar(self.sw_telemetry)
-        # self._fcport_stats_tb = BrocadeFCPortStatsToolbar(self.sw_telemetry)
-        # self._log_tb = BrocadeLogToolbar(self.sw_telemetry)
+        self._request_status_tb = RequestStatusToolbar(self.sw_telemetry)
+        self._chassis_tb = ChassisToolbar(self.sw_telemetry)
+        self._fru_tb = FRUToolbar(self.sw_telemetry)
+        self._maps_system_tb = MAPSSystemToolbar(self.sw_telemetry)
+        self._maps_dashboard_tb = MAPSDashboardToolbar(self.sw_telemetry)
+        self._switch_tb = SwitchToolbar(self.sw_telemetry)
+        self._fabricshow_tb = FabricShowToolbar(self.sw_telemetry)
+        self._fcport_params_tb = FCPortParamsToolbar(self.sw_telemetry)
+        self._sfp_media_tb = SFPMediaToolbar(self.sw_telemetry)
+        self._fcport_stats_tb = FCPortStatsToolbar(self.sw_telemetry)
+        self._log_tb = LogToolbar(self.sw_telemetry)
 
 
     def fill_dashboard_gauge_metrics(self, 
-                                    request_status_parser: BrocadeRequestStatus,
-                                    ch_parser: BrocadeChassisParser,
-                                    fru_parser: BrocadeFRUParser,
-                                    maps_parser: BrocadeMAPSParser,
-                                    sw_parser: BrocadeSwitchParser,
-                                    fcport_params_parser: BrocadeFCPortParametersParser,
-                                    sfp_media_parser: BrocadeSwitchParser,
-                                    fcport_stats_parser: BrocadeFCPortStatisticsParser) -> None:
+                                    request_status_parser: RequestStatusParser,
+                                    ch_parser: ChassisParser,
+                                    fru_parser: FRUParser,
+                                    maps_parser: MAPSParser,
+                                    sw_parser: SwitchParser,
+                                    fcport_params_parser: FCPortParametersParser,
+                                    sfp_media_parser: SFPMediaParser,
+                                    fcport_stats_parser: FCPortStatisticsParser) -> None:
         
 
         print('request_status')
@@ -96,7 +84,6 @@ class BrocadeDashboard:
         # print('log')
         # self.log_tb.fill_toolbar_gauge_metrics(sw_parser, fcport_params_parser, sfp_media_parser, 
         #                                   fcport_stats_parser, fru_parser, maps_parser)
-
 
 
     def __repr__(self):

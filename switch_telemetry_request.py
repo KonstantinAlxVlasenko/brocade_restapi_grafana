@@ -5,29 +5,34 @@ Created on Thu Feb  8 15:35:40 2024
 @author: kavlasenko
 """
 
-from typing import Any
-import time
-import httpx
-
-    
-import sys
-from ipaddress import ip_address
-import requests
-from requests.auth import HTTPBasicAuth
 from datetime import datetime
-import os
-from dotenv import load_dotenv
+from ipaddress import ip_address
+from typing import Any, List, Optional
 
-    
+import httpx
+from requests.auth import HTTPBasicAuth
+
+
 class SwitchTelemetryRequest:
+    """
+    Class to perform Brocade switch http telemetry requests.
+    Requested modules: 
     
-    # USERNAME = '***'
-    # PASSWORD = '***'
+    VF independent: 'chassis', 'fibrechannel-logical-switch', 'time-zone', 'clock-server', 
+                        'power-supply', 'fan', 'sensor', 'switch-status-policy-report', 
+                        'system-resources', 'license', 
+                        
+    VF dependent: 'fabric-switch',  'fibrechannel-switch', 'maps-policy', 'maps-config', 
+                    'dashboard-rule', 'fibrechannel', 'fibrechannel-statistics',  
+                    'media-rdp', 'hba', 'port', 'fibrechannel-name-server'.           
+
+    Attributes:
+        sw_ipaddress (ip_address): IP address of the switch.
+        username (str): Username to access the switch.
+        password (str): Password to access the switch.
+        seccure_access (bool): True if httttps is used. False if http is used. Default is False (http).
+    """
     
-    # load_dotenv()
-    
-    # USERNAME = os.getenv("SW_USERNAME")
-    # PASSWORD = os.getenv("SW_PASSWORD")
 
     HEADERS = {
         'Accept': 'application/yang-data+json', 
@@ -37,13 +42,22 @@ class SwitchTelemetryRequest:
     VF_MODE_RETRIEVE_ERROR = {'errors': {'error': [{'error-message': 'VF mode has not been retreived'}]}}
     VF_ID_RETRIEVE_ERROR = {'errors': {'error': [{'error-message': 'VF IDs has not been retreived'}]}}
     
-    def __init__(self, sw_ipaddress: ip_address, username, password, secure_access=False):
+
+    def __init__(self, sw_ipaddress: ip_address, username: str, password: str, secure_access: bool = False):
+        """
+        Args:
+            sw_ipaddress (ip_address): IP address of the switch.
+            username (str): Username to access the switch.
+            password (str): Password to access the switch.
+            seccure_access (bool): True if httttps is used. False if http is used. Default is False (http).
+        """
         
         self._sw_ipaddress = ip_address(sw_ipaddress)
         self._username = username
         self._password = password
         self._secure_access = secure_access
         
+        # VF independent attributes
         self._chassis = {}
         self._fc_logical_switch = {}
         self._ts_timezone = {}
@@ -74,12 +88,10 @@ class SwitchTelemetryRequest:
                 container.update(self._get_sw_telemetry(client, module_name, module_type))
                 SwitchTelemetryRequest._get_container_error_message(container)
             
-            
-        
         self._vf_enabled = self._check_vfmode_on()
         self._vfid_lst = self._get_vfid_list()
         
-        
+        # VF dependent attributes
         self._fabric_switch = {}
         self._fc_switch = {}
         self._maps_policy = {}
@@ -151,31 +163,30 @@ class SwitchTelemetryRequest:
                     for container, (module_name, module_type) in self._vf_unique_containers:
                         container[vf_id] = self._get_sw_telemetry(client, module_name, module_type, vf_id)
                         SwitchTelemetryRequest._get_container_error_message(container[vf_id])
-                
-            
-        
-    def _create_restapi_url(self, module_name: str, module_type: str):
-        
-        login_protocol = ('https' if self.secure_access else 'http') + r'://'
-        url = login_protocol + self.sw_ipaddress + '/rest/running/' + module_name + '/' + module_type
-        return url
-    
-    def _get_sw_telemetry(self, client, module_name: str, module_type: str, vf_id: int=None):
+
+
+    def _get_sw_telemetry(self, client: httpx.Client, module_name: str, module_type: str, vf_id: int=None) -> dict:
+        """Funtion retrieves switch telemetry of the module_name and module_type for the vf_id.
+
+        Args:
+            client (httpx.Client): client to connect to the switch.
+            module_name (str): module to request (for example brocade-fru)
+            module_type (str): sub-module in a module tree to request (for example fan or power-supply)
+            vf_id (int, optional): virtual fabric id for the VF dependent modules. Defaults to None.
+
+        Returns:
+            dict: switch telemetry of the module_name and module_type for the vf_id.
+        """
 
         url = self._create_restapi_url(module_name, module_type)
-
-        # print(url)
-
         params = {'vf-id': vf_id} if vf_id else {}
         
         try:
-            
             response = client.get(url, 
                                     auth=HTTPBasicAuth(self.username, self.password),
                                     params=params,
                                     headers=SwitchTelemetryRequest.HEADERS,
                                     timeout=31)
-            
             current_telemetry = response.json()
             current_telemetry['status-code'] = response.status_code
             current_telemetry['date'] = datetime.now().strftime("%d/%m/%Y")
@@ -185,48 +196,65 @@ class SwitchTelemetryRequest:
             return current_telemetry
         
         except (Exception) as error:
-            # print ("Error", error)
             current_telemetry ={'errors': {'error': [{'error-message': str(error)}]}}
             current_telemetry['status-code'] = None
             current_telemetry['date'] = datetime.now().strftime("%d/%m/%Y")
             current_telemetry['time'] = datetime.now().strftime("%H:%M:%S")
-            
             return current_telemetry
         
-    
-    def _check_vfmode_on(self) -> str:
+
+    def _create_restapi_url(self, module_name: str, module_type: str) -> str:
+        """Function generates REST API url to request module data.
+
+        Args:
+            module_name (str): module to request (for example brocade-fru)
+            module_type (str): sub-module in a module tree to request (for example fan or power-supply)
+
+        Returns:
+            str: REST API url to request module data.
         """
-        Function extracts leaf value from the chassis container.
         
-        :param1 leaf_name: container leaf name
-        :returns: chassis container leaf value or error message
+        login_protocol = ('https' if self.secure_access else 'http') + r'://'
+        url = login_protocol + self.sw_ipaddress + '/rest/running/' + module_name + '/' + module_type
+        return url
+    
+
+    
+    def _check_vfmode_on(self) -> bool:
+        """
+        Function extracts 'vf-enabled' leaf value from the chassis container.
+        
+        Returns:
+            bool: True if 'vf-enabled' leaf value is True, False otherwise.
         """
         
         if self.chassis.get('Response'):
             return self.chassis['Response']['chassis']['vf-enabled']
         
     
-    def _get_vfid_list(self):
-        
+    def _get_vfid_list(self) -> List[Optional[int]]:
+        """Function gets list of virtual fabric ids configured on the switch.
+
+        Returns:
+            List[Optional[int]]: list of vf_id.
+        """
         
         if self.fc_logical_switch.get('Response'):
             vfid_lst = []
             container = self.fc_logical_switch['Response']['fibrechannel-logical-switch']
             for logical_sw in container:
                 vfid_lst.append(logical_sw['fabric-id'])
-            return vfid_lst
-        
-    
-    def __repr__(self):
-
-        return f"{self.__class__.__name__} ip_address: {self.sw_ipaddress}"
-    
+            return vfid_lst    
 
 
     @staticmethod
     def _get_container_error_message(container):
-        
-        # print('Checking errors')
+        """Function extracts error messages from the container, join them and adds it to the container
+        under 'error-message' key.
+
+        Args:
+            container(dict): class container to extract error messages from.
+        """
    
         if 'errors' in container:
             errors_lst = container['errors']['error']
@@ -238,6 +266,9 @@ class SwitchTelemetryRequest:
         else:
             container['error-message'] = None    
 
+
+    def __repr__(self):
+        return f"{self.__class__.__name__} ip_address: {self.sw_ipaddress}"
 
 
     @property

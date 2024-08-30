@@ -6,14 +6,14 @@ Created on Tue Mar  5 13:01:32 2024
 """
 
 import re
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Self
 
-from brocade_base_parser import BrocadeTelemetryParser
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_switch_parser import BrocadeSwitchParser
+from base_parser import BaseParser
+from switch_telemetry_request import SwitchTelemetryRequest
+from switch_parser import SwitchParser
 
 
-class FCPortParametersParser(BrocadeTelemetryParser):
+class FCPortParametersParser(BaseParser):
     """
     Class to create fc port parameters dictionaries.
 
@@ -77,15 +77,17 @@ class FCPortParametersParser(BrocadeTelemetryParser):
                       64_000_000_000: 6487}
     
     
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, sw_parser: BrocadeSwitchParser, fcport_params_prev=None):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest, sw_parser: SwitchParser, fcport_params_prev: Self = None):
         """
         Args:
-            sw_telemetry: set of switch telemetry retrieved from the switch
+            sw_telemetry: set of switch telemetry retrieved from the switch.
+            sw_parser (BrocadeSwitchParser): switch parameters retrieved from the sw_telemetry.
+            fcport_params_prev (FCPortParametersParser): 
         """
         
         super().__init__(sw_telemetry)
         # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
-        self._sw_parser: BrocadeSwitchParser = sw_parser
+        self._sw_parser: SwitchParser = sw_parser
         self._port_owner = self._get_ports_owner()
         self._fcport_params = self. _get_port_params_values()
         if self.fcport_params:

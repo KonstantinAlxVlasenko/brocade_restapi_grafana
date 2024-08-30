@@ -1,7 +1,7 @@
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_switch_parser import BrocadeSwitchParser
+from switch_telemetry_request import SwitchTelemetryRequest
+from parser import SwitchParser
 
-class BrocadeToolbar:
+class BaseToolbar:
     """
     Class to create a toolbar. Toolbar is a group of prometheus gauges for Brocade switch.
 
@@ -29,17 +29,17 @@ class BrocadeToolbar:
 
     STATUS_ID = {1: 'OK', 2: 'Unknown', 3: 'Warning', 4: 'Critical'}
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry) -> None:
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest) -> None:
         """  
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
         """
 
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        self._sw_telemetry: SwitchTelemetryRequest = sw_telemetry
 
 
     @staticmethod
-    def clone_chassis_to_vf(chassis_level_parser: dict, sw_parser: BrocadeSwitchParser, component_level=False) -> dict:
+    def clone_chassis_to_vf(chassis_level_parser: dict, sw_parser: SwitchParser, component_level=False) -> dict:
         """
         Method converts chassis_level_parser to switch_level_parser 
         by adding VF details to the chassis_level_parser or chassis components parser (fru for example).

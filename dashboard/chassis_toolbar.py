@@ -1,12 +1,12 @@
-from .base_gauge import BaseGauge
-from brocade_base_gauge import BrocadeGauge
-from brocade_base_toolbar import BrocadeToolbar
-from brocade_chassis_parser import BrocadeChassisParser
-from brocade_switch_parser import BrocadeSwitchParser
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+from parser import ChassisParser, SwitchParser
+
+from base_gauge import BaseGauge
+from base_toolbar import BaseToolbar
+
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
-class ChassisToolbar(BrocadeToolbar):
+class ChassisToolbar(BaseToolbar):
     """
     Class to create Chassis toolbar.
     Chassis Toolbar is a set of prometheus gauges:
@@ -17,8 +17,6 @@ class ChassisToolbar(BrocadeToolbar):
         sw_telemetry: set of switch telemetry retrieved from the switch
     """
 
-    # chassis_keys = ['chassis-wwn', 'switch-serial-number', 'model', 'product-name']
-    # chassis_switch_keys = chassis_keys + ['switch-wwn']
     license_keys = ['chassis-wwn', 'switch-wwn', 'name', 'feature']
 
     VF_MODE_STATUS_ID = {-1: 'Not Applicable',  1: 'Enabled', 0: 'Disabled'}
@@ -28,7 +26,7 @@ class ChassisToolbar(BrocadeToolbar):
                          3: 'Expired'}
 
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch
@@ -100,27 +98,27 @@ class ChassisToolbar(BrocadeToolbar):
                                             unit_keys=ChassisToolbar.license_keys, parameter_key='expiration-date')
 
 
-    def fill_toolbar_gauge_metrics(self, ch_parser: BrocadeChassisParser , sw_parser: BrocadeSwitchParser) -> None:
+    def fill_toolbar_gauge_metrics(self, ch_parser: ChassisParser , sw_parser: SwitchParser) -> None:
         """Method to fill the gauge metrics for the toolbar.
 
         Args:
-            ch_parser (BrocadeChassisParser): object contains required data to fill the gauge metrics.
-            sw_parser (BrocadeSwitchParser): object contains vf details.
+            ch_parser (ChassisParser): object contains required data to fill the gauge metrics.
+            sw_parser (SwitchParser): object contains vf details.
         """
 
         chassis_gauges_lst = [self.gauge_chname, self.gauge_sn, self.gauge_model, self.gauge_product_name, 
                               self.gauge_swname, self.gauge_fabricname, self.gauge_vfid, self.gauge_fos, 
                               self.gauge_date, self.gauge_time, self.gauge_tz, self.gauge_vf_mode, self.gauge_ls_number]
-        chassis = BrocadeToolbar.clone_chassis_to_vf(ch_parser.chassis, sw_parser, component_level=False)
+        chassis = BaseToolbar.clone_chassis_to_vf(ch_parser.chassis, sw_parser, component_level=False)
         for gauge in chassis_gauges_lst:
             gauge.fill_switch_gauge_metrics(chassis)
         
 
-        ntp_server = BrocadeToolbar.clone_chassis_to_vf(ch_parser.ntp_server, sw_parser, component_level=False)
+        ntp_server = BaseToolbar.clone_chassis_to_vf(ch_parser.ntp_server, sw_parser, component_level=False)
         self.gauge_ntp_active.fill_switch_gauge_metrics(ntp_server)
         self.gauge_ntp_configured.fill_switch_gauge_metrics(ntp_server)
 
-        sw_license = BrocadeToolbar.clone_chassis_to_vf(ch_parser.sw_license, sw_parser)
+        sw_license = BaseToolbar.clone_chassis_to_vf(ch_parser.sw_license, sw_parser)
         self.gauge_license_status.fill_switch_gauge_metrics(sw_license)
         self.gauge_license_capacity.fill_switch_gauge_metrics(sw_license)
         self.gauge_license_exp_date.fill_switch_gauge_metrics(sw_license)

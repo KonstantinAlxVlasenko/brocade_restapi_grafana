@@ -1,10 +1,10 @@
-from brocade_base_gauge import BrocadeGauge
-from brocade_base_toolbar import BrocadeToolbar
-from brocade_maps_parser import BrocadeMAPSParser
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_switch_parser import BrocadeSwitchParser
+from base_gauge import BaseGauge
+from base_toolbar import BaseToolbar
+from parser import MAPSParser
+from switch_telemetry_request import SwitchTelemetryRequest
+from parser import SwitchParser
 
-class MAPSSystemToolbar(BrocadeToolbar):
+class MAPSSystemToolbar(BaseToolbar):
     """
     Class to create Monitoring and Alerting Policy Suite (MAPS) system resource and system health toolbar.
     MAPS System Toolbar is a set of prometheus gauges:
@@ -22,7 +22,7 @@ class MAPSSystemToolbar(BrocadeToolbar):
     SSP_REPORT_STATUS_ID = {1: 'healthy', 2: 'unknown', 3: 'marginal', 4: 'down'}
 
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch

@@ -8,11 +8,11 @@ Created on Tue Feb 20 15:19:38 2024
 from datetime import date, datetime
 from typing import Dict, List, Union
 
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_base_parser import BrocadeTelemetryParser
+from switch_telemetry_request import SwitchTelemetryRequest
+from base_parser import BaseParser
 
 
-class ChassisParser(SwitchTelemetryRequest):
+class ChassisParser(BaseParser):
     """
     Class to create chassis level parameters dictionaries and license list.
 
@@ -280,11 +280,6 @@ class ChassisParser(SwitchTelemetryRequest):
         return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
 
 
-    # @property
-    # def sw_telemetry(self):
-    #     return self._sw_telemetry
-    
-    
     @property
     def chassis(self):
         return self._chassis

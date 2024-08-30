@@ -9,15 +9,15 @@ import math
 import numbers
 import re
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union, Self
 
-from brocade_base_parser import BrocadeTelemetryParser
+from base_parser import BaseParser
 from quantiphy import Quantity
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_switch_parser import BrocadeSwitchParser
+from switch_telemetry_request import SwitchTelemetryRequest
+from fcport_params_parser import FCPortParametersParser
 
 
-class FCPortStatisticsParser(BrocadeTelemetryParser):
+class FCPortStatisticsParser(BaseParser):
     """
     Class to create fc port statistics dictionaries.
 
@@ -108,14 +108,16 @@ class FCPortStatisticsParser(BrocadeTelemetryParser):
     # FC_PORT_PATH = ['fabric-user-friendly-name', 'vf-id', 'switch-name', 'switch-wwn', 'port-name', 'name', 'slot-number', 'port-number']
 
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, fcport_params_parser: BrocadeSwitchParser, fcport_stats_prev=None):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest, fcport_params_parser: FCPortParametersParser, fcport_stats_prev: Self = None):
         """
         Args:
             sw_telemetry {BrocadeSwitchTelemetry}: set of switch telemetry retrieved from the switch.
+            fcport_params_parser (BrocadeSwitchParser): fc port parameters class instance retrieved from the sw_telemetry.
+            fcport_stats_prev (FCPortStatisticsParser): previous fc port statistics retrieved from the switch.
         """
         
         super().__init__(sw_telemetry)
-        self._fcport_params_parser: BrocadeSwitchParser = fcport_params_parser
+        self._fcport_params_parser: FCPortParametersParser = fcport_params_parser
         self._fcport_stats = self._get_port_stats_values()
         if self.fcport_stats:
             self._fcport_stats_growth = self._calculate_counters_growth(fcport_stats_prev)

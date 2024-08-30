@@ -9,7 +9,7 @@ Created on Mon Feb 12 16:57:29 2024
 from datetime import datetime
 from typing import Dict, List, Union
 
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
 class RequestStatusParser:
@@ -34,14 +34,15 @@ class RequestStatusParser:
                       'No Rule violations found']
     
     
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry, chname_ip_dct: dict):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest, nameserver_dct: dict):
         """
         Args:
-            sw_telemetry: set of switch telemetry retrieved from the switch
+            sw_telemetry: set of switch telemetry retrieved from the switch.
+            nameserver_dct (Dict[str, str]): dictionary key as ip address and chassis name as value.
         """
         
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
-        self._chname_ip: dict = chname_ip_dct.copy()
+        self._sw_telemetry: SwitchTelemetryRequest = sw_telemetry
+        self._nameserver: dict = nameserver_dct.copy()
         self._date: datetime = datetime.now().strftime("%d/%m/%Y")
         self._time: datetime = datetime.now().strftime("%H:%M:%S")
         self._request_status: dict = self._get_request_status()
@@ -109,7 +110,7 @@ class RequestStatusParser:
         telemetry_status_dct['status'] = status
         telemetry_status_dct['status-id'] =  RequestStatusParser.TELEMETRY_STATUS_ID[status]
         telemetry_status_dct['ip-address'] = ip_address
-        telemetry_status_dct['chassis-name'] = self.chname_ip.get(ip_address)
+        telemetry_status_dct['chassis-name'] = self.nameserver.get(ip_address)
         return telemetry_status_dct
 
     
@@ -150,13 +151,13 @@ class RequestStatusParser:
 
 
     @property
-    def chname_ip(self):
-        return self._chname_ip
+    def nameserver(self):
+        return self._nameserver
 
 
-    @property
-    def ch_wwn(self):
-        return self._ch_wwn
+    # @property
+    # def ch_wwn(self):
+    #     return self._ch_wwn
     
                 
     @property

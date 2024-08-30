@@ -1,11 +1,11 @@
-from brocade_base_gauge import BrocadeGauge
+from base_gauge import BaseGauge
+from base_toolbar import BaseToolbar
 
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
-from brocade_base_toolbar import BrocadeToolbar
-from brocade_maps_parser import BrocadeMAPSParser
+from switch_telemetry_request import SwitchTelemetryRequest
+from parser import MAPSParser
 
 
-class MAPSDashboardToolbar(BrocadeToolbar):
+class MAPSDashboardToolbar(BaseToolbar):
     """
     Class to create Monitoring and Alerting Policy Suite (MAPS) policy Dashboard toolbar.
     MAPS Dashboard Toolbar is a set of prometheus gauges:
@@ -26,7 +26,7 @@ class MAPSDashboardToolbar(BrocadeToolbar):
                                  2: 'warning that event condition detected'}
 
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest):
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch

@@ -1,6 +1,6 @@
-from brocade_base_gauge import BrocadeGauge
-from brocade_telemetry_request_status import BrocadeRequestStatus
-from switch_telemetry_httpx_cls import BrocadeSwitchTelemetry
+from base_gauge import BaseGauge
+from parser import RequestStatusParser
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
 class RequestStatusToolbar:
@@ -15,42 +15,43 @@ class RequestStatusToolbar:
 
 
     rs_container_keys = ['ip-address', 'vf-id', 'module', 'container']
-    # rs_error_keys =  rs_container_keys + ['error-message']
-    # rs_date_keys  =  rs_container_keys + ['date']
-    # rs_time_keys   =   rs_container_keys + ['time']
     
     REQUEST_STATUS_ID = {1: 'OK',  2: 'Warnig', 3: 'Fail'}
 
 
-    def __init__(self, sw_telemetry: BrocadeSwitchTelemetry):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest):
+        """
+        Args:
+            sw_telemetry: set of switch telemetry retrieved from the switch
+        """
 
-        self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
+        self._sw_telemetry: SwitchTelemetryRequest = sw_telemetry
 
         # request status chassis name gauge
-        self._gauge_rs_chname = BrocadeGauge(name='request_status_chassis_name', description='Chassis name corresponding to the IP address loaded from db',
+        self._gauge_rs_chname = BaseGauge(name='request_status_chassis_name', description='Chassis name corresponding to the IP address loaded from db',
                                           unit_keys=['ip-address'], parameter_key='chassis-name')
         # request status_id gauge
         # 1 - 'Ok',  2 - 'Warnig', 3 - 'Fail'
         rs_id_description = f'HTTP request status ID {RequestStatusToolbar.REQUEST_STATUS_ID}.'
-        self._gauge_rs_id =  BrocadeGauge(name='request_status_id', description=rs_id_description,
+        self._gauge_rs_id =  BaseGauge(name='request_status_id', description=rs_id_description,
                                           unit_keys=RequestStatusToolbar.rs_container_keys, metric_key='status-id')
         # request status_code gauge
         # HTTP Status Code, 200-OK, 400-Bad Request etc
-        self._gauge_rs_code =  BrocadeGauge(name='request_status_code', description='HTTP request status code', 
+        self._gauge_rs_code =  BaseGauge(name='request_status_code', description='HTTP request status code', 
                                             unit_keys=RequestStatusToolbar.rs_container_keys, metric_key='status-code')
         # request status error message guage
-        self._gauge_rs_error =  BrocadeGauge(name='request_status_error', description='HTTP request status error message', 
+        self._gauge_rs_error =  BaseGauge(name='request_status_error', description='HTTP request status error message', 
                                             unit_keys=RequestStatusToolbar.rs_container_keys, parameter_key='error-message')
         # request status date guage
-        self._gauge_rs_date =  BrocadeGauge(name='request_status_date', description='HTTP request status date', 
+        self._gauge_rs_date =  BaseGauge(name='request_status_date', description='HTTP request status date', 
                                             unit_keys=RequestStatusToolbar.rs_container_keys, parameter_key='date')
         # request status time guage
-        self._gauge_rs_time =  BrocadeGauge(name='request_status_time', description='HTTP request status time', 
+        self._gauge_rs_time =  BaseGauge(name='request_status_time', description='HTTP request status time', 
                                             unit_keys=RequestStatusToolbar.rs_container_keys, parameter_key='time')
 
 
 
-    def fill_toolbar_gauge_metrics(self, request_status: BrocadeRequestStatus) -> None:
+    def fill_toolbar_gauge_metrics(self, request_status_parser: RequestStatusParser) -> None:
         """Method to fill the gauge metrics for the toolbar.
 
         Args:
@@ -61,7 +62,7 @@ class RequestStatusToolbar:
                      self.gauge_rs_error, self.gauge_rs_date, self.gauge_rs_time]
         
         for gauge in gauge_lst:
-            gauge.fill_chassis_gauge_metrics(request_status.request_status)
+            gauge.fill_chassis_gauge_metrics(request_status_parser.request_status)
 
 
     def __repr__(self):
