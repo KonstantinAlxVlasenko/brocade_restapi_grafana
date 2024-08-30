@@ -1,17 +1,11 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 31 17:35:13 2024
-
-@author: kavlasenko
-"""
-
 import re
 from collections import defaultdict
-from typing import Dict, List, Optional, Union, Self
+from typing import Dict, List, Optional, Self, Union
+
+from base_parser import BaseParser
+from switch_parser import SwitchParser
 
 from switch_telemetry_request import SwitchTelemetryRequest
-from switch_parser import SwitchParser
-from base_parser import BaseParser
 
 
 class MAPSParser(BaseParser):

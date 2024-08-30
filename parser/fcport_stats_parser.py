@@ -1,20 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 14 17:08:32 2024
-
-@author: kavlasenko
-"""
-
 import math
 import numbers
-import re
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Union, Self
+from typing import Dict, List, Optional, Self, Tuple, Union
 
 from base_parser import BaseParser
-from quantiphy import Quantity
-from switch_telemetry_request import SwitchTelemetryRequest
 from fcport_params_parser import FCPortParametersParser
+from quantiphy import Quantity
+
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
 class FCPortStatisticsParser(BaseParser):

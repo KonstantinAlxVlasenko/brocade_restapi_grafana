@@ -1,16 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar  5 13:01:32 2024
-
-@author: kavlasenko
-"""
-
 import re
-from typing import Dict, List, Optional, Tuple, Union, Self
+from typing import Dict, List, Optional, Self, Tuple, Union
 
 from base_parser import BaseParser
-from switch_telemetry_request import SwitchTelemetryRequest
 from switch_parser import SwitchParser
+
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
 class FCPortParametersParser(BaseParser):

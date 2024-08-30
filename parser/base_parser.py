@@ -1,5 +1,6 @@
+from typing import Dict, List, Literal, Optional, Tuple, Union
+
 from switch_telemetry_request import SwitchTelemetryRequest
-from typing import Dict, List, Optional, Tuple, Union, Literal
 
 
 class BaseParser:

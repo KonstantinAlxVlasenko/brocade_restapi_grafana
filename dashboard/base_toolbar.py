@@ -1,5 +1,7 @@
-from switch_telemetry_request import SwitchTelemetryRequest
 from parser import SwitchParser
+
+from switch_telemetry_request import SwitchTelemetryRequest
+
 
 class BaseToolbar:
     """

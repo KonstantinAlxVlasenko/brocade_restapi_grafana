@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar  7 12:17:39 2024
-
-@author: kavlasenko
-"""
-
 import math
 from typing import Dict, List, Optional, Self, Tuple, Union
 

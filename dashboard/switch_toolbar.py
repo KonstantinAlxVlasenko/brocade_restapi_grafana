@@ -1,6 +1,8 @@
+from parser import SwitchParser
+
 from base_gauge import BaseGauge
 from base_toolbar import BaseToolbar
-from parser import SwitchParser
+
 from switch_telemetry_request import SwitchTelemetryRequest
 
 

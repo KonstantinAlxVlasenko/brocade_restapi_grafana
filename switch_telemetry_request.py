@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Feb  8 15:35:40 2024
-
-@author: kavlasenko
-"""
-
 from datetime import datetime
 from ipaddress import ip_address
 from typing import Any, List, Optional

@@ -1,1 +1,1 @@
-30.08.2024 version 1.0 release
+30.08.2024 version 0.1 alpha

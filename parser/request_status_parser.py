@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Feb 12 16:57:29 2024
-
-@author: kavlasenko
-"""
-
-
 from datetime import datetime
 from typing import Dict, List, Union
 

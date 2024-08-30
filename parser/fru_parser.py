@@ -1,13 +1,8 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jan 30 17:45:30 2024
+from typing import Dict, List, Optional, Self, Tuple, Union
 
-@author: kavlasenko
-"""
-from typing import Dict, List, Tuple, Union, Optional, Self
+from base_parser import BaseParser
 
 from switch_telemetry_request import SwitchTelemetryRequest
-from base_parser import BaseParser
 
 
 class FRUParser(BaseParser):

@@ -1,4 +1,3 @@
-
 from parser import FCPortParametersParser
 
 from base_gauge import BaseGauge

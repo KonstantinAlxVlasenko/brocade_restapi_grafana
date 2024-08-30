@@ -1,6 +1,8 @@
+from parser import SFPMediaParser
+
 from base_gauge import BaseGauge
 from base_toolbar import BaseToolbar
-from parser import SFPMediaParser
+
 from switch_telemetry_request import SwitchTelemetryRequest
 
 

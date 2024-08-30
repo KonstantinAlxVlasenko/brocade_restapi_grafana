@@ -1,5 +1,7 @@
-from base_gauge import BaseGauge
 from parser import RequestStatusParser
+
+from base_gauge import BaseGauge
+
 from switch_telemetry_request import SwitchTelemetryRequest
 
 

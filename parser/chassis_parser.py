@@ -1,15 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Feb 20 15:19:38 2024
-
-@author: kavlasenko
-"""
-
 from datetime import date, datetime
 from typing import Dict, List, Union
 
-from switch_telemetry_request import SwitchTelemetryRequest
 from base_parser import BaseParser
+
+from switch_telemetry_request import SwitchTelemetryRequest
 
 
 class ChassisParser(BaseParser):

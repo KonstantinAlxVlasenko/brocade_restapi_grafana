@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jun 23 01:19:28 2024
-
-@author: kavlasenko
-"""
-
-
 from typing import Dict, List, Union
 
 from prometheus_client import Gauge

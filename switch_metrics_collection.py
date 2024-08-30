@@ -4,6 +4,7 @@ import os
 import time
 from ipaddress import ip_address
 from parser import BrocadeParser
+from typing import Tuple
 
 from dotenv import load_dotenv
 from prometheus_client import start_http_server
@@ -12,7 +13,6 @@ import database as db
 from config import HTTP_SERVER_PORT, SWITCH_ACCESS
 from dashboard import BrocadeDashboard
 from switch_telemetry_request import SwitchTelemetryRequest
-from typing import Tuple
 
 
 def collect_switch_metrics(sw_ipaddress: ip_address) -> None:
