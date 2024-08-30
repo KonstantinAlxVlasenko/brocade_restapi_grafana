@@ -1,6 +1,4 @@
-from parser import (ChassisParser, FCPortParametersParser,
-                    FCPortStatisticsParser, FRUParser, MAPSParser,
-                    RequestStatusParser, SFPMediaParser, SwitchParser)
+from parser import BrocadeParser
 
 from dashboard import (ChassisToolbar, FabricShowToolbar, FCPortParamsToolbar,
                        FCPortStatsToolbar, FRUToolbar, LogToolbar,
@@ -40,50 +38,47 @@ class BrocadeDashboard:
         self._log_tb = LogToolbar(self.sw_telemetry)
 
 
-    def fill_dashboard_gauge_metrics(self, 
-                                    request_status_parser: RequestStatusParser,
-                                    ch_parser: ChassisParser,
-                                    fru_parser: FRUParser,
-                                    maps_parser: MAPSParser,
-                                    sw_parser: SwitchParser,
-                                    fcport_params_parser: FCPortParametersParser,
-                                    sfp_media_parser: SFPMediaParser,
-                                    fcport_stats_parser: FCPortStatisticsParser) -> None:
+    def fill_dashboard_gauge_metrics(self, brocade_parser: BrocadeParser) -> None:
+        """Method to fill the gauge metrics for the dashboard.
+
+        Args:
+            brocade_parser (BrocadeParser): object contains required data to fill the gauge metrics.
+        """
         
 
         print('request_status')
-        self.request_status_tb.fill_toolbar_gauge_metrics(request_status_parser)
+        self.request_status_tb.fill_toolbar_gauge_metrics(brocade_parser.request_status_parser)
         
         # print('chassis')
-        # self.chassis_tb.fill_toolbar_gauge_metrics(ch_parser, sw_parser)
+        # self.chassis_tb.fill_toolbar_gauge_metrics(brocade_parser.ch_parser, brocade_parser.sw_parser)
 
         # print('fru')
-        # self.fru_tb.fill_toolbar_gauge_metrics(fru_parser, sw_parser)
+        # self.fru_tb.fill_toolbar_gauge_metrics(brocade_parser.fru_parser, brocade_parser.sw_parser)
 
         # print('maps system resources', 'maps system health')
-        # self.maps_system_tb.fill_toolbar_gauge_metrics(maps_parser, sw_parser)
+        # self.maps_system_tb.fill_toolbar_gauge_metrics(brocade_parser.maps_parser, brocade_parser.sw_parser)
 
         # print('maps policy, actions','maps dashboard')
-        # self.maps_dashboard_tb.fill_toolbar_gauge_metrics(maps_parser)
+        # self.maps_dashboard_tb.fill_toolbar_gauge_metrics(brocade_parser.maps_parser)
 
         # print('switch')
-        # self.switch_tb.fill_toolbar_gauge_metrics(sw_parser)
+        # self.switch_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser)
         
         # print('fabrichsow')
-        # self.fabricshow_tb.fill_toolbar_gauge_metrics(sw_parser)
+        # self.fabricshow_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser)
 
         # print('fcport parameters')
-        # self.fcport_params_tb.fill_toolbar_gauge_metrics(fcport_params_parser)
+        # self.fcport_params_tb.fill_toolbar_gauge_metrics(brocade_parser.fcport_params_parser)
 
         # print('sfp media')
-        # self.sfp_media_tb.fill_toolbar_gauge_metrics(sfp_media_parser)
+        # self.sfp_media_tb.fill_toolbar_gauge_metrics(brocade_parser.sfp_media_parser)
 
         # print('fcport_stats')
-        # self.fcport_stats_tb.fill_toolbar_gauge_metrics(fcport_stats_parser)
+        # self.fcport_stats_tb.fill_toolbar_gauge_metrics(brocade_parser.fcport_stats_parser)
 
         # print('log')
-        # self.log_tb.fill_toolbar_gauge_metrics(sw_parser, fcport_params_parser, sfp_media_parser, 
-        #                                   fcport_stats_parser, fru_parser, maps_parser)
+        # self.log_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser, brocade_parser.fcport_params_parser, brocade_parser.sfp_media_parser, 
+        #                                   brocade_parser.fcport_stats_parser, brocade_parser.fru_parser, brocade_parser.maps_parser)
 
 
     def __repr__(self):
