@@ -1,8 +1,8 @@
 from typing import Dict, List, Optional, Self, Tuple, Union
 
-from base_parser import BaseParser
+from .base_parser import BaseParser
 
-from switch_telemetry_request import SwitchTelemetryRequest
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 class FRUParser(BaseParser):

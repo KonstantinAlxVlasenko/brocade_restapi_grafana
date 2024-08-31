@@ -1,10 +1,10 @@
 import math
 from typing import Dict, List, Optional, Self, Tuple, Union
 
-from base_parser import BaseParser
-from fcport_params_parser import FCPortParametersParser
+from .base_parser import BaseParser
+from .fcport_params_parser import FCPortParametersParser
 
-from switch_telemetry_request import SwitchTelemetryRequest
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 class SFPMediaParser(BaseParser):
@@ -373,7 +373,10 @@ class SFPMediaParser(BaseParser):
         Returns:
             dBm value
         """
-                
+
+        if uW == 0:
+            return
+
         mW = uW/1000
         return round(10 * math.log10(mW / 1), 1)
 

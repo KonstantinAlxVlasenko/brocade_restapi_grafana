@@ -1,8 +1,10 @@
-from base_gauge import BaseGauge
-from base_toolbar import BaseToolbar
+from .base_gauge import BaseGauge
+from .base_toolbar import BaseToolbar
 
-from switch_telemetry_request import SwitchTelemetryRequest
-from parser import SwitchParser, FRUParser
+from collection.switch_telemetry_request import SwitchTelemetryRequest
+
+from parser.switch_parser import SwitchParser
+from parser.fru_parser import FRUParser
 
 
 class FRUToolbar(BaseToolbar):

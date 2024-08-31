@@ -1,10 +1,10 @@
-from base_parser import BaseParser
-from brocade_parser import BrocadeParser
-from chassis_parser import ChassisParser
-from fcport_params_parser import FCPortParametersParser
-from fcport_stats_parser import FCPortStatisticsParser
-from fru_parser import FRUParser
-from maps_parser import MAPSParser
-from request_status_parser import RequestStatusParser
-from sfp_media_parser import SFPMediaParser
-from switch_parser import SwitchParser
+# from .base_parser import BaseParser
+# from .brocade_parser import BrocadeParser
+# from .chassis_parser import ChassisParser
+# from .fcport_params_parser import FCPortParametersParser
+# from .fcport_stats_parser import FCPortStatisticsParser
+# from .fru_parser import FRUParser
+# from .maps_parser import MAPSParser
+# from .request_status_parser import RequestStatusParser
+# from .sfp_media_parser import SFPMediaParser
+# from .switch_parser import SwitchParser

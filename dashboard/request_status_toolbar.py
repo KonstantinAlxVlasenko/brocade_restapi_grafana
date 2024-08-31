@@ -1,8 +1,8 @@
-from parser import RequestStatusParser
+from parser.request_status_parser import RequestStatusParser
 
-from base_gauge import BaseGauge
+from .base_gauge import BaseGauge
 
-from switch_telemetry_request import SwitchTelemetryRequest
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 class RequestStatusToolbar:

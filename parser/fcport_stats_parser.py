@@ -3,11 +3,11 @@ import numbers
 from datetime import datetime
 from typing import Dict, List, Optional, Self, Tuple, Union
 
-from base_parser import BaseParser
-from fcport_params_parser import FCPortParametersParser
+from .base_parser import BaseParser
+from .fcport_params_parser import FCPortParametersParser
 from quantiphy import Quantity
 
-from switch_telemetry_request import SwitchTelemetryRequest
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 class FCPortStatisticsParser(BaseParser):

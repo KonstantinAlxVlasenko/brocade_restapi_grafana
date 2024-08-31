@@ -1,9 +1,9 @@
 from datetime import date, datetime
 from typing import Dict, List, Union
 
-from base_parser import BaseParser
+from .base_parser import BaseParser
 
-from switch_telemetry_request import SwitchTelemetryRequest
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 class ChassisParser(BaseParser):

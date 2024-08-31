@@ -1,10 +1,15 @@
-from parser import (FCPortParametersParser, FCPortStatisticsParser, FRUParser,
-                    MAPSParser, SFPMediaParser, SwitchParser)
+from .base_gauge import BaseGauge
+from .base_toolbar import BaseToolbar
 
-from base_gauge import BaseGauge
-from base_toolbar import BaseToolbar
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
-from switch_telemetry_request import SwitchTelemetryRequest
+
+from parser.fcport_params_parser import FCPortParametersParser
+from parser.fcport_stats_parser import FCPortStatisticsParser
+from parser.fru_parser import FRUParser
+from parser.maps_parser import MAPSParser
+from parser.sfp_media_parser import SFPMediaParser
+from parser.switch_parser import SwitchParser
 
 
 class LogToolbar(BaseToolbar):

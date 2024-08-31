@@ -1,9 +1,10 @@
-from parser import ChassisParser, SwitchParser
+from parser.chassis_parser import ChassisParser
+from parser.switch_parser import SwitchParser
 
-from base_gauge import BaseGauge
-from base_toolbar import BaseToolbar
+from .base_gauge import BaseGauge
+from .base_toolbar import BaseToolbar
 
-from switch_telemetry_request import SwitchTelemetryRequest
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 class ChassisToolbar(BaseToolbar):

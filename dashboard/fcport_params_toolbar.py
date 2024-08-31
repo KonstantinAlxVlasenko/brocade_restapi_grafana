@@ -1,9 +1,9 @@
-from parser import FCPortParametersParser
+from parser.fcport_params_parser import FCPortParametersParser
 
-from base_gauge import BaseGauge
-from base_toolbar import BaseToolbar
+from .base_gauge import BaseGauge
+from .base_toolbar import BaseToolbar
 
-from switch_telemetry_request import SwitchTelemetryRequest
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 class FCPortParamsToolbar(BaseToolbar):

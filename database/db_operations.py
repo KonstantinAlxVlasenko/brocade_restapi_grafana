@@ -17,7 +17,7 @@ def load_object(dirname: str, filename: str) -> Any:
         Any: the loaded object
     """
 
-    filpath = os.path.join(dirname, filename=NS_FILENAME)
+    filpath = os.path.join(dirname, filename)
     # Reading the object back from the file
     with open(filpath, "rb") as file:
         loaded_obj = pickle.load(file)

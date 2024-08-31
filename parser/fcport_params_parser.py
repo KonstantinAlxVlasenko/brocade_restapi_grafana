@@ -1,10 +1,10 @@
 import re
 from typing import Dict, List, Optional, Self, Tuple, Union
 
-from base_parser import BaseParser
-from switch_parser import SwitchParser
+from .base_parser import BaseParser
+from .switch_parser import SwitchParser
 
-from switch_telemetry_request import SwitchTelemetryRequest
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 class FCPortParametersParser(BaseParser):

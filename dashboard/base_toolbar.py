@@ -1,6 +1,6 @@
-from parser import SwitchParser
+from parser.switch_parser import SwitchParser
 
-from switch_telemetry_request import SwitchTelemetryRequest
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 class BaseToolbar:

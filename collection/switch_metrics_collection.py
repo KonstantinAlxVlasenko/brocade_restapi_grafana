@@ -3,16 +3,17 @@ import copy
 import os
 import time
 from ipaddress import ip_address
-from parser import BrocadeParser
 from typing import Tuple
+
+from parser.brocade_parser import BrocadeParser
 
 from dotenv import load_dotenv
 from prometheus_client import start_http_server
 
 import database as db
 from config import HTTP_SERVER_PORT, SWITCH_ACCESS
-from dashboard import BrocadeDashboard
-from switch_telemetry_request import SwitchTelemetryRequest
+from dashboard.brocade_dashboard import BrocadeDashboard
+from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
 def collect_switch_metrics(sw_ipaddress: ip_address) -> None:
@@ -26,8 +27,10 @@ def collect_switch_metrics(sw_ipaddress: ip_address) -> None:
 
     # get switch credentials from .env file
     sw_username, sw_password = get_credentials(sw_ipaddress)
+
     # get switch access protocol (http or https) from the configuration file
     secure_access = SWITCH_ACCESS[sw_ipaddress]["secure_access"]
+
     # get http server port number from the configuration file
     http_port_number = HTTP_SERVER_PORT[sw_ipaddress]
 
