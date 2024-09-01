@@ -50,7 +50,7 @@ class FRUToolbar(BaseToolbar):
                                                     unit_keys=FRUToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_fan_vfid = BaseGauge(name='fan_vfid', description='FAN VF ids', 
-                                                    unit_keys=FRUToolbar.switch_wwn_key, parameter_key='vf-id')
+                                                    unit_keys=FRUToolbar.switch_wwn_key, metric_key='vf-id')
         # fan state gauge
         # 0 - 'absent', 1 - 'ok', 2 - 'below minimum', 3 - 'above maximum', 4- 'unknown', 5 -'not ok', 6 - 'faulty'
         fan_state_description = f'Status of each fan in the system {FRUToolbar.FAN_STATE_ID}'
@@ -68,7 +68,7 @@ class FRUToolbar(BaseToolbar):
                                                     unit_keys=FRUToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_ps_vfid = BaseGauge(name='ps_vfid', description='PS VF ids', 
-                                                    unit_keys=FRUToolbar.switch_wwn_key, parameter_key='vf-id')
+                                                    unit_keys=FRUToolbar.switch_wwn_key, metric_key='vf-id')
         # ps state gauge
         # 0 - 'absent', 1 - 'ok', 2 - 'predicting failure', 3 - 'unknown', 4 - 'try reseating unit', 5 - 'faulty'
         ps_state_description = f'Status of the switch power supplies {FRUToolbar.PS_STATE_ID}'
@@ -83,7 +83,7 @@ class FRUToolbar(BaseToolbar):
                                                     unit_keys=FRUToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_sensor_vfid = BaseGauge(name='sensor_vfid', description='Sensor VF ids', 
-                                                    unit_keys=FRUToolbar.switch_wwn_key, parameter_key='vf-id')
+                                                    unit_keys=FRUToolbar.switch_wwn_key, metric_key='vf-id')
         # sensor state gauge
         # 0 - 'absent', 1 - 'ok'
         sensor_state_description = f'The current operational state of the sensor {FRUToolbar.SENSOR_STATE_ID}'

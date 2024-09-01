@@ -18,6 +18,9 @@ class SFPMediaParser(BaseParser):
         sfp_media: sfp media parameters dictionary ({vf_id:{slot_port_id:{param1: value1, param2: valuue2}}}).
     """
 
+
+
+
     MEDIA_RDP_LEAFS = ['connector', 'current', 'identifier', 'media-distance', 
                        'media-speed-capability', 'name', 'part-number', 'power-on-time',
                        'rx-power', 'serial-number', 'temperature', 
@@ -45,6 +48,10 @@ class SFPMediaParser(BaseParser):
                            'rx-power-dbm', 'tx-power-dbm', 'remote-media-rx-power-dbm', 'remote-media-tx-power-dbm']
     
     MEDIA_POWER_STATUS_CHANGED = ['rx-power-status', 'tx-power-status', 'remote-media-rx-power-status', 'remote-media-tx-power-status']
+
+    MEDIA_TEMPERATURE_CHANGED = ['temperature', 'remote-media-temperature']
+    
+    MEDIA_TEMPERATURE_STATUS_CHANGED = ['temperature-status', 'remote-media-temperature-status']
     
     SFP_POWER_ALERT = {'lw_tx': {'high-alarm': 2500, 'low-alarm': 1000, 'high-warning': 2300, 'low-warning': 1200},
                        'lw_rx': {'high-alarm': 630, 'low-alarm': 50, 'high-warning': 580, 'low-warning': 100},
@@ -119,6 +126,8 @@ class SFPMediaParser(BaseParser):
                     sfp_media_current_dct.update(fcport_params_dct)
                     # add power status ('ok', ''warning', 'critical) for the power parameters
                     self._add_power_status(sfp_media_current_dct)
+                    # add temperature status ('ok', ''warning', 'critical)
+                    self._add_temp_status(sfp_media_current_dct)
                     # add current sfp media dictionary to the summary sfp media dictionary with vf_id and slot_port as consecutive keys
                     sfp_media_dct[vf_id][sfp_media_container['name']] = sfp_media_current_dct
         return sfp_media_dct
@@ -313,6 +322,28 @@ class SFPMediaParser(BaseParser):
             sfp_media_dct.update(empty_stutus_id_dct)
                 
 
+    def _add_temp_status(self, sfp_media_dct) -> None:
+        """
+        Method adds temperature status id ('ok', 'unknown', 'warning', 'critical') to the sfp media dictionary
+                
+        Args: 
+            sfp_media_dct (dict): sfp parameters dictionary for a single port
+        
+        Returns:
+            None
+        """
+
+        for temp_key in ['temperature', 'remote-media-temperature']:
+            if sfp_media_dct.get(temp_key) is not None:
+                temp_status_id = SFPMediaParser.get_alert_status_id(sfp_media_dct[temp_key], SFPMediaParser.SFP_TEMPERATURE_ALERT)
+                sfp_media_dct[temp_key + '-status-id'] = temp_status_id
+                sfp_media_dct[temp_key + '-status'] = SFPMediaParser.STATUS_ID.get(temp_status_id)
+            else:
+                sfp_media_dct[temp_key + '-status-id'] = None
+                sfp_media_dct[temp_key + '-status'] = None
+
+
+
     @staticmethod
     def get_alert_status_id(value: float, status_intervals_dct: dict) -> int:
         """
@@ -331,6 +362,15 @@ class SFPMediaParser(BaseParser):
         """
         
         status_id = 2 # unknown
+
+        if value is None:
+            print(value, 'none')
+            return status_id
+
+        if not isinstance(value, (int, float)):
+            print(value, 'not int')
+            return status_id
+
         if value >= status_intervals_dct['low-warning'] and value < status_intervals_dct['high-warning']:
             status_id = 1 # ok
         elif value >= status_intervals_dct['high-alarm'] or value < status_intervals_dct['low-alarm']:
@@ -421,7 +461,9 @@ class SFPMediaParser(BaseParser):
                 # add changed sfp_media ports for the current vf_id
                 sfp_media_changed_dct[vf_id] = SFPMediaParser.get_changed_vfid_ports(
                     sfp_media_vfid_now_dct, sfp_media_vfid_prev_dct, 
-                    changed_keys=SFPMediaParser.MEDIA_RDP_CHANGED + SFPMediaParser.MEDIA_POWER_CHANGED + SFPMediaParser.MEDIA_POWER_STATUS_CHANGED, 
+                    changed_keys=SFPMediaParser.MEDIA_RDP_CHANGED + \
+                        SFPMediaParser.MEDIA_POWER_CHANGED + SFPMediaParser.MEDIA_POWER_STATUS_CHANGED + \
+                            SFPMediaParser.MEDIA_TEMPERATURE_CHANGED + SFPMediaParser.MEDIA_TEMPERATURE_STATUS_CHANGED,
                     const_keys=SFPMediaParser.FC_PORT_PATH, 
                     time_now=time_now, time_prev=time_prev)
         return sfp_media_changed_dct

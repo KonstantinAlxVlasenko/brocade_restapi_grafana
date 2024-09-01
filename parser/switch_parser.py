@@ -102,8 +102,11 @@ class SwitchParser(BaseParser):
                                 # add logical switch parameters to switch parameters dictionary for current vf_id
                                 current_sw_dct.update(current_logical_sw_dct)
                     # if vf mode is disabled and fc_interface container is retrieved from the switch all ports are in the single switch
-                    if fc_sw['vf-id'] == -1 and not self.sw_telemetry.fc_interface.get('error'):
-                        current_sw_dct['port-member-quantity'] = len(self.sw_telemetry.fc_interface[vf_id]['Response']['fibrechannel'])
+                    if fc_sw['vf-id'] == -1:
+                        if not self.sw_telemetry.fc_interface.get('error') and self.sw_telemetry.fc_interface[vf_id].get('Response'):
+                            current_sw_dct['port-member-quantity'] = len(self.sw_telemetry.fc_interface[vf_id]['Response']['fibrechannel'])
+                        else:
+                            current_sw_dct['port-member-quantity'] = None
                         
                     # fill switch paremeters dictionary with empty values for missing keys (switch parameters)
                     none_dct = {key: current_sw_dct.get(key) for key in SwitchParser.FC_LOGICAL_SWITCH_LEAFS if not current_sw_dct.get(key)}

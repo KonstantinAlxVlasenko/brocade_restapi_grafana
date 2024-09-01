@@ -55,8 +55,8 @@ class BrocadeDashboard:
         """
         
 
-        print('request_status')
-        self.request_status_tb.fill_toolbar_gauge_metrics(brocade_parser.request_status_parser)
+        # print('request_status')
+        # self.request_status_tb.fill_toolbar_gauge_metrics(brocade_parser.request_status_parser)
         
         # print('chassis')
         # self.chassis_tb.fill_toolbar_gauge_metrics(brocade_parser.ch_parser, brocade_parser.sw_parser)
@@ -82,8 +82,8 @@ class BrocadeDashboard:
         # print('sfp media')
         # self.sfp_media_tb.fill_toolbar_gauge_metrics(brocade_parser.sfp_media_parser)
 
-        # print('fcport_stats')
-        # self.fcport_stats_tb.fill_toolbar_gauge_metrics(brocade_parser.fcport_stats_parser)
+        print('fcport_stats')
+        self.fcport_stats_tb.fill_toolbar_gauge_metrics(brocade_parser.fcport_stats_parser)
 
         # print('log')
         # self.log_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser, brocade_parser.fcport_params_parser, brocade_parser.sfp_media_parser, 

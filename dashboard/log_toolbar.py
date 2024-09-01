@@ -173,7 +173,7 @@ class LogToolbar(BaseToolbar):
         """        
 
         # sfp media module change and power status change log
-        sfp_media_changed = SFPMediaParser.MEDIA_RDP_CHANGED + SFPMediaParser.MEDIA_POWER_STATUS_CHANGED
+        sfp_media_changed = SFPMediaParser.MEDIA_RDP_CHANGED + SFPMediaParser.MEDIA_POWER_STATUS_CHANGED + SFPMediaParser.MEDIA_TEMPERATURE_STATUS_CHANGED
          # add portname for port with changed values in sfp_media_changed keys
         self.gauge_portname.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_any=sfp_media_changed)
         for key in sfp_media_changed:
@@ -184,7 +184,9 @@ class LogToolbar(BaseToolbar):
                                                                  renamed_keys={key + '-prev': LogToolbar.previous_value_key}, 
                                                                  add_dict={LogToolbar.modified_parameter_key: key})
         # sfp media power change if power status has changed
-        for key in SFPMediaParser.MEDIA_POWER_CHANGED:
+        # sfp media temperature change if temperature status has changed
+        sfp_media_sensor_changed = SFPMediaParser.MEDIA_POWER_CHANGED + SFPMediaParser.MEDIA_TEMPERATURE_CHANGED
+        for key in sfp_media_sensor_changed:
             self.gauge_current_value_str.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key, key + '-status'],
                                                                 renamed_keys={key: LogToolbar.current_value_key}, 
                                                                 add_dict={LogToolbar.modified_parameter_key: key})

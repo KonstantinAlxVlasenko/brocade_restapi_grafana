@@ -89,6 +89,12 @@ class SFPMediaToolbar(BaseToolbar):
         # sfp media temperature gauge
         self._gauge_temperature = BaseGauge(name='sfp_temperature', description='The SFP module temperature in Celcius.', 
                                                unit_keys=SFPMediaToolbar.switch_port_keys, metric_key='temperature')
+        # sfp media temperature status id gauge
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
+        temperature_status_description = f'SFP temperature status {SFPMediaToolbar.STATUS_ID}.'
+        self._gauge_temperature_status = BaseGauge(name='sfp_temperature_status', description=temperature_status_description, 
+                                               unit_keys=SFPMediaToolbar.switch_port_keys, metric_key='temperature-status-id')
+        
         # sfp media rx-power in uWatts gauge
         self._gauge_rx_power_uwatt = BaseGauge(name='sfp_rx_power_uwatt', description='The SFP rx power in uWatts.', 
                                                unit_keys=SFPMediaToolbar.switch_port_keys, metric_key='rx-power')
@@ -130,7 +136,11 @@ class SFPMediaToolbar(BaseToolbar):
         # remote sfp media temperature gauge
         self._gauge_remote_temperature = BaseGauge(name='remote_sfp_temperature', description='The remote SFP module temperature in Celcius.', 
                                                unit_keys=SFPMediaToolbar.switch_port_keys, metric_key='remote-media-temperature')
-
+        # remote sfp media temperature status id gauge
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
+        temperature_remote_status_description = f'The rempote SFP temperature status {SFPMediaToolbar.STATUS_ID}.'
+        self._gauge_remote_temperature_status = BaseGauge(name='remote_sfp_temperature_status', description=temperature_remote_status_description, 
+                                               unit_keys=SFPMediaToolbar.switch_port_keys, metric_key='remote-media-temperature-status-id')
         # remote sfp media rx-power in uWatts gauge
         self._gauge_remote_rx_power_uwatt = BaseGauge(name='remote_sfp_rx_power_uwatt', description='The remote SFP rx power in uWatts.', 
                                                unit_keys=SFPMediaToolbar.switch_port_keys, metric_key='remote-media-rx-power')
@@ -165,11 +175,13 @@ class SFPMediaToolbar(BaseToolbar):
         gauge_lst = [self.gauge_swname, self.gauge_fabricname, self.gauge_portname, self.gauge_switch_vfid, 
                      self.gauge_port_speed_value, self.gauge_port_speed_mode, self.gauge_port_physical_state, 
                      self.gauge_port_type, self.gauge_vendor, self.gauge_pn, self.gauge_sn, self.gauge_laser_type, 
-                     self.gauge_speed_capability, self.gauge_wavelength, self.gauge_power_on_time, self.gauge_temperature, 
+                     self.gauge_speed_capability, self.gauge_wavelength, self.gauge_power_on_time, 
+                     self.gauge_temperature, self.gauge_temperature_status, 
                      self.gauge_rx_power_uwatt, self.gauge_rx_power_dbm, self.gauge_rx_power_status, self.gauge_tx_power_uwatt, 
                      self.gauge_tx_power_dbm, self.gauge_tx_power_status, self.gauge_remote_vendor, self.gauge_remote_pn, 
                      self.gauge_remote_sn, self.gauge_remote_laser_type, self.gauge_remote_speed_capability, 
-                     self.gauge_remote_temperature, self.gauge_remote_rx_power_uwatt, self.gauge_remote_rx_power_dbm, 
+                     self.gauge_remote_temperature, self.gauge_remote_temperature_status,  self.gauge_remote_rx_power_uwatt, 
+                     self.gauge_remote_rx_power_dbm, 
                      self.gauge_remote_rx_power_status, self.gauge_remote_tx_power_uwatt, self.gauge_remote_tx_power_dbm, 
                      self.gauge_remote_tx_power_status]
 
@@ -267,6 +279,11 @@ class SFPMediaToolbar(BaseToolbar):
 
 
     @property
+    def gauge_temperature_status(self):
+        return self._gauge_temperature_status
+
+
+    @property
     def gauge_rx_power_uwatt(self):
         return self._gauge_rx_power_uwatt
 
@@ -324,6 +341,11 @@ class SFPMediaToolbar(BaseToolbar):
     @property
     def gauge_remote_temperature(self):
         return self._gauge_remote_temperature
+
+
+    @property
+    def gauge_remote_temperature_status(self):
+        return self._gauge_remote_temperature_status
 
 
     @property

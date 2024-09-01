@@ -44,7 +44,7 @@ class MAPSSystemToolbar(BaseToolbar):
                                                     unit_keys=MAPSSystemToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_sys_resource_vfid = BaseGauge(name='ssystem_resource_vfid', description='System resource VF id', 
-                                                    unit_keys=MAPSSystemToolbar.switch_wwn_key, parameter_key='vf-id')
+                                                    unit_keys=MAPSSystemToolbar.switch_wwn_key, metric_key='vf-id')
 
         # cpu usage gauge
         self._gauge_cpu_usage = BaseGauge(name='cpu_usage', description='CPU usage', 
@@ -73,7 +73,7 @@ class MAPSSystemToolbar(BaseToolbar):
                                                     unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='fabric-user-friendly-name')
         # vf id
         self._gauge_ssp_report_vfid = BaseGauge(name='ssp_report_vfid', description='SSP report VF id', 
-                                                    unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, parameter_key='vf-id')
+                                                    unit_keys=MAPSSystemToolbar.chassis_switch_wwn_keys, metric_key='vf-id')
         # ssp report gauge
         # 1 - 'healthy', 2 - 'unknown', 3 - 'marginal', 4 - 'down'
         ssp_report_description = f'The switch status policy report state {MAPSSystemToolbar.SSP_REPORT_STATUS_ID}'
