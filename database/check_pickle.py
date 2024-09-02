@@ -1,18 +1,11 @@
-"""
-SAN: Ost_stg
-Fabric: B
-Switch name: n3-g620-118-stg-f2
-Switch IP: 10.213.164.102
-"""
-
 import sys
 import os
 
-from pathlib import Path
 
 # getting the name of the directory
 # where the this file is present.
 current = os.path.dirname(os.path.realpath(__file__))
+
 
 # Getting the parent directory name
 # where the current directory is present.
@@ -23,9 +16,11 @@ parent = os.path.dirname(current)
 sys.path.append(parent)
 
 # now we can import the collection module in the parent
-from collection.switch_metrics_collection import collect_switch_metrics
+import db_operations as db
 
+pickle_file = db.load_object(current, 'n3-g620-118-stg-f2-parser.pickle')
 
-if __name__ == '__main__':
-    current_filename = Path(__file__).stem
-    collect_switch_metrics(sw_ipaddress="10.213.164.102", initiator_filename=current_filename)
+# print(pickle_file.__dict__)
+
+print(pickle_file.ch_parser.chassis)
+

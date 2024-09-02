@@ -164,8 +164,8 @@ class FCPortStatisticsParser(BaseParser):
                     # add current fc port statistics dictionary to the summary port statistics dictionary with vf_id and slot_port as consecutive keys
                     fcport_stats_dct[vf_id][fc_statistics_container['name']] = fcport_stats_current_dct
 
-                    print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['in-rate'], fcport_stats_current_dct['in-rate-Mbytes'])
-                    print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['out-rate'], fcport_stats_current_dct['out-rate-Mbytes'])
+                    # print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['in-rate'], fcport_stats_current_dct['in-rate-Mbytes'])
+                    # print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['out-rate'], fcport_stats_current_dct['out-rate-Mbytes'])
 
         return fcport_stats_dct
 
@@ -271,7 +271,7 @@ class FCPortStatisticsParser(BaseParser):
                     # find delta for each fc port counter
                     fcport_stats_growth_port_dct = self._get_port_counters_delta(fc_statistics_port_now_dct, fc_statistics_port_prev_dct)
 
-                    self._count_throughput_mbytes(fcport_stats_growth_port_dct)
+                    self._count_throughput_mbytes(fc_statistics_port_now_dct)
 
                     # if switch operates normally LR_OUT and OLS_IN values must be equal
                     self._detect_lr_ols_inconsistency(fc_statistics_port_now_dct, fcport_stats_growth_port_dct, lr_type='lr_out')
@@ -295,7 +295,7 @@ class FCPortStatisticsParser(BaseParser):
 
         
         for octet_key in ['in-octets', 'out-octets']:
-            throughput_mbytes_key = octet_key.split('-')[0] + '-throughput-mbytes'
+            throughput_mbytes_key = octet_key.split('-')[0] + '-throughput-Mbytes'
             octet_delta_key = octet_key + FCPortStatisticsParser.DELTA_TAG
             time_delta_key = 'time-generated' + FCPortStatisticsParser.DELTA_TAG
 
@@ -305,7 +305,8 @@ class FCPortStatisticsParser(BaseParser):
 
             throughput_bytes = fc_statistics_port_now_dct[octet_delta_key] / fc_statistics_port_now_dct[time_delta_key]
             fc_statistics_port_now_dct[throughput_mbytes_key] = round(throughput_bytes / 1024 / 1024, 2)
-            print(fc_statistics_port_now_dct['port-number'], throughput_mbytes_key, fc_statistics_port_now_dct[throughput_mbytes_key])
+            if fc_statistics_port_now_dct['port-number'] == 44:
+                print(fc_statistics_port_now_dct['port-number'], throughput_mbytes_key, fc_statistics_port_now_dct['time-generated-hrf'], fc_statistics_port_now_dct[time_delta_key], fc_statistics_port_now_dct[throughput_mbytes_key])
             
 
         
