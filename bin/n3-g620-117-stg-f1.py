@@ -23,5 +23,7 @@ sys.path.append(parent)
 # now we can import the collection module in the parent
 from collection.switch_metrics_collection import collect_switch_metrics
 
+print(os.path.basename(__file__))
+
 if __name__ == '__main__':
     collect_switch_metrics(sw_ipaddress="10.213.164.101")

@@ -16,7 +16,7 @@ from dashboard.brocade_dashboard import BrocadeDashboard
 from collection.switch_telemetry_request import SwitchTelemetryRequest
 
 
-def collect_switch_metrics(sw_ipaddress: ip_address) -> None:
+def collect_switch_metrics(sw_ipaddress: ip_address, save_filename: str) -> None:
     """Function connects to the switch, retrieves the telemetry through rest api,
     and fills the dashboard with the collected metrics.
     Dashboard is a set of proometheus Gauges. Time interval between two collections is 1 minute.
@@ -43,10 +43,18 @@ def collect_switch_metrics(sw_ipaddress: ip_address) -> None:
     start = time.time()
     # get telemetry from the switch through rest api
     sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
+    
+    # # save current switch telemetry to the database
+    # db.save_object(sw_telemetry, db.DATABASE_DIR, filename=save_filename + '-telemetry')
+    
     # load current nameserver from the database
-    nameserver_dct = db.load_object(db.NS_DIR, db.NS_FILENAME)
+    nameserver_dct = db.load_object(db.DATABASE_DIR, db.NS_FILENAME)
     # parse retrieved telemetry to export to the dashboard
     brocade_parser_now = BrocadeParser(sw_telemetry, nameserver_dct)
+    
+    # # save current switch parser to the database
+    # db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=save_filename + '-parser')
+    
     # update namserver with data from the parser if needed
     db.update_nameserver(nameserver_dct, brocade_parser_now.ch_parser)
 
@@ -70,10 +78,18 @@ def collect_switch_metrics(sw_ipaddress: ip_address) -> None:
             brocade_parser_prev = copy.deepcopy(brocade_parser_now)
             # collect new telemetry
             sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
+            
+            # # save current switch telemetry to the database
+            # db.save_object(sw_telemetry, db.DATABASE_DIR, filename=save_filename + '-telemetry')
+            
             # load current nameserver from the database
-            nameserver_dct = db.load_object(db.NS_DIR, db.NS_FILENAME)
+            nameserver_dct = db.load_object(db.DATABASE_DIR, db.NS_FILENAME)
             # parse retrieved telemetry to export to the dashboard
             brocade_parser_now = BrocadeParser(sw_telemetry, nameserver_dct, brocade_parser_prev)
+            
+            # # save current switch parser to the database
+            # db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=save_filename + '-parser')
+            
             # update namserver with data from the parser if needed
             db.update_nameserver(nameserver_dct, brocade_parser_now.ch_parser)
             # fill dashboard gauges with labels and metrics from the parser

@@ -85,9 +85,9 @@ class BrocadeDashboard:
         print('fcport_stats')
         self.fcport_stats_tb.fill_toolbar_gauge_metrics(brocade_parser.fcport_stats_parser)
 
-        # print('log')
-        # self.log_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser, brocade_parser.fcport_params_parser, brocade_parser.sfp_media_parser, 
-        #                                   brocade_parser.fcport_stats_parser, brocade_parser.fru_parser, brocade_parser.maps_parser)
+        print('log')
+        self.log_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser, brocade_parser.fcport_params_parser, brocade_parser.sfp_media_parser, 
+                                          brocade_parser.fcport_stats_parser, brocade_parser.fru_parser, brocade_parser.maps_parser)
 
 
     def __repr__(self):

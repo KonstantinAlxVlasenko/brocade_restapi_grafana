@@ -159,10 +159,14 @@ class FCPortStatisticsParser(BaseParser):
                     # add port parameters to the fc port statistics dictionary
                     fcport_params_dct = self._get_port_params(vf_id, slot_port_number)
                     fcport_stats_current_dct.update(fcport_params_dct)
-                    # convert io rates to bits and check if throuput threshold is exceeded
+                    # convert io rates to bits and check if throuput threshold is exceded
                     self._add_io_troughput_status(fcport_stats_current_dct)
                     # add current fc port statistics dictionary to the summary port statistics dictionary with vf_id and slot_port as consecutive keys
                     fcport_stats_dct[vf_id][fc_statistics_container['name']] = fcport_stats_current_dct
+
+                    print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['in-rate'], fcport_stats_current_dct['in-rate-Mbytes'])
+                    print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['out-rate'], fcport_stats_current_dct['out-rate-Mbytes'])
+
         return fcport_stats_dct
 
 
