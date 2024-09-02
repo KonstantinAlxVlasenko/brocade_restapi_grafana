@@ -30,10 +30,10 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
     """
     
 
-    FC_STATISTICS_PARAMS_LEAFS = ['name', 'sampling-interval', 'time-generated',
+    FC_STATISTICS_PARAMS_LEAFS = ['name', 'sampling-interval',
                                   'in-peak-rate', 'in-rate', 'out-peak-rate', 'out-rate']
 
-    FC_STATISTICS_STAT_LEAFS = ['in-frames', 'out-frames', 'class-3-frames', 'in-lcs'] 
+    FC_STATISTICS_STAT_LEAFS = ['in-frames', 'out-frames', 'class-3-frames', 'in-lcs', 'in-octets', 'out-octets', 'time-generated']  
     
     HIGH_SEVERITY_ERROR_LEAFS = ['class3-in-discards', 'class3-out-discards', 'class-3-discards', 
                                   'crc-errors', 'in-crc-errors', 'remote-crc-errors', 'remote-fec-uncorrected', 

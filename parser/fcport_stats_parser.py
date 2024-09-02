@@ -23,10 +23,10 @@ class FCPortStatisticsParser(BaseParser):
     """
     
 
-    FC_STATISTICS_PARAMS_LEAFS = ['name', 'sampling-interval', 'time-generated',
+    FC_STATISTICS_PARAMS_LEAFS = ['name', 'sampling-interval', 
                                   'in-peak-rate', 'in-rate', 'out-peak-rate', 'out-rate']
 
-    FC_STATISTICS_STAT_LEAFS = ['in-frames', 'out-frames', 'class-3-frames', 'in-lcs'] 
+    FC_STATISTICS_STAT_LEAFS = ['in-frames', 'out-frames', 'class-3-frames', 'in-lcs', 'in-octets', 'out-octets', 'time-generated'] 
     
     HIGH_SEVERITY_ERROR_LEAFS = ['class3-in-discards', 'class3-out-discards', 'class-3-discards', 
                                   'crc-errors', 'in-crc-errors', 'remote-crc-errors', 'remote-fec-uncorrected', 
@@ -270,6 +270,9 @@ class FCPortStatisticsParser(BaseParser):
                     fc_statistics_port_prev_dct = fcport_stats_vfid_prev_dct[slot_port]
                     # find delta for each fc port counter
                     fcport_stats_growth_port_dct = self._get_port_counters_delta(fc_statistics_port_now_dct, fc_statistics_port_prev_dct)
+
+                    self._count_throughput_mbytes(fcport_stats_growth_port_dct)
+
                     # if switch operates normally LR_OUT and OLS_IN values must be equal
                     self._detect_lr_ols_inconsistency(fc_statistics_port_now_dct, fcport_stats_growth_port_dct, lr_type='lr_out')
                     # if switch operates normally LR_IN and OLS_OUT values must be equal
@@ -285,6 +288,28 @@ class FCPortStatisticsParser(BaseParser):
                     # otherwise add increased port counters stats to the fcport_stats_growth_dct
                     self._update_fcport_stats_growth(fcport_stats_growth_dct, fcport_stats_growth_port_dct, fc_statistics_port_now_dct, vf_id, slot_port)
         return fcport_stats_growth_dct    
+
+
+
+    def _count_throughput_mbytes(self, fc_statistics_port_now_dct):
+
+        
+        for octet_key in ['in-octets', 'out-octets']:
+            throughput_mbytes_key = octet_key.split('-')[0] + '-throughput-mbytes'
+            octet_delta_key = octet_key + FCPortStatisticsParser.DELTA_TAG
+            time_delta_key = 'time-generated' + FCPortStatisticsParser.DELTA_TAG
+
+            if fc_statistics_port_now_dct.get(octet_delta_key) is None:
+                fc_statistics_port_now_dct[throughput_mbytes_key] = None
+                continue
+
+            throughput_bytes = fc_statistics_port_now_dct[octet_delta_key] / fc_statistics_port_now_dct[time_delta_key]
+            fc_statistics_port_now_dct[throughput_mbytes_key] = round(throughput_bytes / 1024 / 1024, 2)
+            print(fc_statistics_port_now_dct['port-number'], throughput_mbytes_key, fc_statistics_port_now_dct[throughput_mbytes_key])
+            
+
+        
+
 
 
     def _get_port_counters_delta(self, fc_statistics_port_now_dct: dict, fc_statistics_port_prev_dct: dict) -> dict:
