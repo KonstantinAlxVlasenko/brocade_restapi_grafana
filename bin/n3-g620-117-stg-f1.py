@@ -8,6 +8,8 @@ Switch IP: 10.213.164.101
 import sys
 import os
 
+from pathlib import Path
+
 # getting the name of the directory
 # where the this file is present.
 current = os.path.dirname(os.path.realpath(__file__))
@@ -23,7 +25,7 @@ sys.path.append(parent)
 # now we can import the collection module in the parent
 from collection.switch_metrics_collection import collect_switch_metrics
 
-print(os.path.basename(__file__))
 
 if __name__ == '__main__':
-    collect_switch_metrics(sw_ipaddress="10.213.164.101")
+    current_filename = Path(__file__).stem
+    collect_switch_metrics(sw_ipaddress="10.213.164.101", initiator_filename=current_filename)

@@ -133,6 +133,11 @@ class RequestStatusParser:
             return 'FAIL'
         
         
+    def reset_sw_telemetry(self):
+
+        self._sw_telemetry = None
+
+        
     def __repr__(self):
         return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
     

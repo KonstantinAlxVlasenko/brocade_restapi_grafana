@@ -503,11 +503,6 @@ class FCPortParametersParser(BaseParser):
         # unknown status
         return 2
 
-
-    # @property
-    # def sw_telemetry(self):
-    #     return self._sw_telemetry
-    
     
     @property
     def sw_parser(self):

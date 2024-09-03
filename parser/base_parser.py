@@ -86,13 +86,9 @@ class BaseParser:
         """
 
         return self.ch_wwn == other.ch_wwn
+    
 
 
-    def __repr__(self):
-        return (f"{self.__class__.__name__} " 
-                f"ip_address: {self.sw_telemetry.sw_ipaddress}, "
-                f"date: {self.telemetry_date if self.telemetry_date else 'None'}, "
-                f"time: {self.telemetry_time if self.telemetry_time else 'None'}")
 
 
     @staticmethod
@@ -225,7 +221,14 @@ class BaseParser:
         if copy:
             for key in  keys:
                 dest_dct[key] = source_dct[key]
-        
+
+
+    def __repr__(self):
+        return (f"{self.__class__.__name__} " 
+                f"ip_address: {self.sw_telemetry.sw_ipaddress}, "
+                f"date: {self.telemetry_date if self.telemetry_date else 'None'}, "
+                f"time: {self.telemetry_time if self.telemetry_time else 'None'}")
+
 
     @property
     def sw_telemetry(self):

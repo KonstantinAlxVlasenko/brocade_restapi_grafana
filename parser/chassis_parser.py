@@ -270,10 +270,6 @@ class ChassisParser(BaseParser):
         return license_feature_lst
             
 
-    def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
-
-
     @property
     def chassis(self):
         return self._chassis

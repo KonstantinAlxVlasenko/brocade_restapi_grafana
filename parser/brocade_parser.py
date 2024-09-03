@@ -36,6 +36,10 @@ class BrocadeParser:
         self._sw_telemetry: SwitchTelemetryRequest = sw_telemetry
         self._nameserver: Dict[str, str] = nameserver_dct
         self._brocade_parser_prev: 'BrocadeParser' = brocade_parser_prev
+        # delete brocade_parser_prev of the brocade_parser_prev attribute 
+        # to aviod infinit brocade_parser_prev increase
+        if self.brocade_parser_prev:
+            self._brocade_parser_prev._brocade_parser_prev = None
 
         # http request status parser
         self._request_status_parser = RequestStatusParser(self.sw_telemetry, self.nameserver)
@@ -69,11 +73,14 @@ class BrocadeParser:
                                                            self.brocade_parser_prev.sfp_media_parser)
             # fc port statistics parser
             self._fcport_stats_parser = FCPortStatisticsParser(self.sw_telemetry, self.fcport_params_parser, 
-                                                                      self.brocade_parser_prev.fcport_stats_parser)
+                                                                      self.brocade_parser_prev.fcport_stats_parser)            
 
-
+    
     def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
+        return (f"{self.__class__.__name__} " 
+                f"ip_address: {self.sw_telemetry.sw_ipaddress}, "
+                f"date: {self.telemetry_date if self.telemetry_date else 'None'}, "
+                f"time: {self.telemetry_time if self.telemetry_time else 'None'}")
 
 
     @property

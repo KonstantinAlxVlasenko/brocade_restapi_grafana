@@ -27,10 +27,8 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
 
     # get switch credentials from .env file
     sw_username, sw_password = get_credentials(sw_ipaddress)
-
     # get switch access protocol (http or https) from the configuration file
     secure_access = SWITCH_ACCESS[sw_ipaddress]["secure_access"]
-
     # get http server port number from the configuration file
     http_port_number = HTTP_SERVER_PORT[sw_ipaddress]
 
@@ -43,18 +41,15 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
     start = time.time()
     # get telemetry from the switch through rest api
     sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
-    
     # save current switch telemetry to the database
     db.save_object(sw_telemetry, db.DATABASE_DIR, filename=initiator_filename + '-telemetry')
-    
+
     # load current nameserver from the database
     nameserver_dct = db.load_object(db.DATABASE_DIR, db.NS_FILENAME)
     # parse retrieved telemetry to export to the dashboard
     brocade_parser_now = BrocadeParser(sw_telemetry, nameserver_dct)
-    
     # save current switch parser to the database
     db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=initiator_filename + '-parser')
-    
     # update namserver with data from the parser if needed
     db.update_nameserver(nameserver_dct, brocade_parser_now.ch_parser)
 
@@ -78,18 +73,15 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
             brocade_parser_prev = copy.deepcopy(brocade_parser_now)
             # collect new telemetry
             sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
-            
             # save current switch telemetry to the database
             db.save_object(sw_telemetry, db.DATABASE_DIR, filename=initiator_filename + '-telemetry')
             
             # load current nameserver from the database
             nameserver_dct = db.load_object(db.DATABASE_DIR, db.NS_FILENAME)
             # parse retrieved telemetry to export to the dashboard
-            brocade_parser_now = BrocadeParser(sw_telemetry, nameserver_dct, brocade_parser_prev)
-            
+            brocade_parser_now = BrocadeParser(sw_telemetry, nameserver_dct, brocade_parser_prev)            
             # save current switch parser to the database
-            db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=initiator_filename + '-parser')
-            
+            db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=initiator_filename + '-parser')            
             # update namserver with data from the parser if needed
             db.update_nameserver(nameserver_dct, brocade_parser_now.ch_parser)
             # fill dashboard gauges with labels and metrics from the parser
@@ -121,5 +113,4 @@ def get_credentials(sw_ipaddress: ip_address) -> Tuple[str]:
     elif SWITCH_ACCESS[sw_ipaddress]['authentication'] == 'local':
         sw_username = os.getenv("SW_USERNAME_LOCAL")
         sw_password = os.getenv("SW_PASSWORD_LOCAL")
-
     return sw_username, sw_password

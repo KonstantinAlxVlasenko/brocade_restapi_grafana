@@ -39,20 +39,11 @@ def save_object(obj: Any, dirname: str, filename: str) -> None:
         filename += '.pickle'
     
     filpath = os.path.join(dirname, filename)
-
-    # if os.path.isfile(filpath):
-    #     os.remove(filpath)
-        # with open(filpath, 'wb') as file:
-        #     pickle.dump([], file)
-            # print(f'Object successfully saved to "{filename}"')        
-
     # Writing the object to a file using pickle
     with open(filpath, 'wb') as file:
         pickle.dump(obj, file)
         print(f'Object successfully saved to "{filename}"')
-
-
-    print("File Size is :", os.path.getsize(filpath)/1024, "kbytes")
+    print("File Size is :", round(os.path.getsize(filpath)/1024), "kbytes")
 
 def create_nameserver(ns_dir=DATABASE_DIR, ns_filename=NS_FILENAME):
     """Function is used to create an empty nameserver file if it does not exist.

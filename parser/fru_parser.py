@@ -233,15 +233,6 @@ class FRUParser(BaseParser):
         return fru_params_changed_dct
 
 
-    def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
-
-
-    # @property
-    # def sw_telemetry(self):
-    #     return self._sw_telemetry    
-
-
     @property
     def fru_ps(self):
         return self._fru_ps

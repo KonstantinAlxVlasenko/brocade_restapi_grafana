@@ -362,15 +362,6 @@ class SwitchParser(BaseParser):
                 f"{minutes} min{'' if minutes == 1 else 's'}"
     
     
-    def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
-        
-
-    # @property
-    # def sw_telemetry(self):
-    #     return self._sw_telemetry
-    
-    
     @property
     def fc_switch(self):
         return self._fc_switch

@@ -323,52 +323,6 @@ class MAPSParser(BaseParser):
         return system_resources_changed_dct
 
 
-    # def _get_changed_ssp_report(self, other) -> Dict[str, Dict[str, Dict[str, Union[str, int]]]]:
-    #     """
-    #     Method detects if ssp report parameters (operational-state) have been changed for each ssp leaf.
-    #     It compares ssp leafs parameters of two instances of BrocadeMAPSParser class.
-    #     All changed parameters are added to to the dictionatry including current and previous values.
-        
-    #     Args:
-    #         other {BrocadeMAPSParser}: class instance retrieved from the previous sw_telemetry.
-        
-    #     Returns:
-    #         dict: ssp report change dictionary. Any ssp leaf with changed parameters are in this dictionary.
-    #     """
-
-    #     # switch ports with changed parameters
-    #     ssp_report_changed_dct = {}
-
-    #     # other is not exist (for examle 1st iteration)
-    #     # other is not BrocadeFCPortParametersParser type
-    #     # other's fcport_params atrribute is empty
-    #     if other is None or str(type(self)) != str(type(other)) or not other.ssp_report:
-    #         return None
-        
-    #     # check if other is for the same switch
-    #     elif self.same_chassis(other):
-    #         for ssp_leaf, ssp_leaf_now_dct in self.ssp_report.items():
-
-    #             # if there is no ssp_leaf in other check next ssp_leaf 
-    #             if ssp_leaf not in other.ssp_report:
-    #                 continue
-
-    #             # ssp leaf parameters from the previous telemetry    
-    #             ssp_leaf_prev_dct = other.ssp_report[ssp_leaf]
-    #             # timestamps
-    #             time_now = self.telemetry_date + ' ' + self.telemetry_time
-    #             time_prev = other.telemetry_date + ' ' + other.telemetry_time
-    #             # change parameters
-    #             ssp_leaf_changed = BrocadeMAPSParser.get_changed_chasssis_params(ssp_leaf_now_dct, ssp_leaf_prev_dct, 
-    #                                                                                 changed_keys=['operational-state'], 
-    #                                                                                 const_keys=['chassis-name', 'chassis-wwn', 'name'], 
-    #                                                                                 time_now=time_now, time_prev=time_prev)
-    #             if ssp_leaf_changed:
-    #                 ssp_report_changed_dct[ssp_leaf] = ssp_leaf_changed
-    #     return ssp_report_changed_dct
-
-
-
     def _get_changed_ssp_report(self, other) -> Dict[str, Dict[str, Dict[str, Union[str, int]]]]:
         """
         Method detects if ssp report parameters (operational-state) have been changed for each ssp leaf.
@@ -404,7 +358,6 @@ class MAPSParser(BaseParser):
                                                                                 const_keys=['chassis-name', 'chassis-wwn'], 
                                                                                 time_now=time_now, time_prev=time_prev)
         return ssp_report_changed_dct
-
 
 
     @property
