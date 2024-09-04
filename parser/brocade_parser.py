@@ -22,9 +22,10 @@ class BrocadeParser:
         nameserver_dct (Dict[str, str]): dictionary key as ip address and chassis name as value. 
         brocade_parser_prev (BrocadeParser): previous parser.
     """
+    # nameserver_dct: Dict[str, str]
 
-
-    def __init__(self, sw_telemetry: SwitchTelemetryRequest, nameserver_dct: Dict[str, str], 
+    def __init__(self, 
+                 sw_telemetry: SwitchTelemetryRequest, 
                  brocade_parser_prev: Self = None) -> None:
         """  
         Args:

@@ -6,6 +6,7 @@ from ipaddress import ip_address
 from typing import Tuple
 
 from parser.brocade_parser import BrocadeParser
+from parser.request_status_parser import RequestStatusParser
 
 from dotenv import load_dotenv
 from prometheus_client import start_http_server
@@ -14,6 +15,11 @@ import database as db
 from config import HTTP_SERVER_PORT, SWITCH_ACCESS
 from dashboard.brocade_dashboard import BrocadeDashboard
 from collection.switch_telemetry_request import SwitchTelemetryRequest
+
+TIME_INTERVAL = 60
+REQUEST_STATUS_TAG = '-request'
+BROCADE_PARSER_TAG = '-parser'
+TELEMETRY_TAG = '-telemetry'
 
 
 def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) -> None:
@@ -39,66 +45,96 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
 
 
     # start timer to measure execution time
-    start = time.time()
-    
+    start_time = time.time()
     # get telemetry from the switch through rest api
     sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
     # save current switch telemetry to the database
-    db.save_object(sw_telemetry, db.DATABASE_DIR, filename=initiator_filename + '-telemetry')
+    db.save_object(sw_telemetry, db.DATABASE_DIR, filename=initiator_filename + TELEMETRY_TAG)
     # load current nameserver from the database
     nameserver_dct = db.load_object(db.DATABASE_DIR, db.NS_FILENAME)
-    
     # http request status parser
-    self._request_status_parser = RequestStatusParser(self.sw_telemetry, self.nameserver, request_status_parser_prev)
-    
-    
-    # parse retrieved telemetry to export to the dashboard
-    brocade_parser_now = BrocadeParser(sw_telemetry, nameserver_dct)
-    # save current switch parser to the database
-    db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=initiator_filename + '-parser')
-    # update namserver with data from the parser if needed
-    db.update_nameserver(nameserver_dct, brocade_parser_now.ch_parser)
-
+    request_status_parser_now = RequestStatusParser(sw_telemetry, nameserver_dct)
+    # save current request status to the database
+    db.save_object(request_status_parser_now, db.DATABASE_DIR, filename=initiator_filename + REQUEST_STATUS_TAG)
     # create switch dashboard (set of toolbars which are set of gauges)
     dashboard = BrocadeDashboard(sw_telemetry)
-    # fill dashboard gauges with labels and metrics from the parser
-    dashboard.fill_dashboard_gauge_metrics(brocade_parser_now)
+    
+    if sw_telemetry.corrupted_request:
+        while sw_telemetry.corrupted_request:
+            # if any request is corrupted parser is not initialized
+            brocade_parser_now = None
+            # fill dashboard gauges with labels and metrics from the parser
+            dashboard.fill_dashboard_gauge_metrics(brocade_parser_now, request_status_parser_now)   
 
-    # stop timer
-    end = time.time()
-    duration = end - start
-    # wait till 1 minute is expired
-    if duration < 60:
-        time.sleep(60 - duration)
-        
-        # collect metrics in infinite loop
-        while True:
-            # reset timer
-            start = time.time()
-            # save previous parsed telemmetry
-            brocade_parser_prev = copy.deepcopy(brocade_parser_now)
-            # collect new telemetry
+            # wait timer to expire
+            wait_timer(start_time)
+
+            # start timer to measure execution time
+            start_time = time.time()
+
+            # save previous parsed request status
+            request_status_parser_prev = copy.deepcopy(request_status_parser_now)
+            # get telemetry from the switch through rest api
             sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
             # save current switch telemetry to the database
-            db.save_object(sw_telemetry, db.DATABASE_DIR, filename=initiator_filename + '-telemetry')
-            
+            db.save_object(sw_telemetry, db.DATABASE_DIR, filename=initiator_filename + TELEMETRY_TAG)
             # load current nameserver from the database
             nameserver_dct = db.load_object(db.DATABASE_DIR, db.NS_FILENAME)
+            # http request status parser
+            request_status_parser_now = RequestStatusParser(sw_telemetry, nameserver_dct, request_status_parser_prev)
+            # save current request status to the database
+            db.save_object(request_status_parser_now, db.DATABASE_DIR, filename=initiator_filename + REQUEST_STATUS_TAG)
+            
+    # parse retrieved telemetry to export to the dashboard
+    brocade_parser_now = BrocadeParser(sw_telemetry)
+    # save current switch parser to the database
+    db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=initiator_filename + BROCADE_PARSER_TAG)
+    # update namserver with data from the parser if needed
+    db.update_nameserver(nameserver_dct, brocade_parser_now.ch_parser)
+    # fill dashboard gauges with labels and metrics from the parser
+    dashboard.fill_dashboard_gauge_metrics(brocade_parser_now, request_status_parser_now)
+
+    # stop timer
+    wait_timer(start_time)
+        
+    # collect metrics in infinite loop
+    while True:
+        # reset timer
+        start_time = time.time()
+        # save previous parsed telemetry
+        if brocade_parser_now is not None:
+            brocade_parser_prev = copy.deepcopy(brocade_parser_now)
+        # save previous parsed request status
+        request_status_parser_prev = copy.deepcopy(request_status_parser_now)
+        # collect new telemetry
+        sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
+        # save current switch telemetry to the database
+        db.save_object(sw_telemetry, db.DATABASE_DIR, filename=initiator_filename + TELEMETRY_TAG)
+        # load current nameserver from the database
+        nameserver_dct = db.load_object(db.DATABASE_DIR, db.NS_FILENAME)
+        # http request status parser
+        request_status_parser_now = RequestStatusParser(sw_telemetry, nameserver_dct, request_status_parser_prev)
+        # save current request status to the database
+        db.save_object(request_status_parser_now, db.DATABASE_DIR, filename=initiator_filename + REQUEST_STATUS_TAG)
+
+        if sw_telemetry.corrupted_request:
+            # if any request is corrupted parser is not initialized
+            brocade_parser_now = None
+            # fill dashboard gauges with labels and metrics from the parser
+            dashboard.fill_dashboard_gauge_metrics(brocade_parser_now, request_status_parser_now)
+
+        else:
             # parse retrieved telemetry to export to the dashboard
-            brocade_parser_now = BrocadeParser(sw_telemetry, nameserver_dct, brocade_parser_prev)            
+            brocade_parser_now = BrocadeParser(sw_telemetry, brocade_parser_prev)            
             # save current switch parser to the database
-            db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=initiator_filename + '-parser')            
+            db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=initiator_filename + BROCADE_PARSER_TAG)            
             # update namserver with data from the parser if needed
             db.update_nameserver(nameserver_dct, brocade_parser_now.ch_parser)
             # fill dashboard gauges with labels and metrics from the parser
             dashboard.fill_dashboard_gauge_metrics(brocade_parser_now)
-            
-            # stop timer
-            end = time.time()
-            # wait till 1 minute is expired
-            duration = end - start
-            if duration < 60:
-                time.sleep(60 - duration)
+        
+        # wait timer to expire
+        wait_timer(start_time)
     
 
 def get_credentials(sw_ipaddress: ip_address) -> Tuple[str]:
@@ -120,3 +156,13 @@ def get_credentials(sw_ipaddress: ip_address) -> Tuple[str]:
         sw_username = os.getenv("SW_USERNAME_LOCAL")
         sw_password = os.getenv("SW_PASSWORD_LOCAL")
     return sw_username, sw_password
+
+
+def wait_timer(start_time: time) -> None:
+
+    # stop timer
+    finish_time = time.time()
+    duration = finish_time - start_time
+    # wait till 1 minute is expired
+    if duration < TIME_INTERVAL:
+        time.sleep(TIME_INTERVAL - duration)  

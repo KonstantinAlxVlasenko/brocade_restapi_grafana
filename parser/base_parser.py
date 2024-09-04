@@ -88,9 +88,6 @@ class BaseParser:
         return self.ch_wwn == other.ch_wwn
     
 
-
-
-
     @staticmethod
     def get_changed_vfid_ports(ports_vfid_now_dct, ports_vfid_prev_dct, changed_keys, const_keys, time_now, time_prev):
         """

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Self
 
 from collection.switch_telemetry_request import SwitchTelemetryRequest
 
@@ -26,7 +26,10 @@ class RequestStatusParser:
                       'No Rule violations found']
     
     
-    def __init__(self, sw_telemetry: SwitchTelemetryRequest, nameserver_dct: dict):
+    def __init__(self, 
+                 sw_telemetry: SwitchTelemetryRequest, 
+                 nameserver_dct: dict,
+                 request_status_parser_prev: Self = None) -> None:
         """
         Args:
             sw_telemetry: set of switch telemetry retrieved from the switch.
@@ -35,9 +38,14 @@ class RequestStatusParser:
         
         self._sw_telemetry: SwitchTelemetryRequest = sw_telemetry
         self._nameserver: dict = nameserver_dct.copy()
+        self._request_status_parser_prev = request_status_parser_prev
         self._date: datetime = datetime.now().strftime("%d/%m/%Y")
         self._time: datetime = datetime.now().strftime("%H:%M:%S")
         self._request_status: dict = self._get_request_status()
+
+        if self.request_status_parser_prev:
+            self._request_status_parser_prev._request_status_parser_prev = None
+
         
 
     def _get_request_status(self) -> List[Dict[str, Union[str, int]]]:
@@ -131,15 +139,13 @@ class RequestStatusParser:
                 return 'WARNING'
         else:
             return 'FAIL'
-        
-        
-    def reset_sw_telemetry(self):
-
-        self._sw_telemetry = None
 
         
     def __repr__(self):
-        return f"{self.__class__.__name__} ip_address: {self.sw_telemetry.sw_ipaddress}"
+        return (f"{self.__class__.__name__} " 
+                f"ip_address: {self.sw_telemetry.sw_ipaddress}, "
+                f"date: {self.telemetry_date if self.telemetry_date else 'None'}, "
+                f"time: {self.telemetry_time if self.telemetry_time else 'None'}")
     
 
     @property
@@ -151,6 +157,10 @@ class RequestStatusParser:
     def nameserver(self):
         return self._nameserver
 
+
+    @property
+    def request_status_parser_prev(self):
+        return self._request_status_parser_prev
 
     # @property
     # def ch_wwn(self):
