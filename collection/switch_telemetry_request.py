@@ -195,7 +195,7 @@ class SwitchTelemetryRequest:
             current_telemetry['status-code'] = None
             current_telemetry['date'] = datetime.now().strftime("%d/%m/%Y")
             current_telemetry['time'] = datetime.now().strftime("%H:%M:%S")
-            print(module_name, module_type, response.status_code)
+            print(module_name, module_type, str(error))
             self.corrupted_request = True
             return current_telemetry
         

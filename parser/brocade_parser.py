@@ -42,8 +42,8 @@ class BrocadeParser:
         if self.brocade_parser_prev:
             self._brocade_parser_prev._brocade_parser_prev = None
 
-        # http request status parser
-        self._request_status_parser = RequestStatusParser(self.sw_telemetry, self.nameserver)
+        # # http request status parser
+        # self._request_status_parser = RequestStatusParser(self.sw_telemetry, self.nameserver)
         
         # chassis parameters parser
         self._ch_parser = ChassisParser(self.sw_telemetry)
@@ -100,9 +100,9 @@ class BrocadeParser:
         return self._brocade_parser_prev
     
      
-    @property
-    def request_status_parser(self):
-        return self._request_status_parser
+    # @property
+    # def request_status_parser(self):
+    #     return self._request_status_parser
     
     
     @property

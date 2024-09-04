@@ -120,8 +120,7 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
         if sw_telemetry.corrupted_request:
             # if any request is corrupted parser is not initialized
             brocade_parser_now = None
-            # fill dashboard gauges with labels and metrics from the parser
-            dashboard.fill_dashboard_gauge_metrics(brocade_parser_now, request_status_parser_now)
+            
 
         else:
             # parse retrieved telemetry to export to the dashboard
@@ -130,9 +129,12 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
             db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=initiator_filename + BROCADE_PARSER_TAG)            
             # update namserver with data from the parser if needed
             db.update_nameserver(nameserver_dct, brocade_parser_now.ch_parser)
-            # fill dashboard gauges with labels and metrics from the parser
-            dashboard.fill_dashboard_gauge_metrics(brocade_parser_now)
+            # # fill dashboard gauges with labels and metrics from the parser
+            # dashboard.fill_dashboard_gauge_metrics(brocade_parser_now)
         
+
+        # fill dashboard gauges with labels and metrics from the parser
+        dashboard.fill_dashboard_gauge_metrics(brocade_parser_now, request_status_parser_now)
         # wait timer to expire
         wait_timer(start_time)
     
