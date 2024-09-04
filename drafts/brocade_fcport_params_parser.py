@@ -186,7 +186,7 @@ class BrocadeFCPortParametersParser(BrocadeTelemetryParser):
                         'port-speed-hrf': port_speed_gbps_hrf,
                         'port-speed-gbps': port_speed_gbps,
                         'port-max-speed-gbps': port_max_speed,
-                        'port-throughput-Mbytes': BrocadeFCPortParametersParser.get_port_throughput(fc_interface_container['speed']),
+                        'port-throughput-megabytes': BrocadeFCPortParametersParser.get_port_throughput(fc_interface_container['speed']),
                         'physical-state': physical_state,
                         'physical-state-id': BrocadeFCPortParametersParser.PHYSICAL_STATE_ID.get(fc_interface_container['physical-state'], 100),
                         'port-type-id': fc_interface_container['port-type'],

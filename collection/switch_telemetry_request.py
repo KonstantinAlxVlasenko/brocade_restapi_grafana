@@ -49,6 +49,8 @@ class SwitchTelemetryRequest:
         self._username = username
         self._password = password
         self._secure_access = secure_access
+
+        self._corrupted_request = False
         
         # VF independent attributes
         self._chassis = {}
@@ -193,6 +195,8 @@ class SwitchTelemetryRequest:
             current_telemetry['status-code'] = None
             current_telemetry['date'] = datetime.now().strftime("%d/%m/%Y")
             current_telemetry['time'] = datetime.now().strftime("%H:%M:%S")
+            print(module_name, module_type, response.status_code)
+            self.corrupted_request = True
             return current_telemetry
         
 
@@ -282,6 +286,11 @@ class SwitchTelemetryRequest:
     @property
     def secure_access(self):
         return self._secure_access    
+
+
+    @property
+    def corrupted_request(self):
+        return self._corrupted_request
 
 
     @property

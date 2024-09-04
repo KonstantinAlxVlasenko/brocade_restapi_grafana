@@ -34,7 +34,7 @@ class BrocadeParser:
         """
 
         self._sw_telemetry: SwitchTelemetryRequest = sw_telemetry
-        self._nameserver: Dict[str, str] = nameserver_dct
+        # self._nameserver: Dict[str, str] = nameserver_dct
         self._brocade_parser_prev: 'BrocadeParser' = brocade_parser_prev
         # delete brocade_parser_prev of the brocade_parser_prev attribute 
         # to aviod infinit brocade_parser_prev increase
@@ -43,6 +43,7 @@ class BrocadeParser:
 
         # http request status parser
         self._request_status_parser = RequestStatusParser(self.sw_telemetry, self.nameserver)
+        
         # chassis parameters parser
         self._ch_parser = ChassisParser(self.sw_telemetry)
         # switch parameters parser

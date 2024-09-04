@@ -295,13 +295,13 @@ class FCPortStatsToolbar(BaseToolbar):
         
         # in rate gauges
         self._gauge_in_peak_rate = BaseGauge(name="fcport_stats_in_peak_rate", description="The peak byte receive rate in MB/s.", 
-                                                unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-Mbytes")
+                                                unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-megabytes")
         self._gauge_in_peak_rate_percentage = BaseGauge(name="fcport_stats_in_peak_rate_percentage", description="The percentage of peak receive rate from maximum port throughput.", 
                                                            unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-percentage")
         # self._gauge_in_peak_rate_bits = BaseGauge(name="fcport_stats_in_peak_rate_bits", description="The peak bit receive rate.", 
         #                                              unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-peak-rate-bits")
         self._gauge_in_rate = BaseGauge(name="fcport_stats_in_rate", description="The instantaneous byte receive rate in MB/s.", 
-                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-rate-Mbytes")
+                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-rate-megabytes")
         self._gauge_in_rate_percentage = BaseGauge(name="fcport_stats_in_rate_percentage", description="The percentage of the instantaneous receive rate from maximum port throughput.", 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-rate-percentage")
         # self._gauge_in_rate_bits = BaseGauge(name="fcport_stats_in_rate_bits", description="The instantaneous bit receive rate.", unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="in-rate-bits")
@@ -313,13 +313,13 @@ class FCPortStatsToolbar(BaseToolbar):
         
         # out rate gauges
         self._gauge_out_peak_rate = BaseGauge(name="fcport_stats_out_peak_rate", description="The peak byte transmit rate in MB/s.", 
-                                                 unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-Mbytes")
+                                                 unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-megabytes")
         self._gauge_out_peak_rate_percentage = BaseGauge(name="fcport_stats_out_peak_rate_percentage", description="The percentage of peak transmit rate from maximum port throughput.", 
                                                             unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-percentage")
         # self._gauge_out_peak_rate_bits = BaseGauge(name="fcport_stats_out_peak_rate_bits", description="The peak bit transmit rate.", 
         #                                               unit_keys=BrocadeFCPortStatsToolbar.switch_port_keys, metric_key="out-peak-rate-bits")
         self._gauge_out_rate = BaseGauge(name="fcport_stats_out_rate", description="The instantaneous byte transmit rate in MB/s.", 
-                                            unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-rate-Mbytes")
+                                            unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-rate-megabytes")
         self._gauge_out_rate_percentage = BaseGauge(name="fcport_stats_out_rate_percentage", description="The percentage of the instantaneous transmit rate from maximum port throughput.", 
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-rate-percentage")
         # self._gauge_out_rate_bits = BaseGauge(name="fcport_stats_out_rate_bits", description="The instantaneous bit transmit rate.", 

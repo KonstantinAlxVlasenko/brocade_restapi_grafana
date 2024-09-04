@@ -37,15 +37,21 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
     # start http server on the specified port
     start_http_server(http_port_number)
 
+
     # start timer to measure execution time
     start = time.time()
+    
     # get telemetry from the switch through rest api
     sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
     # save current switch telemetry to the database
     db.save_object(sw_telemetry, db.DATABASE_DIR, filename=initiator_filename + '-telemetry')
-
     # load current nameserver from the database
     nameserver_dct = db.load_object(db.DATABASE_DIR, db.NS_FILENAME)
+    
+    # http request status parser
+    self._request_status_parser = RequestStatusParser(self.sw_telemetry, self.nameserver, request_status_parser_prev)
+    
+    
     # parse retrieved telemetry to export to the dashboard
     brocade_parser_now = BrocadeParser(sw_telemetry, nameserver_dct)
     # save current switch parser to the database
