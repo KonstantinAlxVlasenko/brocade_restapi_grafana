@@ -164,8 +164,8 @@ class FCPortStatisticsParser(BaseParser):
                     # add current fc port statistics dictionary to the summary port statistics dictionary with vf_id and slot_port as consecutive keys
                     fcport_stats_dct[vf_id][fc_statistics_container['name']] = fcport_stats_current_dct
 
-                    # print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['in-rate'], fcport_stats_current_dct['in-rate-Mbytes'])
-                    # print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['out-rate'], fcport_stats_current_dct['out-rate-Mbytes'])
+                    # print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['in-rate'], fcport_stats_current_dct['in-rate-megabytes'])
+                    # print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['out-rate'], fcport_stats_current_dct['out-rate-megabytes'])
 
         return fcport_stats_dct
 
@@ -200,7 +200,7 @@ class FCPortStatisticsParser(BaseParser):
 
         for rate_key in ['in-peak-rate', 'in-rate', 'out-peak-rate', 'out-rate']:
             # rate_bits_key = rate_key + '-bits'
-            rate_mbytes_key = rate_key + '-Mbytes'
+            rate_mbytes_key = rate_key + '-megabytes'
             rate_percantage_key = rate_key + '-percentage'
             # # convert rate bytes to bits
             # fcport_stats_current_dct[rate_bits_key] = BrocadeFCPortStatisticsParser.bytes_to_bits(fcport_stats_current_dct[rate_key])
@@ -208,7 +208,7 @@ class FCPortStatisticsParser(BaseParser):
             fcport_stats_current_dct[rate_mbytes_key] = FCPortStatisticsParser.bytes_to_mbytes(fcport_stats_current_dct[rate_key])
             # find throughput percentage from the port throughput
             fcport_stats_current_dct[rate_percantage_key] = FCPortStatisticsParser.get_percentage(
-                fcport_stats_current_dct[rate_mbytes_key], fcport_stats_current_dct['port-throughput-Mbytes'])
+                fcport_stats_current_dct[rate_mbytes_key], fcport_stats_current_dct['port-throughput-megabytes'])
             if not 'peak' in rate_key:
                 rate_status_key = rate_key + '-status'
                 rate_status_id_key = rate_status_key + '-id'
@@ -217,9 +217,6 @@ class FCPortStatisticsParser(BaseParser):
                     fcport_stats_current_dct[rate_percantage_key])
                 # corresponding status
                 fcport_stats_current_dct[rate_status_key] = FCPortStatisticsParser.STATUS_ID[fcport_stats_current_dct[rate_status_id_key]]
-            
-            # if not 'peak' in  rate_key:
-            #     print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['physical-state'], rate_key + '-%', fcport_stats_current_dct[rate_bits_key], fcport_stats_current_dct['speed'], fcport_stats_current_dct[rate_key + '-%'])
 
 
     def _calculate_counters_growth(self, other) -> Dict[int, Dict[str, Dict[str, Optional[Union[str, int]]]]]:
@@ -290,26 +287,60 @@ class FCPortStatisticsParser(BaseParser):
         return fcport_stats_growth_dct    
 
 
-
     def _count_throughput_mbytes(self, fc_statistics_port_now_dct):
+        """_summary_
+
+        Args:
+            fc_statistics_port_now_dct (_type_): _description_
+        """
 
         
         for octet_key in ['in-octets', 'out-octets']:
-            throughput_mbytes_key = octet_key.split('-')[0] + '-throughput-Mbytes'
+            throughput_base_key = octet_key.split('-')[0] + '-throughput'
+            throughput_mbytes_key = throughput_base_key + '-megabytes'
             octet_delta_key = octet_key + FCPortStatisticsParser.DELTA_TAG
             time_delta_key = 'time-generated' + FCPortStatisticsParser.DELTA_TAG
 
             if fc_statistics_port_now_dct.get(octet_delta_key) is None:
-                fc_statistics_port_now_dct[throughput_mbytes_key] = None
-                continue
-
-            throughput_bytes = fc_statistics_port_now_dct[octet_delta_key] / fc_statistics_port_now_dct[time_delta_key]
-            fc_statistics_port_now_dct[throughput_mbytes_key] = round(throughput_bytes / 1024 / 1024, 2)
+                throughput_mbytes = None
+            else:
+                throughput_mbytes = round(
+                fc_statistics_port_now_dct[octet_delta_key] / fc_statistics_port_now_dct[time_delta_key] / 1024 / 1024, 2)
+            
+            fc_statistics_port_now_dct[throughput_mbytes_key] = throughput_mbytes
+            self._add_io_troughput_status_(fc_statistics_port_now_dct, throughput_base_key, throughput_mbytes)
             if fc_statistics_port_now_dct['port-number'] == 44:
-                print(fc_statistics_port_now_dct['port-number'], throughput_mbytes_key, fc_statistics_port_now_dct['time-generated-hrf'], fc_statistics_port_now_dct[time_delta_key], fc_statistics_port_now_dct[throughput_mbytes_key])
+                print(fc_statistics_port_now_dct['port-number'], 
+                      throughput_mbytes_key, 
+                      fc_statistics_port_now_dct['time-generated-hrf'], 
+                      fc_statistics_port_now_dct[time_delta_key], 
+                      throughput_mbytes, 
+                      fc_statistics_port_now_dct[throughput_base_key + '-percentage'],
+                      fc_statistics_port_now_dct[throughput_base_key + '-status'])
             
 
+    def _add_io_troughput_status_(self, fc_statistics_port_now_dct: dict, throughput_base_key: str, throughput_mbytes_value: float) -> None:
+        """
+        Method to add io troughput status to the fc port statistics dictionary (based on io octets values).
         
+        Args:
+            fc_statistics_port_now_dct {dict}: fc statistics dictionary for the current slot_port.
+        
+        Returns:
+            None.
+        """
+
+        throughput_percantage_key = throughput_base_key + '-percentage'
+        throughput_status_key = throughput_base_key + '-status'
+        throughput_status_id_key = throughput_status_key + '-id'
+        # find throughput percentage from the port throughput
+        fc_statistics_port_now_dct[throughput_percantage_key] = FCPortStatisticsParser.get_percentage(
+                throughput_mbytes_value, fc_statistics_port_now_dct['port-throughput-megabytes'])
+        # find if throughput threshold is exceeded and get corresponding status id
+        fc_statistics_port_now_dct[throughput_status_id_key] = FCPortStatisticsParser.get_rate_status(
+            fc_statistics_port_now_dct[throughput_percantage_key])
+        # corresponding status
+        fc_statistics_port_now_dct[throughput_status_key] = FCPortStatisticsParser.STATUS_ID[fc_statistics_port_now_dct[throughput_status_id_key]]  
 
 
 
@@ -763,7 +794,7 @@ class FCPortStatisticsParser(BaseParser):
             bytes {int}: nember of bytes.
         
         Returns:
-            int: Mbytes.
+            int: MB (megabytes).
         """
         
         if bytes is not None:

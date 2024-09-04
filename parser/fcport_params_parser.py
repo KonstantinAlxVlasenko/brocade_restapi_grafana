@@ -182,7 +182,7 @@ class FCPortParametersParser(BaseParser):
                         'port-speed-hrf': port_speed_gbps_hrf,
                         'port-speed-gbps': port_speed_gbps,
                         'port-max-speed-gbps': port_max_speed,
-                        'port-throughput-Mbytes': FCPortParametersParser.get_port_throughput(fc_interface_container['speed']),
+                        'port-throughput-megabytes': FCPortParametersParser.get_port_throughput(fc_interface_container['speed']),
                         'physical-state': physical_state,
                         'physical-state-id': FCPortParametersParser.PHYSICAL_STATE_ID.get(fc_interface_container['physical-state'], 100),
                         'port-type-id': fc_interface_container['port-type'],

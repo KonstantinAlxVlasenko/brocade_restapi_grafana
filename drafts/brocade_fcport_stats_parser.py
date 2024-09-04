@@ -201,7 +201,7 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
 
         for rate_key in ['in-peak-rate', 'in-rate', 'out-peak-rate', 'out-rate']:
             # rate_bits_key = rate_key + '-bits'
-            rate_mbytes_key = rate_key + '-Mbytes'
+            rate_mbytes_key = rate_key + '-megabytes'
             rate_percantage_key = rate_key + '-percentage'
             # # convert rate bytes to bits
             # fcport_stats_current_dct[rate_bits_key] = BrocadeFCPortStatisticsParser.bytes_to_bits(fcport_stats_current_dct[rate_key])
@@ -209,7 +209,7 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             fcport_stats_current_dct[rate_mbytes_key] = BrocadeFCPortStatisticsParser.bytes_to_mbytes(fcport_stats_current_dct[rate_key])
             # find throughput percentage from the port throughput
             fcport_stats_current_dct[rate_percantage_key] = BrocadeFCPortStatisticsParser.get_percentage(
-                fcport_stats_current_dct[rate_mbytes_key], fcport_stats_current_dct['port-throughput-Mbytes'])
+                fcport_stats_current_dct[rate_mbytes_key], fcport_stats_current_dct['port-throughput-megabytes'])
             if not 'peak' in rate_key:
                 rate_status_key = rate_key + '-status'
                 rate_status_id_key = rate_status_key + '-id'
@@ -738,7 +738,7 @@ class BrocadeFCPortStatisticsParser(BrocadeTelemetryParser):
             bytes {int}: nember of bytes.
         
         Returns:
-            int: Mbytes.
+            int: MB (mega bytes).
         """
         
         if bytes is not None:

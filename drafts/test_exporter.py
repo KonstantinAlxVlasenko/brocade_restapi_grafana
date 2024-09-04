@@ -44,8 +44,8 @@ from brocade_sfp_media_toolbar import BrocadeSFPMediaToolbar
 from brocade_fcport_stats_toolbar import BrocadeFCPortStatsToolbar
 from brocade_log_toolbar import BrocadeLogToolbar
 
-from brocade_parser import BrocadeParser
-from brocade_dashboard import BrocadeDashboard
+# from brocade_parser import BrocadeParser
+# from brocade_dashboard import BrocadeDashboard
 
 def load_object(dirname, filename):
     filpath = os.path.join(dirname, filename)
@@ -112,7 +112,6 @@ o3_g620_107_vc01_f1_a = load_object(dirname=storage_directory, filename='o3_g620
 o3_g620_107_vc01_f1_b = load_object(dirname=storage_directory, filename='o3_g620_107_vc01_f1_b')
 o1_g620_003_vc5_f1 = load_object(dirname=storage_directory, filename='o1_g620_003_vc5_f1')
 
-n3_g620_118_stg_f2 = load_object(dirname=storage_directory, filename='n3-g620-118-stg-f2.pickle')
 
 
 lr_out_2 = o3_g630_003_vc01_f1_b.fc_statistics[-1]['Response']['fibrechannel-statistics'][0]['out-link-resets']
@@ -184,7 +183,7 @@ o3_g630_003_vc01_f1_b.ssp_report['Response']['switch-status-policy-report']['fan
 create_chname_ip_db_file(db_dir, chname_ip_db_filename)
 chname_ip_dct = load_object(db_dir, chname_ip_db_filename)
 
-print(chname_ip_dct)
+# print(chname_ip_dct)
 
 sw_telemetry_prev = o3_g630_003_vc01_f1_a
 # brocade_parser_prev = BrocadeParser(sw_telemetry_prev, chname_ip_dct)
@@ -221,7 +220,7 @@ fcport_stats_parser_prev = BrocadeFCPortStatisticsParser(sw_telemetry_prev, fcpo
 # now telemetry
 create_chname_ip_db_file(db_dir, chname_ip_db_filename, chname_ip_default_dct)
 chname_ip_dct = load_object(db_dir, chname_ip_db_filename)
-print(chname_ip_dct)
+# print(chname_ip_dct)
 
 
 sw_telemetry_now = o3_g630_003_vc01_f1_b
@@ -238,7 +237,6 @@ fcport_stats_parser_now = BrocadeFCPortStatisticsParser(sw_telemetry_now, fcport
 
 
 # update_chname_ip_db(chname_ip_dct, brocade_parser_now.ch_parser, db_dir, chname_ip_db_filename)
-
 
 
 # request_status_tb = BrocadeRequestStatusToolbar(sw_telemetry_now)
