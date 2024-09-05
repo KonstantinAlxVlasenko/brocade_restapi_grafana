@@ -1,6 +1,7 @@
 import os
 import pickle
 from typing import Any
+from parser.chassis_parser import ChassisParser
 
 NS_FILENAME = 'nameserver.pickle'
 DATABASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -62,14 +63,14 @@ def create_nameserver(ns_dir=DATABASE_DIR, ns_filename=NS_FILENAME):
         save_object(ns_empty_dct, ns_dir, ns_filename)
 
 
-def update_nameserver(nameserver_dct, ch_parser, ns_dir=DATABASE_DIR, ns_filename=NS_FILENAME) -> None:
+def update_nameserver(ch_parser: ChassisParser, ns_dir=DATABASE_DIR, ns_filename=NS_FILENAME) -> None:
     """Function is used to change the nameserver file.
+    Loads current nameserver from the database.
     Add new chassis name of the ip address or update existing one.
-    If the nameserver file is changed the file is saved.
+    If the nameserver file is changed then file is saved.
 
     Args:
-        nameserver_dct (_type_): current nameserver dictionary.
-        ch_parser (_type_): chassis parser file containing the ip address and the chassis name.
+        ch_parser (ChassisParser): chassis parser file containing the ip address and the chassis name.
         ns_dir (str): directory of the pickle file. Defaults to NS_DIR.
         ns_filename (str): name of the pickle file. Defaults to NS_FILENAME.
     """
@@ -77,6 +78,9 @@ def update_nameserver(nameserver_dct, ch_parser, ns_dir=DATABASE_DIR, ns_filenam
     if not ch_parser.ch_name:
         return
     sw_ipaddress = ch_parser.sw_telemetry.sw_ipaddress
+
+    # load current nameserver from the database
+    nameserver_dct = load_object(ns_dir, ns_filename)
     if not nameserver_dct.get(sw_ipaddress) or nameserver_dct[sw_ipaddress] != ch_parser.ch_name:
         nameserver_dct[sw_ipaddress] = ch_parser.ch_name
         save_object(nameserver_dct, ns_dir, ns_filename)

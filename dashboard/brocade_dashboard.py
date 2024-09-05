@@ -61,7 +61,7 @@ class BrocadeDashboard:
         print('request_status')
         self.request_status_tb.fill_toolbar_gauge_metrics(request_status_parser)
         
-        if brocade_parser is not None:
+        if self.sw_telemetry.corrupted_request:
         
             # print('chassis')
             # self.chassis_tb.fill_toolbar_gauge_metrics(brocade_parser.ch_parser, brocade_parser.sw_parser)
