@@ -291,6 +291,11 @@ class SwitchTelemetryRequest:
     @property
     def corrupted_request(self):
         return self._corrupted_request
+    
+    @corrupted_request.setter
+    def corrupted_request(self, value):
+        self._corrupted_request = value
+
 
 
     @property
