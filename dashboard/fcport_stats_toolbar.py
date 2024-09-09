@@ -29,27 +29,27 @@ class FCPortStatsToolbar(BaseToolbar):
 
         super().__init__(sw_telemetry)
 
-        # sfp media switch name gauge
-        self._gauge_swname = BaseGauge(name='fcport_stats_switchname', description='Switch name in the SFP media output.', 
+        # port stats switch name gauge
+        self._gauge_swname = BaseGauge(name='fcport_stats_switchname', description='Switch name in the port statistics output.', 
                                           unit_keys=FCPortStatsToolbar.switch_wwn_key, parameter_key='switch-name')
-        # sfp media fabric name gauge
-        self._gauge_fabricname = BaseGauge(name='fcport_stats_fabricname', description='Fabric name in the SFP media output.', 
+        # port stats fabric name gauge
+        self._gauge_fabricname = BaseGauge(name='fcport_stats_fabricname', description='Fabric name in the port statistics output.', 
                                               unit_keys=FCPortStatsToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
-        # sfp media port name gauge
-        self._gauge_portname = BaseGauge(name='fcport_stats_portname', description='Port name in the SFP media output.',
+        # port stats port name gauge
+        self._gauge_portname = BaseGauge(name='fcport_stats_portname', description='Port name in the port statistics output.',
                                              unit_keys=FCPortStatsToolbar.switch_port_keys, parameter_key='port-name')  
-        # sfp media switch VF ID gauge
-        self._gauge_switch_vfid = BaseGauge(name='fcport_stats_switch_vfid', description='Switch virtual fabric ID in the SFP media output.', 
+        # port stats switch VF ID gauge
+        self._gauge_switch_vfid = BaseGauge(name='fcport_stats_switch_vfid', description='Switch virtual fabric ID in the port statistics output.', 
                                                unit_keys=FCPortStatsToolbar.switch_wwn_key, metric_key='vf-id')
-        # sfp media port speed gbps gauge
+        # port stats port speed gbps gauge
         self._gauge_port_speed_value = BaseGauge(name='fcport_stats_port_speed_value', description='The speed of the port.', 
                                                unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key='port-speed-gbps')
-        # sfp media port speed mode gauge
+        # port stats port speed mode gauge
         # 0 - 'G', 1 - 'N'
         speed_mode_description = f'Whether the port speed is auto-negotiated on the specified port {FCPortStatsToolbar.SPEED_MODE_ID}.'
         self._gauge_port_speed_mode = BaseGauge(name='fcport_stats_port_speed_mode', description=speed_mode_description, 
                                                unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key='auto-negotiate')
-        # sfp media physical state gauge
+        # port stats physical state gauge
         # 0 - 'Offline', 1 - 'Online', 2 - 'Testing', 3 - 'Faulty', 4 - 'E_port', 5 - 'F_port', 
         # 6 - 'Segmented', 7 - 'Unknown', 8 - 'No_port', 9 - 'No_module', 10 - 'Laser_flt',
         # 11 - 'No_light', 12 - 'No_sync', 13 - 'In_sync', 14 - 'Port_flt', 15 - 'Hard_flt',
@@ -58,7 +58,7 @@ class FCPortStatsToolbar(BaseToolbar):
         port_physical_state_description = f'The physical state of a port {FCPortStatsToolbar.PORT_PHYSICAL_STATE_ID}.'
         self._gauge_port_physical_state = BaseGauge(name='fcport_stats_physical_state', description=port_physical_state_description,
                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key='physical-state-id')
-        # sfp media port type gauge
+        # port stats port type gauge
         # 0 - 'Unknown', 7 - 'E_Port', 10 - 'G_Port', 11 - 'U_Port', 15 - 'F_Port',
         # 16 - 'L_Port', 17 - 'FCoE Port', 19 - 'EX_Port', 20 - 'D_Port', 21 - 'SIM Port',
         # 22 - 'AF_Port', 23 - 'AE_Port', 25 - 'VE_Port', 26 - 'Ethernet Flex Port',
@@ -329,6 +329,30 @@ class FCPortStatsToolbar(BaseToolbar):
         self._gauge_out_rate_status_id = BaseGauge(name="fcport_stats_out_rate_status_id", description=description_out_rate_status_id, 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-rate-status-id")
 
+        # maximum port throughput gauge
+        self._gauge_port_throughput_megabytes = BaseGauge(name="fcport_stats_port_throughput_megabytes", description="The port throughput (negotiated port speed) in MB/s.",
+                                                          unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="port-throughput-megabytes")
+        
+        # in throughput gauge
+        self._gauge_in_throughput_megabytes = BaseGauge(name="fcport_stats_in_throughput_megabytes", description="The receive throughput in MB/s.", 
+                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-throughput-megabytes")
+        self._gauge_in_throughput_percentage = BaseGauge(name="fcport_stats_in_throughput_percentage", description="The percentage of receive throughput from maximum port throughput.", 
+                                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-throughput-percentage")
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
+        description_in_throughput_status_id = f"The receive throughput status id {FCPortStatsToolbar.STATUS_ID}."
+        self._gauge_in_throughput_status_id = BaseGauge(name="fcport_stats_in_throughput_status_id", description=description_in_throughput_status_id, 
+                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="in-throughput-status-id")
+        
+        # out throughput gauge
+        self._gauge_out_throughput_megabytes = BaseGauge(name="fcport_stats_out_throughput_megabytes", description="The transmit throughput out MB/s.", 
+                                                        unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-throughput-megabytes")
+        self._gauge_out_throughput_percentage = BaseGauge(name="fcport_stats_out_throughput_percentage", description="The percentage of transmit throughput from maximum port throughput.", 
+                                                           unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-throughput-percentage")
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warnoutg', 4 - 'Critical'
+        description_out_throughput_status_id = f"The transmit throughput status id {FCPortStatsToolbar.STATUS_ID}."
+        self._gauge_out_throughput_status_id = BaseGauge(name="fcport_stats_out_throughput_status_id", description=description_out_throughput_status_id, 
+                                                     unit_keys=FCPortStatsToolbar.switch_port_keys, metric_key="out-throughput-status-id")
+        
         # total number of frames in human-readable format counters gauges
         self._gauge_class_3_frames_hrf = BaseGauge(name="fcport_stats_class_3_frames_hrf", description="The number of Class 3 frames received at this port (stat_c3_frx) in human-readable format.", 
                                                       unit_keys=FCPortStatsToolbar.switch_port_keys, parameter_key="class-3-frames-hrf")
@@ -378,7 +402,9 @@ class FCPortStatsToolbar(BaseToolbar):
             self.gauge_remote_link_failures, self.gauge_remote_link_failures_delta, self.gauge_remote_loss_of_signal, self.gauge_remote_loss_of_signal_delta, 
             self.gauge_remote_loss_of_sync, self.gauge_remote_loss_of_sync_delta, self.gauge_remote_primitive_sequence_protocol_error, 
             self.gauge_remote_primitive_sequence_protocol_error_delta, self.gauge_too_many_rdys, self.gauge_too_many_rdys_delta, self.gauge_truncated_frames, 
-            self.gauge_truncated_frames_delta
+            self.gauge_truncated_frames_delta, 
+            self.gauge_port_throughput_megabytes, self.gauge_in_throughput_megabytes, self.gauge_in_throughput_percentage, self.gauge_in_throughput_status_id, 
+            self.gauge_out_throughput_megabytes, self.gauge_out_throughput_percentage, self.gauge_out_throughput_status_id
             ]
         
         for gauge in gauge_lst:
@@ -704,6 +730,41 @@ class FCPortStatsToolbar(BaseToolbar):
         return self._gauge_in_rate_status_id
     
 
+    @property
+    def gauge_port_throughput_megabytes(self):
+        return self._gauge_port_throughput_megabytes
+
+
+    @property
+    def gauge_in_throughput_megabytes(self):
+        return self._gauge_in_throughput_megabytes
+    
+
+    @property
+    def gauge_in_throughput_percentage(self):
+        return self._gauge_in_throughput_percentage
+    
+
+    @property
+    def gauge_in_throughput_status_id(self):
+        return self._gauge_in_throughput_status_id
+    
+
+    @property
+    def gauge_out_throughput_megabytes(self):
+        return self._gauge_out_throughput_megabytes
+    
+
+    @property
+    def gauge_out_throughput_percentage(self):
+        return self._gauge_out_throughput_percentage
+    
+    
+    @property
+    def gauge_out_throughput_status_id(self):
+        return self._gauge_out_throughput_status_id
+
+    
     @property
     def gauge_invalid_ordered_sets(self):
         return self._gauge_invalid_ordered_sets

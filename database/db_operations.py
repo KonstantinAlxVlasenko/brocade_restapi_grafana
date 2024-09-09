@@ -39,6 +39,9 @@ def save_object(obj: Any, dirname: str, filename: str) -> None:
     # add file extension
     if not filename.endswith(".pickle"):
         filename += '.pickle'
+
+    if not os.path.isdir(dirname): 
+        os.makedirs(dirname) 
     
     filpath = os.path.join(dirname, filename)
     # Writing the object to a file using pickle
