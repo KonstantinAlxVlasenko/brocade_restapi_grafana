@@ -60,8 +60,6 @@ class BrocadeDashboard:
 
         print('request_status')
         self.request_status_tb.fill_toolbar_gauge_metrics(request_status_parser)
-
-        print(f'self.sw_telemetry.corrupted_request {self.sw_telemetry.corrupted_request} inside fill_dashboard_gauge_metrics')
         
         if brocade_parser is None:
             return

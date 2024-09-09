@@ -125,7 +125,7 @@ def get_sw_telemetry(sw_ipaddress: ip_address,
     # collect new telemetry
     sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
     # save current switch telemetry to the database
-    db.save_object(sw_telemetry, db.DATABASE_DIR, filename=initiator_filename + TELEMETRY_TAG)
+    db.save_object(sw_telemetry, db.ARCHIVE_DIR, filename=initiator_filename + TELEMETRY_TAG)
     return sw_telemetry
 
 
@@ -170,7 +170,7 @@ def get_request_status(sw_telemetry: SwitchTelemetryRequest,
     # http request status parser
     request_status_parser_now = RequestStatusParser(sw_telemetry, nameserver_dct, request_status_parser_prev)
     # save current request status to the database
-    db.save_object(request_status_parser_now, db.DATABASE_DIR, filename=initiator_filename + REQUEST_STATUS_TAG)
+    db.save_object(request_status_parser_now, db.ARCHIVE_DIR, filename=initiator_filename + REQUEST_STATUS_TAG)
     return request_status_parser_now
 
 
@@ -194,7 +194,7 @@ def get_brocade_parser(sw_telemetry: SwitchTelemetryRequest,
     # parse retrieved telemetry to export to the dashboard
     brocade_parser_now = BrocadeParser(sw_telemetry, brocade_parser_prev)            
     # save current switch parser to the database
-    db.save_object(brocade_parser_now, db.DATABASE_DIR, filename=initiator_filename + BROCADE_PARSER_TAG)
+    db.save_object(brocade_parser_now, db.ARCHIVE_DIR, filename=initiator_filename + BROCADE_PARSER_TAG)
     return brocade_parser_now        
 
 

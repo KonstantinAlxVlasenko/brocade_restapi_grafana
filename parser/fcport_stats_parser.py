@@ -163,10 +163,6 @@ class FCPortStatisticsParser(BaseParser):
                     self._add_io_troughput_status(fcport_stats_current_dct)
                     # add current fc port statistics dictionary to the summary port statistics dictionary with vf_id and slot_port as consecutive keys
                     fcport_stats_dct[vf_id][fc_statistics_container['name']] = fcport_stats_current_dct
-
-                    # print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['in-rate'], fcport_stats_current_dct['in-rate-megabytes'])
-                    # print(fcport_stats_current_dct['port-number'], fcport_stats_current_dct['out-rate'], fcport_stats_current_dct['out-rate-megabytes'])
-
         return fcport_stats_dct
 
 
@@ -189,7 +185,7 @@ class FCPortStatisticsParser(BaseParser):
 
     def _add_io_troughput_status(self, fcport_stats_current_dct) -> None:
         """
-        Method to add io troughput status to the fc port statistics dictionary.
+        Method to add io troughput status to the fc port statistics dictionary (based in 'in-rate', 'out-rate').
         
         Args:
             fcport_stats_current_dct {dict}: fc statistics dictionary for the current slot_port.
@@ -241,7 +237,7 @@ class FCPortStatisticsParser(BaseParser):
             for fcport_stats_vfid_now_dct in self.fcport_stats.values():
                 for fc_statistics_port_now_dct in fcport_stats_vfid_now_dct.values():
                     force_ok_status = True if other is None else False
-                    self._add_empty_fields(fc_statistics_port_now_dct, force_ok_status=force_ok_status)
+                    self._add_empty_fields(fc_statistics_port_now_dct, force_ok_status)
         
         # check if other is for the same switch
         elif self.same_chassis(other):
@@ -286,14 +282,13 @@ class FCPortStatisticsParser(BaseParser):
 
 
     def _add_io_octets_throughput_values(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
-        """ add io troughput MB, percentage, status, status id based on io octets values
+        """Method adds io troughput MB, percentage, status, status id based on io octets values (based on io octets values).
 
         Args:
             fc_statistics_port_now_dct (_type_): _description_
             force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'.
         """
 
-        
         for octet_key in ['in-octets', 'out-octets']:
             throughput_base_key = octet_key.split('-')[0] + '-throughput'
             throughput_mbytes_key = throughput_base_key + '-megabytes'
@@ -321,10 +316,12 @@ class FCPortStatisticsParser(BaseParser):
 
     def _add_io_troughput_status_(self, fc_statistics_port_now_dct: dict, throughput_base_key: str, throughput_mbytes_value: float, force_ok_status: bool = False) -> None:
         """
-        Method to add io troughput status to the fc port statistics dictionary (based on io octets values).
+        Method to add io troughput status and status id to the fc port statistics dictionary (based on io octets values).
         
         Args:
             fc_statistics_port_now_dct {dict}: fc statistics dictionary for the current slot_port.
+            throughput_base_key (str): 'in-throughput' or 'out-throughput'
+            throughput_mbytes_value (str): current in or out throughput in MB.
             force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'.
         
         Returns:
@@ -339,10 +336,9 @@ class FCPortStatisticsParser(BaseParser):
                 throughput_mbytes_value, fc_statistics_port_now_dct['port-throughput-megabytes'])
         # find if throughput threshold is exceeded and get corresponding status id
         fc_statistics_port_now_dct[throughput_status_id_key] = FCPortStatisticsParser.get_rate_status(
-            fc_statistics_port_now_dct[throughput_percantage_key])
+            fc_statistics_port_now_dct[throughput_percantage_key], force_ok_status)
         # corresponding status
         fc_statistics_port_now_dct[throughput_status_key] = FCPortStatisticsParser.STATUS_ID[fc_statistics_port_now_dct[throughput_status_id_key]]  
-
 
 
     def _get_port_counters_delta(self, fc_statistics_port_now_dct: dict, fc_statistics_port_prev_dct: dict) -> dict:
@@ -473,9 +469,6 @@ class FCPortStatisticsParser(BaseParser):
             None
         """
                 
-        # if counter_status == 'ok':
-        #     return
-
         if counter_status_id == 2: # 'unknown'
             return
         
@@ -491,6 +484,7 @@ class FCPortStatisticsParser(BaseParser):
             fc_statistics_port_now_dct[counter_category] = [counter_name]
             fc_statistics_port_now_dct[counter_category + FCPortStatisticsParser.DELTA_TAG] ={
                 counter_name: fc_statistics_port_now_dct[counter_delta_name]}
+
 
     def _detect_lr_ols_inconsistency(self, fcport_stats_dct: dict, fcport_stats_growth_dct: dict, lr_type: str) -> None:
         """
@@ -566,7 +560,6 @@ class FCPortStatisticsParser(BaseParser):
             fcport_stats_growth_dct[vf_id][slot_port] = fcport_stats_growth_port_dct
                                    
 
-
     def _add_empty_fields(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
         """
         Method adds empty fields from the BrocadeFCPortStatisticsParser list,
@@ -574,7 +567,7 @@ class FCPortStatisticsParser(BaseParser):
 
         Args:
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
-            
+            force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'. 
         
         Returns:
             None.
@@ -746,7 +739,6 @@ class FCPortStatisticsParser(BaseParser):
             force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'.
             
         """
-
 
         if rate_percantage is None:
             if force_ok_status:

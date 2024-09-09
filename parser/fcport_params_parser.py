@@ -80,12 +80,10 @@ class FCPortParametersParser(BaseParser):
         """
         
         super().__init__(sw_telemetry)
-        # self._sw_telemetry: BrocadeSwitchTelemetry = sw_telemetry
         self._sw_parser: SwitchParser = sw_parser
         self._port_owner = self._get_ports_owner()
         self._fcport_params = self. _get_port_params_values()
         if self.fcport_params:
-            # self._fcport_params_change = self._get_switch_ports_params_change(fcport_params_parser)
             self._fcport_params_changed = self._get_changed_fcport_params(fcport_params_prev)
         else:
             self._fcport_params_changd = {}
@@ -182,7 +180,7 @@ class FCPortParametersParser(BaseParser):
                         'port-speed-hrf': port_speed_gbps_hrf,
                         'port-speed-gbps': port_speed_gbps,
                         'port-max-speed-gbps': port_max_speed,
-                        'port-throughput-megabytes': FCPortParametersParser.get_port_throughput(fc_interface_container['speed']),
+                        'port-throughput-megabytes': FCPortParametersParser.get_port_throughput_megabytes(fc_interface_container['speed']),
                         'physical-state': physical_state,
                         'physical-state-id': FCPortParametersParser.PHYSICAL_STATE_ID.get(fc_interface_container['physical-state'], 100),
                         'port-type-id': fc_interface_container['port-type'],
@@ -210,7 +208,7 @@ class FCPortParametersParser(BaseParser):
 
 
     @staticmethod
-    def get_port_throughput(port_speed: int):
+    def get_port_throughput_megabytes(port_speed: int):
         """Method converts port_speed value to throughput in MB/s.
 
         Args:

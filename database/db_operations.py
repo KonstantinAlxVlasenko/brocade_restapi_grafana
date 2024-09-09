@@ -5,6 +5,7 @@ from parser.chassis_parser import ChassisParser
 
 NS_FILENAME = 'nameserver.pickle'
 DATABASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ARCHIVE_DIR = os.path.join(DATABASE_DIR, 'archive')
 
 
 def load_object(dirname: str, filename: str) -> Any:
