@@ -10,6 +10,7 @@ current = os.path.dirname(os.path.realpath(__file__))
 # Getting the parent directory name
 # where the current directory is present.
 parent = os.path.dirname(current)
+# archive = os.path.join(current, 'ar')
 
 # adding the parent directory to 
 # the sys.path.
@@ -20,8 +21,8 @@ import db_operations as db
 
 # pickle_file = db.load_object(current, 'n3-g620-118-stg-f2-parser.pickle')
 # pickle_tlm_file = db.load_object(current, 'n3-g620-117-stg-f1-telemetry.pickle')
-pickle_tlm_file = db.load_object(current, 'n3-g620-118-stg-f2-telemetry.pickle')
-pickle_tlm_correct_file = db.load_object(current, 'n3-g620-118-stg-f2-telemetry_correct.pickle')
+pickle_tlm_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-telemetry.pickle')
+# pickle_tlm_correct_file = db.load_object(current, 'n3-g620-118-stg-f2-telemetry_correct.pickle')
 
 
 # print(pickle_file.__dict__)

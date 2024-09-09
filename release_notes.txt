@@ -1,3 +1,4 @@
 30.08.2024 version 0.1 alpha
 01.09.2024 version 0.11 modified imports
-01.09.2024 version 0.12 sfp media teperature change logging
+01.09.2024 version 0.12 sfp media temperature change logging
+10.09.2024 version 0.2 request status corruption tag

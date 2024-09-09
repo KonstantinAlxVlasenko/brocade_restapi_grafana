@@ -5,6 +5,8 @@ Switch name: n3-g620-117-stg-f1
 Switch IP: 10.213.164.101
 """
 
+SW_IP_ADDRESS = "10.213.164.101"
+
 import sys
 import os
 
@@ -28,4 +30,4 @@ from collection.switch_metrics_collection import collect_switch_metrics
 
 if __name__ == '__main__':
     current_filename = Path(__file__).stem
-    collect_switch_metrics(sw_ipaddress="10.213.164.101", initiator_filename=current_filename)
+    collect_switch_metrics(sw_ipaddress=SW_IP_ADDRESS, initiator_filename=current_filename)
