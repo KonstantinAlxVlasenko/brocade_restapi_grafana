@@ -240,7 +240,6 @@ class FCPortStatisticsParser(BaseParser):
         if other is None or str(type(self)) != str(type(other)) or not other.fcport_stats:
             for fcport_stats_vfid_now_dct in self.fcport_stats.values():
                 for fc_statistics_port_now_dct in fcport_stats_vfid_now_dct.values():
-                    # BrocadeFCPortStatisticsParser._add_empty_fields(fc_statistics_port_now_dct)
                     force_ok_status = True if other is None else False
                     self._add_empty_fields(fc_statistics_port_now_dct, force_ok_status=force_ok_status)
         
@@ -267,9 +266,8 @@ class FCPortStatisticsParser(BaseParser):
                     fc_statistics_port_prev_dct = fcport_stats_vfid_prev_dct[slot_port]
                     # find delta for each fc port counter
                     fcport_stats_growth_port_dct = self._get_port_counters_delta(fc_statistics_port_now_dct, fc_statistics_port_prev_dct)
-
-                    self._count_throughput_mbytes(fc_statistics_port_now_dct)
-
+                    # add io troughput MB, percentage, status, status id based on io octets values
+                    self._add_io_octets_throughput_values(fc_statistics_port_now_dct)
                     # if switch operates normally LR_OUT and OLS_IN values must be equal
                     self._detect_lr_ols_inconsistency(fc_statistics_port_now_dct, fcport_stats_growth_port_dct, lr_type='lr_out')
                     # if switch operates normally LR_IN and OLS_OUT values must be equal
@@ -287,11 +285,12 @@ class FCPortStatisticsParser(BaseParser):
         return fcport_stats_growth_dct    
 
 
-    def _count_throughput_mbytes(self, fc_statistics_port_now_dct):
-        """_summary_
+    def _add_io_octets_throughput_values(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
+        """ add io troughput MB, percentage, status, status id based on io octets values
 
         Args:
             fc_statistics_port_now_dct (_type_): _description_
+            force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'.
         """
 
         
@@ -308,7 +307,8 @@ class FCPortStatisticsParser(BaseParser):
                 fc_statistics_port_now_dct[octet_delta_key] / fc_statistics_port_now_dct[time_delta_key] / 1024 / 1024, 2)
             
             fc_statistics_port_now_dct[throughput_mbytes_key] = throughput_mbytes
-            self._add_io_troughput_status_(fc_statistics_port_now_dct, throughput_base_key, throughput_mbytes)
+            self._add_io_troughput_status_(fc_statistics_port_now_dct, throughput_base_key, throughput_mbytes, force_ok_status)
+            
             if fc_statistics_port_now_dct['port-number'] == 44:
                 print(fc_statistics_port_now_dct['port-number'], 
                       throughput_mbytes_key, 
@@ -317,14 +317,15 @@ class FCPortStatisticsParser(BaseParser):
                       throughput_mbytes, 
                       fc_statistics_port_now_dct[throughput_base_key + '-percentage'],
                       fc_statistics_port_now_dct[throughput_base_key + '-status'])
-            
+     
 
-    def _add_io_troughput_status_(self, fc_statistics_port_now_dct: dict, throughput_base_key: str, throughput_mbytes_value: float) -> None:
+    def _add_io_troughput_status_(self, fc_statistics_port_now_dct: dict, throughput_base_key: str, throughput_mbytes_value: float, force_ok_status: bool = False) -> None:
         """
         Method to add io troughput status to the fc port statistics dictionary (based on io octets values).
         
         Args:
             fc_statistics_port_now_dct {dict}: fc statistics dictionary for the current slot_port.
+            force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'.
         
         Returns:
             None.
@@ -565,6 +566,7 @@ class FCPortStatisticsParser(BaseParser):
             fcport_stats_growth_dct[vf_id][slot_port] = fcport_stats_growth_port_dct
                                    
 
+
     def _add_empty_fields(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
         """
         Method adds empty fields from the BrocadeFCPortStatisticsParser list,
@@ -572,7 +574,7 @@ class FCPortStatisticsParser(BaseParser):
 
         Args:
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
-            force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'.
+            
         
         Returns:
             None.
@@ -585,7 +587,9 @@ class FCPortStatisticsParser(BaseParser):
         fc_statistics_port_now_dct['time-generated-prev-hrf'] = None
         fc_statistics_port_now_dct[FCPortStatisticsParser.LROUT_SUBTRACT_OLSIN_LEAF] = None
         fc_statistics_port_now_dct[FCPortStatisticsParser.LRIN_SUBTRACT_OLSOUT_LEAF] = None
-        
+        # add io troughput MB, percentage, status, status id based on io octets values
+        self._add_io_octets_throughput_values(fc_statistics_port_now_dct, force_ok_status)
+
 
     def _add_unknown_port_error_status_fields(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
         """
@@ -730,7 +734,7 @@ class FCPortStatisticsParser(BaseParser):
 
 
     @staticmethod
-    def get_rate_status(rate_percantage: float) -> str:
+    def get_rate_status(rate_percantage: float, force_ok_status: bool = False) -> str:
         """
         Method to get port in and out rate status. Port throughput status.
         
@@ -739,11 +743,16 @@ class FCPortStatisticsParser(BaseParser):
         
         Returns:
             int: Port in and out throughput status (1: 'ok', 2: 'unknown', 3: 'warning', 4: 'critical',).
+            force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'.
             
         """
 
+
         if rate_percantage is None:
-            return 2 #'unknown'
+            if force_ok_status:
+                return 1 #'ok'
+            else:
+                return 2 #'unknown'
         
         if rate_percantage >= 90:
             return 4 #'critical'
