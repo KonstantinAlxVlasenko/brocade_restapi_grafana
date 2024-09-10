@@ -19,9 +19,10 @@ sys.path.append(parent)
 # now we can import the collection module in the parent
 import db_operations as db
 
-# pickle_file = db.load_object(current, 'n3-g620-118-stg-f2-parser.pickle')
-# pickle_tlm_file = db.load_object(current, 'n3-g620-117-stg-f1-telemetry.pickle')
+
 pickle_tlm_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-telemetry.pickle')
+pickle_prs_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-parser.pickle')
+pickle_rs_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-request.pickle')
 # pickle_tlm_correct_file = db.load_object(current, 'n3-g620-118-stg-f2-telemetry_correct.pickle')
 
 

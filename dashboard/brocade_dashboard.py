@@ -57,7 +57,7 @@ class BrocadeDashboard:
             brocade_parser (BrocadeParser): object contains required data to fill the gauge metrics.
         """
         
-
+        print('\n----Dashboard----')
         print('request_status')
         self.request_status_tb.fill_toolbar_gauge_metrics(request_status_parser)
         
@@ -94,6 +94,8 @@ class BrocadeDashboard:
         print('log')
         self.log_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser, brocade_parser.fcport_params_parser, brocade_parser.sfp_media_parser, 
                                         brocade_parser.fcport_stats_parser, brocade_parser.fru_parser, brocade_parser.maps_parser)
+        
+        print('\n')
 
 
     def __repr__(self):

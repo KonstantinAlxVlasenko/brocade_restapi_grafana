@@ -16,7 +16,7 @@ from config import HTTP_SERVER_PORT, SWITCH_ACCESS
 from dashboard.brocade_dashboard import BrocadeDashboard
 from collection.switch_telemetry_request import SwitchTelemetryRequest
 
-TIME_INTERVAL = 30
+TIME_INTERVAL = 60
 REQUEST_STATUS_TAG = '-request'
 BROCADE_PARSER_TAG = '-parser'
 TELEMETRY_TAG = '-telemetry'

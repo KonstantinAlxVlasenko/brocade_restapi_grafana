@@ -303,14 +303,14 @@ class FCPortStatisticsParser(BaseParser):
             fc_statistics_port_now_dct[throughput_mbytes_key] = throughput_mbytes
             self._add_io_troughput_status_(fc_statistics_port_now_dct, throughput_base_key, throughput_mbytes, force_ok_status)
             
-            if fc_statistics_port_now_dct['port-number'] == 44:
-                print(fc_statistics_port_now_dct['port-number'], 
-                      throughput_mbytes_key, 
-                      fc_statistics_port_now_dct['time-generated-hrf'], 
-                      fc_statistics_port_now_dct[time_delta_key], 
-                      throughput_mbytes, 
-                      fc_statistics_port_now_dct[throughput_base_key + '-percentage'],
-                      fc_statistics_port_now_dct[throughput_base_key + '-status'])
+            # if fc_statistics_port_now_dct['port-number'] == 44:
+            #     print(fc_statistics_port_now_dct['port-number'], 
+            #           throughput_mbytes_key, 
+            #           fc_statistics_port_now_dct['time-generated-hrf'], 
+            #           fc_statistics_port_now_dct[time_delta_key], 
+            #           throughput_mbytes, 
+            #           fc_statistics_port_now_dct[throughput_base_key + '-percentage'],
+            #           fc_statistics_port_now_dct[throughput_base_key + '-status'])
      
 
     def _add_io_troughput_status_(self, fc_statistics_port_now_dct: dict, throughput_base_key: str, throughput_mbytes_value: float, force_ok_status: bool = False) -> None:
