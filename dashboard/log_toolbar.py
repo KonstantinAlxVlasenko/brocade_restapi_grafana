@@ -139,6 +139,16 @@ class LogToolbar(BaseToolbar):
                 self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key + extension, key + '-status'],
                                                                     renamed_keys={key + extension + '-prev': LogToolbar.previous_value_key}, 
                                                                     add_dict={LogToolbar.modified_parameter_key: key + extension})
+                
+        # io octets throughput change log
+        for key in ['in-throughput', 'out-throughput']:
+            for extension in ['-megabytes', '-percentage']:
+                self.gauge_current_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key + extension, key + '-status'],
+                                                                    renamed_keys={key + extension: LogToolbar.current_value_key}, 
+                                                                    add_dict={LogToolbar.modified_parameter_key: key + extension})
+                self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key + extension, key + '-status'],
+                                                                    renamed_keys={key + extension + '-prev': LogToolbar.previous_value_key}, 
+                                                                    add_dict={LogToolbar.modified_parameter_key: key + extension})        
 
 
     def _fill_fc_port_params_log(self, fcport_params_parser: FCPortParametersParser) -> None:

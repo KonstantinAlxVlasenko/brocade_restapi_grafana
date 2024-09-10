@@ -88,15 +88,14 @@ class FCPortStatisticsParser(BaseParser):
     
     COUNTER_CATEGORY_DELTA_KEYS = [category + '-delta' for category in COUNTER_CATEGORY_KEYS]
     
-    # STATUS_IDS = {'ok': 1, 'unknown': 2, 'warning': 3, 'critical': 4}
-
-    # IO_RATE_KEYS = [rate_key + tag for rate_key in ['in-rate', 'out-rate'] for tag in ['-bits', '-percentage', '-status']]
-    # IO_RATE_KEYS = [rate_key + tag for rate_key in ['in-rate', 'out-rate'] for tag in ['-status']]
-    
     IO_RATE_KEYS = [rate_key + tag for rate_key in ['in-rate', 'out-rate'] for tag in ['-bits', '-percentage']]
     IO_RATE_STATUS_KEYS = [rate_key + tag for rate_key in ['in-rate', 'out-rate'] for tag in ['-status']]
 
-    FC_PORT_STATS_CHANGED = PORT_ERROR_STATUS_KEYS + COUNTER_CATEGORY_KEYS + COUNTER_CATEGORY_DELTA_KEYS + IO_RATE_KEYS + IO_RATE_STATUS_KEYS
+    IO_TROUGHPUT_KEYS = [throughput_base_key + tag for throughput_base_key in ['in-throughput', 'out-throughput'] for tag in ['-megabytes', '-percentage']]
+    IO_TROUGHPUT_STATUS_KEYS = [throughput_base_key + tag for throughput_base_key in ['in-throughput', 'out-throughput'] for tag in ['-status']]
+
+    FC_PORT_STATS_CHANGED = PORT_ERROR_STATUS_KEYS + COUNTER_CATEGORY_KEYS + COUNTER_CATEGORY_DELTA_KEYS + \
+        IO_RATE_KEYS + IO_RATE_STATUS_KEYS + IO_TROUGHPUT_KEYS + IO_TROUGHPUT_STATUS_KEYS
 
     # FC_PORT_PATH = ['fabric-user-friendly-name', 'vf-id', 'switch-name', 'switch-wwn', 'port-name', 'name', 'slot-number', 'port-number']
 
