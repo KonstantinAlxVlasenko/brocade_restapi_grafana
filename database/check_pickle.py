@@ -23,6 +23,14 @@ import db_operations as db
 pickle_tlm_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-telemetry.pickle')
 pickle_prs_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-parser.pickle')
 pickle_rs_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-request.pickle')
+
+# requset status file
+
+print(dir(pickle_rs_file))
+print(pickle_rs_file.request_status)
+
+
+
 # pickle_tlm_correct_file = db.load_object(current, 'n3-g620-118-stg-f2-telemetry_correct.pickle')
 
 
@@ -46,7 +54,16 @@ pickle_rs_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-request.pick
 
 # print(pickle_tlm_file.__dict__)
 # print(dir(pickle_tlm_file.fc_interface))
-print(pickle_tlm_file.fc_interface)
+
+
+# ---------------------------
+# parser file
+
+# print(dir(pickle_prs_file.fcport_stats_parser.fcport_stats_changed))
+# print(pickle_prs_file.fcport_stats_parser.fcport_stats_changed[-1]['0/44'])
+
+
+# print(pickle_prs_file.fc_interface)
 
 
 # print(pickle_tlm_correct_file.fc_interface))

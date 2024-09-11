@@ -6,6 +6,7 @@ import httpx
 from requests.auth import HTTPBasicAuth
 
 
+
 class SwitchTelemetryRequest:
     """
     Class to perform Brocade switch http telemetry requests.
@@ -34,6 +35,9 @@ class SwitchTelemetryRequest:
     
     VF_MODE_RETRIEVE_ERROR = {'errors': {'error': [{'error-message': 'VF mode has not been retreived'}]}}
     VF_ID_RETRIEVE_ERROR = {'errors': {'error': [{'error-message': 'VF IDs has not been retreived'}]}}
+
+    # 503 - 'Chassis is not ready for management'
+    FAILED_STATUS_CODES = [503]
     
 
     def __init__(self, sw_ipaddress: ip_address, username: str, password: str, secure_access: bool = False):
@@ -186,7 +190,8 @@ class SwitchTelemetryRequest:
             current_telemetry['status-code'] = response.status_code
             current_telemetry['date'] = datetime.now().strftime("%d/%m/%Y")
             current_telemetry['time'] = datetime.now().strftime("%H:%M:%S")
-            
+            if response.status_code in SwitchTelemetryRequest.FAILED_STATUS_CODES:
+                self.corrupted_request = True    
             print(module_name, module_type, response.status_code)
             return current_telemetry
         

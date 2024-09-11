@@ -64,29 +64,29 @@ class BrocadeDashboard:
         if brocade_parser is None:
             return
         
-        # print('chassis')
-        # self.chassis_tb.fill_toolbar_gauge_metrics(brocade_parser.ch_parser, brocade_parser.sw_parser)
+        print('chassis')
+        self.chassis_tb.fill_toolbar_gauge_metrics(brocade_parser.ch_parser, brocade_parser.sw_parser)
 
-        # print('fru')
-        # self.fru_tb.fill_toolbar_gauge_metrics(brocade_parser.fru_parser, brocade_parser.sw_parser)
+        print('fru')
+        self.fru_tb.fill_toolbar_gauge_metrics(brocade_parser.fru_parser, brocade_parser.sw_parser)
 
-        # print('maps system resources', 'maps system health')
-        # self.maps_system_tb.fill_toolbar_gauge_metrics(brocade_parser.maps_parser, brocade_parser.sw_parser)
+        print('maps system resources', 'maps system health')
+        self.maps_system_tb.fill_toolbar_gauge_metrics(brocade_parser.maps_parser, brocade_parser.sw_parser)
 
-        # print('maps policy, actions','maps dashboard')
-        # self.maps_dashboard_tb.fill_toolbar_gauge_metrics(brocade_parser.maps_parser)
+        print('maps policy, actions','maps dashboard')
+        self.maps_dashboard_tb.fill_toolbar_gauge_metrics(brocade_parser.maps_parser)
 
-        # print('switch')
-        # self.switch_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser)
+        print('switch')
+        self.switch_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser)
         
-        # print('fabrichsow')
-        # self.fabricshow_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser)
+        print('fabrichsow')
+        self.fabricshow_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser)
 
-        # print('fcport parameters')
-        # self.fcport_params_tb.fill_toolbar_gauge_metrics(brocade_parser.fcport_params_parser)
+        print('fcport parameters')
+        self.fcport_params_tb.fill_toolbar_gauge_metrics(brocade_parser.fcport_params_parser)
 
-        # print('sfp media')
-        # self.sfp_media_tb.fill_toolbar_gauge_metrics(brocade_parser.sfp_media_parser)
+        print('sfp media')
+        self.sfp_media_tb.fill_toolbar_gauge_metrics(brocade_parser.sfp_media_parser)
 
         print('fcport_stats')
         self.fcport_stats_tb.fill_toolbar_gauge_metrics(brocade_parser.fcport_stats_parser)
