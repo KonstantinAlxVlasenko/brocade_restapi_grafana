@@ -38,6 +38,8 @@ class SwitchTelemetryRequest:
 
     # 503 - 'Chassis is not ready for management'
     FAILED_STATUS_CODES = [503]
+
+    VALID_STATUS_CODES = [200, 400, 404]
     
 
     def __init__(self, sw_ipaddress: ip_address, username: str, password: str, secure_access: bool = False):
@@ -190,7 +192,8 @@ class SwitchTelemetryRequest:
             current_telemetry['status-code'] = response.status_code
             current_telemetry['date'] = datetime.now().strftime("%d/%m/%Y")
             current_telemetry['time'] = datetime.now().strftime("%H:%M:%S")
-            if response.status_code in SwitchTelemetryRequest.FAILED_STATUS_CODES:
+            if not response.status_code in SwitchTelemetryRequest.VALID_STATUS_CODES:
+                print(module_name, module_type, 'corrupted request')
                 self.corrupted_request = True    
             print(module_name, module_type, response.status_code)
             return current_telemetry
