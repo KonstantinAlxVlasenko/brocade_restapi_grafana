@@ -165,10 +165,10 @@ class LogToolbar(BaseToolbar):
         self.gauge_portname.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, 
                                                     prerequisite_keys_any=FCPortParametersParser.FC_PORT_PARAMS_CHANGED)
         for key in FCPortParametersParser.FC_PORT_PARAMS_CHANGED:
-            self.gauge_current_value_str.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, prerequisite_keys_all=[key],
+            self.gauge_current_value_str.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, prerequisite_keys_all=[key, key + '-prev'],
                                                                  renamed_keys={key: LogToolbar.current_value_key}, 
                                                                  add_dict={LogToolbar.modified_parameter_key: key})
-            self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, prerequisite_keys_all=[key],
+            self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, prerequisite_keys_all=[key, key + '-prev'],
                                                                  renamed_keys={key + '-prev': LogToolbar.previous_value_key}, 
                                                                  add_dict={LogToolbar.modified_parameter_key: key})
 

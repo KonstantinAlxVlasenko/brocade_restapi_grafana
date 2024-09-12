@@ -261,7 +261,7 @@ class FCPortParametersParser(BaseParser):
                 # timestamps
                 time_now = self.telemetry_date + ' ' + self.telemetry_time
                 time_prev = other.telemetry_date + ' ' + other.telemetry_time
-                # add changed sfp_media ports for the current vf_id
+                # add changed port parameters for the current vf_id
                 fcport_params_changed_dct[vf_id] = FCPortParametersParser.get_changed_vfid_ports(fcport_params_vfid_now_dct, fcport_params_vfid_prev_dct, 
                                                                                         changed_keys=FCPortParametersParser.FC_PORT_PARAMS_CHANGED, 
                                                                                         const_keys=FCPortParametersParser.FC_PORT_PATH, 
