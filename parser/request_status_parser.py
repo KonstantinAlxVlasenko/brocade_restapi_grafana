@@ -25,6 +25,10 @@ class RequestStatusParser:
     IGNORED_ERRORS = ['VF feature is not enabled', 
                       'No Rule violations found']
     
+    # 401 - Unauthorized access
+    # 503 - Chassis is not ready
+    FAILED_STATUS_CODES = [401, 503]
+    
     
     def __init__(self, 
                  sw_telemetry: SwitchTelemetryRequest, 
@@ -133,7 +137,7 @@ class RequestStatusParser:
         elif container.get('error-message') in RequestStatusParser.IGNORED_ERRORS:
             return 'OK'
         elif container.get('status-code'):
-            if container['status-code'] in [401]: # Unauthorized access
+            if container['status-code'] in RequestStatusParser.FAILED_STATUS_CODES:
                 return 'FAIL'
             else:
                 return 'WARNING'
