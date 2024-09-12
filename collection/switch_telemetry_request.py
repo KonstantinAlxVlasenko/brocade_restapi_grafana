@@ -36,9 +36,6 @@ class SwitchTelemetryRequest:
     VF_MODE_RETRIEVE_ERROR = {'errors': {'error': [{'error-message': 'VF mode has not been retreived'}]}}
     VF_ID_RETRIEVE_ERROR = {'errors': {'error': [{'error-message': 'VF IDs has not been retreived'}]}}
 
-    # 503 - 'Chassis is not ready for management'
-    FAILED_STATUS_CODES = [503]
-
     VALID_STATUS_CODES = [200, 400, 404]
     
 
@@ -105,6 +102,21 @@ class SwitchTelemetryRequest:
         self._fdmi_port = {}
         self._fc_nameserver = {}
 
+        # self._vf_unique_containers = [
+        #     [self._fabric_switch, ('brocade-fabric', 'fabric-switch')],
+        #     [self._fc_switch, ('brocade-fibrechannel-switch', 'fibrechannel-switch')],
+        #     [self._maps_policy, ('brocade-maps', 'maps-policy')],
+        #     [self._maps_config, ('brocade-maps', 'maps-config')],
+        #     [self._dashboard_rule, ('brocade-maps', 'dashboard-rule')],
+        #     [self._fc_interface, ('brocade-interface', 'fibrechannel')],
+        #     [self._fc_statistics, ('brocade-interface', 'fibrechannel-statistics')],
+        #     [self._media_rdp, ('brocade-media', 'media-rdp')],
+        #     [self._fdmi_hba, ('brocade-fdmi', 'hba')],
+        #     [self._fdmi_port, ('brocade-fdmi', 'port')],
+        #     [self._fc_nameserver, ('brocade-name-server', 'fibrechannel-name-server')]
+        #     ]
+        
+
         self._vf_unique_containers = [
             [self._fabric_switch, ('brocade-fabric', 'fabric-switch')],
             [self._fc_switch, ('brocade-fibrechannel-switch', 'fibrechannel-switch')],
@@ -113,10 +125,7 @@ class SwitchTelemetryRequest:
             [self._dashboard_rule, ('brocade-maps', 'dashboard-rule')],
             [self._fc_interface, ('brocade-interface', 'fibrechannel')],
             [self._fc_statistics, ('brocade-interface', 'fibrechannel-statistics')],
-            [self._media_rdp, ('brocade-media', 'media-rdp')],
-            [self._fdmi_hba, ('brocade-fdmi', 'hba')],
-            [self._fdmi_port, ('brocade-fdmi', 'port')],
-            [self._fc_nameserver, ('brocade-name-server', 'fibrechannel-name-server')]
+            [self._media_rdp, ('brocade-media', 'media-rdp')]
             ]
         
         with httpx.Client(verify=False) as client:
