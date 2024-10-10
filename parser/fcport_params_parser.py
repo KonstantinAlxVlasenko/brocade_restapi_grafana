@@ -80,13 +80,17 @@ class FCPortParametersParser(BaseParser):
         """
         
         super().__init__(sw_telemetry)
+        
         self._sw_parser: SwitchParser = sw_parser
+        print('-----------------------------------')
+        print(self.sw_parser.fc_switch[-1]['uport-gport-enabled-quantity'])
         self._port_owner = self._get_ports_owner()
         self._fcport_params = self. _get_port_params_values()
         if self.fcport_params:
             self._fcport_params_changed = self._get_changed_fcport_params(fcport_params_prev)
         else:
             self._fcport_params_changd = {}
+        print(self.sw_parser.fc_switch[-1]['uport-gport-enabled-quantity'])
 
     
     def _get_ports_owner(self) -> Dict[str, Union[int, str]]:
@@ -301,8 +305,10 @@ class FCPortParametersParser(BaseParser):
                 0 in all other cases.
         """
 
+
+
         if fc_interface_container['is-enabled-state'] and fc_interface_container['port-type'] in [10, 11]:
-            self.sw_parser.fc_switch[vf_id]['uport-gport-enabled'] =+ 1
+            self.sw_parser.fc_switch[vf_id]['uport-gport-enabled-quantity'] += 1
             if fc_interface_container['port-type'] == 11:
                 return 1
             elif fc_interface_container['port-type'] == 10:
