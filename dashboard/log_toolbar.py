@@ -45,8 +45,12 @@ class LogToolbar(BaseToolbar):
         self._gauge_fabricname = BaseGauge(name='log_fabricname', description='Fabric name in the log output.', 
                                               unit_keys=LogToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
         # log port name gauge
+        # self._gauge_portname = BaseGauge(name='log_portname', description='Port name in the log output.',
+        #                                      unit_keys=LogToolbar.switch_port_keys, parameter_key='port-name')
+        
         self._gauge_portname = BaseGauge(name='log_portname', description='Port name in the log output.',
-                                             unit_keys=LogToolbar.switch_port_keys, parameter_key='port-name')  
+                                             unit_keys=LogToolbar.log_unit_keys, parameter_key='port-name')
+
         # log switch VF ID gauge
         self._gauge_switch_vfid = BaseGauge(name='log_switch_vfid', description='Switch virtual fabric ID in the log output.', 
                                                unit_keys=LogToolbar.switch_wwn_key, metric_key='vf-id')
@@ -110,7 +114,7 @@ class LogToolbar(BaseToolbar):
         counter_category_keys = [key for key in FCPortStatisticsParser.COUNTER_CATEGORY_KEYS if 'ok-status_errors' not in key]
 
         # portname for port with changed values in fc_port_stats_changed keys
-        self.gauge_portname.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_any=fc_port_status_changed + counter_category_keys)
+        # self.gauge_portname.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_any=fc_port_status_changed + counter_category_keys)
         
         # port error status and io rate status change log
         for key in fc_port_status_changed:
@@ -120,6 +124,8 @@ class LogToolbar(BaseToolbar):
             self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key],
                                                                  renamed_keys={key + '-prev': LogToolbar.previous_value_key}, 
                                                                  add_dict={LogToolbar.modified_parameter_key: key})
+            self.gauge_portname.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key],
+                                                        add_dict={LogToolbar.modified_parameter_key: key})
         # port error deltas if errors in counter_category_keys has changed
         for key in counter_category_keys:
             self.gauge_current_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, 
@@ -130,6 +136,8 @@ class LogToolbar(BaseToolbar):
                                                                   prerequisite_keys_all=[key, key + FCPortStatisticsParser.DELTA_TAG],
                                                                  renamed_keys={key + FCPortStatisticsParser.DELTA_TAG + '-prev': LogToolbar.previous_value_key}, 
                                                                  add_dict={LogToolbar.modified_parameter_key: key + FCPortStatisticsParser.DELTA_TAG})
+            self.gauge_portname.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key],
+                                                        add_dict={LogToolbar.modified_parameter_key: key + FCPortStatisticsParser.DELTA_TAG})
         # iorate details if iorate status changed
         for key in ['in-rate', 'out-rate']:
             for extension in ['-bits', '-percentage']:
@@ -139,6 +147,8 @@ class LogToolbar(BaseToolbar):
                 self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key + extension, key + '-status'],
                                                                     renamed_keys={key + extension + '-prev': LogToolbar.previous_value_key}, 
                                                                     add_dict={LogToolbar.modified_parameter_key: key + extension})
+                self.gauge_portname.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key],
+                                                        add_dict={LogToolbar.modified_parameter_key: key + extension})
                 
         # io octets throughput change log
         for key in ['in-throughput', 'out-throughput']:
@@ -148,7 +158,9 @@ class LogToolbar(BaseToolbar):
                                                                     add_dict={LogToolbar.modified_parameter_key: key + extension})
                 self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key + extension, key + '-status'],
                                                                     renamed_keys={key + extension + '-prev': LogToolbar.previous_value_key}, 
-                                                                    add_dict={LogToolbar.modified_parameter_key: key + extension})        
+                                                                    add_dict={LogToolbar.modified_parameter_key: key + extension})
+                self.gauge_portname.fill_port_gauge_metrics(fcport_stats_parser.fcport_stats_changed, prerequisite_keys_all=[key],
+                                                            add_dict={LogToolbar.modified_parameter_key: key + extension})        
 
 
     def _fill_fc_port_params_log(self, fcport_params_parser: FCPortParametersParser) -> None:
@@ -162,8 +174,11 @@ class LogToolbar(BaseToolbar):
 
         # fcport parameters change log
         # portname for ports with changed port parameters
-        self.gauge_portname.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, 
-                                                    prerequisite_keys_any=FCPortParametersParser.FC_PORT_PARAMS_CHANGED)
+
+        # self.gauge_portname.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, 
+        #                                             prerequisite_keys_any=FCPortParametersParser.FC_PORT_PARAMS_CHANGED)
+        
+
         for key in FCPortParametersParser.FC_PORT_PARAMS_CHANGED:
             self.gauge_current_value_str.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, prerequisite_keys_all=[key, key + '-prev'],
                                                                  renamed_keys={key: LogToolbar.current_value_key}, 
@@ -171,6 +186,8 @@ class LogToolbar(BaseToolbar):
             self.gauge_previous_value_str.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, prerequisite_keys_all=[key, key + '-prev'],
                                                                  renamed_keys={key + '-prev': LogToolbar.previous_value_key}, 
                                                                  add_dict={LogToolbar.modified_parameter_key: key})
+            self.gauge_portname.fill_port_gauge_metrics(fcport_params_parser.fcport_params_changed, prerequisite_keys_all=[key, key + '-prev'],
+                                                        add_dict={LogToolbar.modified_parameter_key: key})
 
 
     def _fill_sfp_media_log(self, sfp_media_parser: SFPMediaParser) -> None:
@@ -184,8 +201,8 @@ class LogToolbar(BaseToolbar):
 
         # sfp media module change and power status change log
         sfp_media_changed = SFPMediaParser.MEDIA_RDP_CHANGED + SFPMediaParser.MEDIA_POWER_STATUS_CHANGED + SFPMediaParser.MEDIA_TEMPERATURE_STATUS_CHANGED
-         # add portname for port with changed values in sfp_media_changed keys
-        self.gauge_portname.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_any=sfp_media_changed)
+        # add portname for port with changed values in sfp_media_changed keys
+        # self.gauge_portname.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_any=sfp_media_changed)
         for key in sfp_media_changed:
             self.gauge_current_value_str.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key],
                                                                 renamed_keys={key: LogToolbar.current_value_key}, 
@@ -193,6 +210,8 @@ class LogToolbar(BaseToolbar):
             self.gauge_previous_value_str.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key],
                                                                  renamed_keys={key + '-prev': LogToolbar.previous_value_key}, 
                                                                  add_dict={LogToolbar.modified_parameter_key: key})
+            self.gauge_portname.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key],
+                                                        add_dict={LogToolbar.modified_parameter_key: key})
         # sfp media power change if power status has changed
         # sfp media temperature change if temperature status has changed
         sfp_media_sensor_changed = SFPMediaParser.MEDIA_POWER_CHANGED + SFPMediaParser.MEDIA_TEMPERATURE_CHANGED
@@ -203,6 +222,8 @@ class LogToolbar(BaseToolbar):
             self.gauge_previous_value_str.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key, key + '-status'],
                                                                  renamed_keys={key + '-prev': LogToolbar.previous_value_key}, 
                                                                  add_dict={LogToolbar.modified_parameter_key: key})
+            self.gauge_portname.fill_port_gauge_metrics(sfp_media_parser.sfp_media_changed, prerequisite_keys_all=[key, key + '-status'],
+                                                        add_dict={LogToolbar.modified_parameter_key: key})
 
 
     def _fill_fru_log(self, fru_parser: FRUParser, sw_parser: SwitchParser) -> None:

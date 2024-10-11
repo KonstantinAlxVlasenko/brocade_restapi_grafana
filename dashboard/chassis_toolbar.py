@@ -111,10 +111,10 @@ class ChassisToolbar(BaseToolbar):
                               self.gauge_swname, self.gauge_fabricname, self.gauge_vfid, self.gauge_fos, 
                               self.gauge_date, self.gauge_time, self.gauge_tz, self.gauge_vf_mode, self.gauge_ls_number]
         chassis = BaseToolbar.clone_chassis_to_vf(ch_parser.chassis, sw_parser, component_level=False)
+    
         for gauge in chassis_gauges_lst:
             gauge.fill_switch_gauge_metrics(chassis)
         
-
         ntp_server = BaseToolbar.clone_chassis_to_vf(ch_parser.ntp_server, sw_parser, component_level=False)
         self.gauge_ntp_active.fill_switch_gauge_metrics(ntp_server)
         self.gauge_ntp_configured.fill_switch_gauge_metrics(ntp_server)

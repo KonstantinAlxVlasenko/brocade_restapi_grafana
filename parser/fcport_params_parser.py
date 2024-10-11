@@ -80,18 +80,14 @@ class FCPortParametersParser(BaseParser):
         """
         
         super().__init__(sw_telemetry)
-        
         self._sw_parser: SwitchParser = sw_parser
-        print('-----------------------------------')
-        print(self.sw_parser.fc_switch[-1]['uport-gport-enabled-quantity'])
         self._port_owner = self._get_ports_owner()
         self._fcport_params = self. _get_port_params_values()
         if self.fcport_params:
             self._fcport_params_changed = self._get_changed_fcport_params(fcport_params_prev)
         else:
             self._fcport_params_changd = {}
-        print(self.sw_parser.fc_switch[-1]['uport-gport-enabled-quantity'])
-
+            
     
     def _get_ports_owner(self) -> Dict[str, Union[int, str]]:
         """
