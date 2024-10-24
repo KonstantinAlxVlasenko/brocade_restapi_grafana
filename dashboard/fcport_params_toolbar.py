@@ -17,7 +17,7 @@ class FCPortParamsToolbar(BaseToolbar):
         sw_telemetry: set of switch telemetry retrieved from the switch.
     """
 
-    switch_port_extended_keys  = BaseToolbar.switch_port_keys + ['port-index', 'port-id']
+    switch_port_extended_keys  = BaseToolbar.switch_port_name_keys + ['port-index', 'port-id']
     # switch_port_name_keys = switch_port_extended_keys + ['port-name']
 
     PORT_PHYSICAL_STATE_ID = {0: 'Offline', 1: 'Online', 2: 'Testing', 3: 'Faulty', 4: 'E_Port', 5: 'F_Port', 
@@ -59,9 +59,11 @@ class FCPortParamsToolbar(BaseToolbar):
         # fcport params fabric name gauge
         self._gauge_fabricname = BaseGauge(name='fcport_params_fabricname', description='Fabric name in the FC port parameters output.', 
                                               unit_keys=FCPortParamsToolbar.switch_wwn_key, parameter_key='fabric-user-friendly-name')
-        # fcport params port name gauge
-        self._gauge_portname = BaseGauge(name='fcport_params_portname', description='Port name in the FC port parameters output.',
-                                             unit_keys=FCPortParamsToolbar.switch_port_extended_keys, parameter_key='port-name')
+        
+        # # fcport params port name gauge
+        # self._gauge_portname = BaseGauge(name='fcport_params_portname', description='Port name in the FC port parameters output.',
+        #                                      unit_keys=FCPortParamsToolbar.switch_port_extended_keys, parameter_key='port-name')
+        
         # fcport params neighbor wwpn gauge
         self._gauge_neighbor_wwpn = BaseGauge(name='fcport_params_neighbor_wwpn', description='The Fibre Channel WWN of the neighbor port.',
                                                 unit_keys=FCPortParamsToolbar.switch_port_extended_keys, parameter_key='neighbor-port-wwn-str')        
@@ -142,7 +144,14 @@ class FCPortParamsToolbar(BaseToolbar):
             fcport_params_parser (BrocadeFCPortParametersParser): object contains required data to fill the gauge metrics.
         """
 
-        gauge_lst = [self.gauge_swname, self.gauge_fabricname, self.gauge_portname, self.gauge_neighbor_wwpn, 
+        # gauge_lst = [self.gauge_swname, self.gauge_fabricname, self.gauge_portname, self.gauge_neighbor_wwpn, 
+        #              self.gauge_switch_vfid, self.gauge_port_speed_value, self.gauge_port_speed_mode, 
+        #              self.gauge_port_ld_mode, self.gauge_port_physical_state, self.gauge_port_physical_state_status, 
+        #              self.gauge_port_type, self.gauge_enabled_port_type, self.gauge_port_status, 
+        #              self.gauge_nodevice_enabled_port, self.gauge_uport_gport_enabled_port, self.gauge_pod_license_state,]
+        
+
+        gauge_lst = [self.gauge_swname, self.gauge_fabricname, self.gauge_neighbor_wwpn, 
                      self.gauge_switch_vfid, self.gauge_port_speed_value, self.gauge_port_speed_mode, 
                      self.gauge_port_ld_mode, self.gauge_port_physical_state, self.gauge_port_physical_state_status, 
                      self.gauge_port_type, self.gauge_enabled_port_type, self.gauge_port_status, 
@@ -167,9 +176,9 @@ class FCPortParamsToolbar(BaseToolbar):
          return self._gauge_fabricname
 
 
-    @property
-    def gauge_portname(self):
-        return self._gauge_portname
+    # @property
+    # def gauge_portname(self):
+    #     return self._gauge_portname
     
 
     @property

@@ -94,6 +94,7 @@ class ChassisParser(BaseParser):
             None
         """
 
+        self.chassis['datetime'] = self.chassis.get('date')
         # date is splitted to date and time
         if self.chassis.get('date'):
             self.chassis['date'], self.chassis['time'] = self.chassis['date'].split('-')

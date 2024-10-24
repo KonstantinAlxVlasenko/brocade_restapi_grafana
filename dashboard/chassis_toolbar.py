@@ -60,11 +60,15 @@ class ChassisToolbar(BaseToolbar):
         self._gauge_fos =  BaseGauge(name='chassis_fos', description='Chassis firmware version', 
                                         unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='firmware-version')
         # date gauge
+        self._gauge_datetime =  BaseGauge(name='chassis_datetime', description='Chassis datetime', 
+                                         unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='datetime')
+        # date gauge
         self._gauge_date =  BaseGauge(name='chassis_date', description='Chassis date', 
                                          unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='date')
         # time gauge
         self._gauge_time =  BaseGauge(name='chassis_time', description='Chassis time', 
                                          unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='time')
+        
         # timezone gauge
         self._gauge_tz =  BaseGauge(name='chassis_tz', description='Chassis timezone', 
                                        unit_keys=ChassisToolbar.chassis_switch_wwn_keys, parameter_key='time-zone')
@@ -109,7 +113,8 @@ class ChassisToolbar(BaseToolbar):
 
         chassis_gauges_lst = [self.gauge_chname, self.gauge_sn, self.gauge_model, self.gauge_product_name, 
                               self.gauge_swname, self.gauge_fabricname, self.gauge_vfid, self.gauge_fos, 
-                              self.gauge_date, self.gauge_time, self.gauge_tz, self.gauge_vf_mode, self.gauge_ls_number]
+                              self.gauge_datetime, self.gauge_date, self.gauge_time, self.gauge_tz, 
+                              self.gauge_vf_mode, self.gauge_ls_number]
         chassis = BaseToolbar.clone_chassis_to_vf(ch_parser.chassis, sw_parser, component_level=False)
     
         for gauge in chassis_gauges_lst:
@@ -168,6 +173,11 @@ class ChassisToolbar(BaseToolbar):
     def gauge_fos(self):
         return self._gauge_fos
     
+
+    @property
+    def gauge_datetime(self):
+        return self._gauge_datetime
+
 
     @property
     def gauge_date(self):

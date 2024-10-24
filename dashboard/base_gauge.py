@@ -88,12 +88,14 @@ class BaseGauge:
     def fill_switch_gauge_metrics(self, 
                                   gauge_data: Dict[int, Union[Dict, List[Dict]]],
                                   prerequisite_keys_all: List[str] = None, prerequisite_keys_any: List[str] = None,  
-                                  renamed_keys: dict = None, add_dict:dict = None) -> None:
+                                  renamed_keys: dict = None, add_dict:dict = None,
+                                  storage_lst: list = None) -> None:
         """Method to unpack gauge_data to get switch level dictionaries.
         Each unpacked dictionary contains key, value pairs to fill gauge labels and set gauge metric.
         
         Args:
-            gauge_data (Dict[int, Union[Dict, List[Dict]]]): Nested dictionaries. Each dictionary contains switch level element parameters.     
+            gauge_data (Dict[int, Union[Dict, List[Dict]]]): Nested dictionaries. Each dictionary contains switch level element parameters.
+            storage_lst (list): list to store dictionaries which are added to the gauge.     
         """
         
         if not gauge_data:
@@ -117,18 +119,22 @@ class BaseGauge:
                     continue
                 # rename existing keys or add new key, value pairs
                 gauge_data_switch_modified = BaseGauge.modify_dict(gauge_data_switch, renamed_keys, add_dict)
+                if storage_lst is not None:
+                    storage_lst.append(gauge_data_switch_modified)
                 self.add_gauge_metric(gauge_data_switch_modified)
 
 
     def fill_port_gauge_metrics(self, 
                                 gauge_data: Dict[int, Dict[str, Dict]], 
                                 prerequisite_keys_all: List[str] = None, prerequisite_keys_any: List[str] = None,  
-                                renamed_keys: dict = None, add_dict:dict = None) -> None:
+                                renamed_keys: dict = None, add_dict:dict = None,
+                                storage_lst: list = None) -> None:
         """Method to unpack gauge_data to get port level dictionaries.
         Each unpacked dictionary contains key, value pairs to fill gauge labels and set gauge metric.
         
         Args:
-            gauge_data (Dict[int, Dict[str, Dict]]): Nested dictionaries. Each dictionary contains port level element parameters.     
+            gauge_data (Dict[int, Dict[str, Dict]]): Nested dictionaries. Each dictionary contains port level element parameters.
+            storage_lst (list): list to store dictionaries which are added to the gauge.
         """
         
         if not gauge_data:
@@ -152,6 +158,8 @@ class BaseGauge:
                         continue
                     # rename existing keys or add new key, value pairs
                     gauge_data_port_modified = BaseGauge.modify_dict(gauge_data_port, renamed_keys, add_dict)
+                    if storage_lst is not None:
+                        storage_lst.append(gauge_data_port_modified)
                     self.add_gauge_metric(gauge_data_port_modified)
                 else:
                     print('NOT DICT')

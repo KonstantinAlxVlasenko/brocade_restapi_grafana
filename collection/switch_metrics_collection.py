@@ -35,8 +35,14 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
     # get http server port number from the configuration file
     http_port_number = HTTP_SERVER_PORT[sw_ipaddress]
 
-    # create empty nameserver and save it in the database
+    # if not found create empty nameserver and save it in the database
     db.create_nameserver()
+    # create archive folder in the database if not exist
+    db.create_directory_if_not_exists(db.ARCHIVE_DIR)
+    # create switch log directory in the database if not exist
+    db.create_directory_if_not_exists(db.SWITCH_LOG_DIR)
+
+
     # start http server on the specified port
     start_http_server(http_port_number)
 
@@ -47,7 +53,7 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
     # get http request status parser
     request_status_parser_now = get_request_status(sw_telemetry, initiator_filename)
     # create switch dashboard (set of toolbars which are set of gauges)
-    dashboard = BrocadeDashboard(sw_telemetry)
+    dashboard = BrocadeDashboard(sw_telemetry, initiator_filename)
     
     if sw_telemetry.corrupted_request:
         while sw_telemetry.corrupted_request:

@@ -6,8 +6,8 @@ LOGIN_SCENARIO = {
 }
 
 SWITCH_ACCESS = {
-    "10.213.164.101": LOGIN_SCENARIO["http_local"],
-    "10.213.164.102": LOGIN_SCENARIO["http_local"]
+    "10.213.164.101": LOGIN_SCENARIO["http_ldap"],
+    "10.213.164.102": LOGIN_SCENARIO["http_ldap"]
 }
 
 

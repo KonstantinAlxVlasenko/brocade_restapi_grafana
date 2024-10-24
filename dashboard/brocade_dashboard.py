@@ -24,16 +24,19 @@ class BrocadeDashboard:
 
     Attributes:
         sw_telemetry: set of switch telemetry retrieved from the switch.
+        initiator_filename (str): filename where collect_switch_metrics function is executed (switchname by default).
     """
 
 
-    def __init__(self, sw_telemetry: SwitchTelemetryRequest) -> None:
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest, initiator_filename: str) -> None:
         """  
         Args:
-            sw_telemetry: set of switch telemetry retrieved from the switch
+            sw_telemetry: set of switch telemetry retrieved from the switch.
+            initiator_filename (str): filename where collect_switch_metrics function is executed (switchname by default).
         """
 
         self._sw_telemetry: SwitchTelemetryRequest = sw_telemetry
+        self._initiator_filename: str = initiator_filename
 
         self._request_status_tb = RequestStatusToolbar(self.sw_telemetry)
         self._chassis_tb = ChassisToolbar(self.sw_telemetry)
@@ -45,7 +48,7 @@ class BrocadeDashboard:
         self._fcport_params_tb = FCPortParamsToolbar(self.sw_telemetry)
         self._sfp_media_tb = SFPMediaToolbar(self.sw_telemetry)
         self._fcport_stats_tb = FCPortStatsToolbar(self.sw_telemetry)
-        self._log_tb = LogToolbar(self.sw_telemetry)
+        self._log_tb = LogToolbar(self.sw_telemetry, self.initiator_filename)
 
 
     def fill_dashboard_gauge_metrics(self, 
@@ -55,6 +58,7 @@ class BrocadeDashboard:
 
         Args:
             brocade_parser (BrocadeParser): object contains required data to fill the gauge metrics.
+            
         """
         
         print('\n----Dashboard----')
@@ -92,8 +96,9 @@ class BrocadeDashboard:
         self.fcport_stats_tb.fill_toolbar_gauge_metrics(brocade_parser.fcport_stats_parser)
 
         print('log')
-        self.log_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser, brocade_parser.fcport_params_parser, brocade_parser.sfp_media_parser, 
-                                        brocade_parser.fcport_stats_parser, brocade_parser.fru_parser, brocade_parser.maps_parser)
+        self.log_tb.fill_toolbar_gauge_metrics(brocade_parser.sw_parser, brocade_parser.fcport_params_parser, 
+                                               brocade_parser.sfp_media_parser, brocade_parser.fcport_stats_parser, 
+                                               brocade_parser.fru_parser, brocade_parser.maps_parser)
         
         print('\n')
 
@@ -105,6 +110,11 @@ class BrocadeDashboard:
     @property
     def sw_telemetry(self):
         return self._sw_telemetry
+    
+
+    @property
+    def initiator_filename(self):
+        return self._initiator_filename
     
     
     @property    

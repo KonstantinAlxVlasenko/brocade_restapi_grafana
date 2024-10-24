@@ -7,6 +7,18 @@ NS_FILENAME = 'nameserver.pickle'
 DATABASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ARCHIVE_DIR = os.path.join(DATABASE_DIR, 'archive')
 
+SWITCH_LOG_DIR = os.path.join(DATABASE_DIR, 'switch_log')
+MAX_SWITCH_LOG_LINES = 3
+SWITCH_LOG_FILENAME_EXT = '_swlog.pickle'
+
+
+
+def file_exist(dirname: str, filename: str) -> bool:
+
+    filpath = os.path.join(dirname, filename)
+    return os.path.exists(filpath)
+
+
 
 def load_object(dirname: str, filename: str) -> Any:
     """Functions is used to load an object from the pickle file.
@@ -88,3 +100,36 @@ def update_nameserver(ch_parser: ChassisParser, ns_dir=DATABASE_DIR, ns_filename
     if not nameserver_dct.get(sw_ipaddress) or nameserver_dct[sw_ipaddress] != ch_parser.ch_name:
         nameserver_dct[sw_ipaddress] = ch_parser.ch_name
         save_object(nameserver_dct, ns_dir, ns_filename)
+
+
+def create_directory_if_not_exists(directory_path: str) -> None:
+    """Создает папку по указанному пути, если она не существует.
+
+    Args:
+        directory_path (str): Абсолютный путь к папке.
+    """
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+        print(f"Папка '{directory_path}' успешно создана.")
+    else:
+        print(f"Папка '{directory_path}' уже существует.")
+
+
+class LimitedList(list):
+    def __init__(self, max_size):
+        super().__init__()
+        self.max_size = max_size
+
+    def append(self, item):
+        if len(self) >= self.max_size:
+            self.pop(0)  # Удаляем первый элемент, если достигнут предел
+        super().append(item)
+
+    def extend(self, iterable):
+        for item in iterable:
+            self.append(item)  # Используем переопределенный append
+
+    def insert(self, index, item):
+        if len(self) >= self.max_size:
+            self.pop(0)  # Удаляем первый элемент, если достигнут предел
+        super().insert(index, item)
