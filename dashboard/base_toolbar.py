@@ -13,7 +13,7 @@ class BaseToolbar:
 
     chassis_wwn_key = ['chassis-wwn']
     switch_wwn_key = ['switch-wwn']
-    switch_port_keys = ['switch-wwn', 'name', 'slot-number', 'port-number']
+    switch_port_keys = ['switch-wwn', 'port-index', 'name', 'slot-number', 'port-number']
     switch_port_name_keys = switch_port_keys + ['port-name']
     chassis_switch_wwn_keys = ['chassis-wwn', 'switch-wwn']
 
@@ -22,7 +22,7 @@ class BaseToolbar:
     previous_value_key = 'previous-value'
     log_unit_keys = switch_port_keys + [modified_parameter_key, 'time-generated-hrf']
     
-    
+
     PORT_PHYSICAL_STATE_ID = {0: 'Offline', 1: 'Online', 2: 'Testing', 3: 'Faulty', 4: 'E_Port', 5: 'F_Port', 
                             6: 'Segmented', 7: 'Unknown',8: 'No_Port', 9: 'No_Module', 10: 'Laser_Flt', 
                             11: 'No_Light', 12: 'No_Sync', 13: 'In_Sync', 14: 'Port_Flt', 15: 'Hard_Flt', 

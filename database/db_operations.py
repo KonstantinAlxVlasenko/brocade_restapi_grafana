@@ -8,7 +8,7 @@ DATABASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ARCHIVE_DIR = os.path.join(DATABASE_DIR, 'archive')
 
 SWITCH_LOG_DIR = os.path.join(DATABASE_DIR, 'switch_log')
-MAX_SWITCH_LOG_LINES = 3
+MAX_SWITCH_LOG_LINES = 100
 SWITCH_LOG_FILENAME_EXT = '_swlog.pickle'
 
 

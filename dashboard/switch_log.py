@@ -28,10 +28,10 @@ class SwitchLog:
 
         if db.file_exist(db.SWITCH_LOG_DIR, self.sw_log_filename):
             print(f'Load switch log from {self.sw_log_filename=}')
-            self._switch_log = db.load_object(db.SWITCH_LOG_DIR, self.sw_log_filename)
+            self._saved_log = db.load_object(db.SWITCH_LOG_DIR, self.sw_log_filename)
         else:
             print("Create empty switch log")
-            self._switch_log = dict()
+            self._saved_log = dict()
 
         # add current logs to the loaded switch_log
         self._current_log = {'port-name': list(), 
@@ -99,8 +99,8 @@ class SwitchLog:
         # if log size exceeds the threshold find entries to remove
         if spare_entries_number < 0:
             # combine loaded and current logs
-            total_log_entries_lst = self.switch_log['current-value'] + self.current_log['current-value'] \
-                if self.switch_log.get('current-value') else self.current_log['current-value']
+            total_log_entries_lst = self.saved_log['current-value'] + self.current_log['current-value'] \
+                if self.saved_log.get('current-value') else self.current_log['current-value']
             # oldest log entries to remove from the log 
             removed_log_entries_lst = total_log_entries_lst[:abs(spare_entries_number)]
             for log_entry in removed_log_entries_lst:
@@ -124,11 +124,11 @@ class SwitchLog:
         """
 
         # entries number of the switch log 
-        switch_log_entries_number = len(self.switch_log['current-value']) if self.switch_log.get('current-value') else 0
+        saved_log_entries_number = len(self.saved_log['current-value']) if self.saved_log.get('current-value') else 0
         # entries number in the current iteration log
         current_log_entries_number = len(self.current_log['current-value'])
         # free log slots number
-        spare_entries_number = db.MAX_SWITCH_LOG_LINES - (switch_log_entries_number + current_log_entries_number)
+        spare_entries_number = db.MAX_SWITCH_LOG_LINES - (saved_log_entries_number + current_log_entries_number)
         return spare_entries_number
 
 
@@ -150,7 +150,7 @@ class SwitchLog:
             # set empty_log flag to False if section is not empty
             self._current_log_empty = False
             # backup log section
-            bckp_log_section = self.switch_log[key].copy() if self.switch_log.get(key) else list()
+            bckp_log_section = self.saved_log[key].copy() if self.saved_log.get(key) else list()
             # create empty limited list
             log_section = db.LimitedList(max_size=db.MAX_SWITCH_LOG_LINES)
             # add backup log section to the limited list
@@ -160,7 +160,7 @@ class SwitchLog:
             # convert limited list to the regular list
             log_section = list(log_section)
             # add limited list to the switch_log under current key
-            self.switch_log[key] = log_section.copy()
+            self.saved_log[key] = log_section.copy()
 
 
     def clean_portname_section(self, unit_removal_candidates_lst: List[Dict[str, str]])-> None:
@@ -177,17 +177,17 @@ class SwitchLog:
             None
         """
 
-        if not self.switch_log.get('current-value'):
+        if not self.saved_log.get('current-value'):
             return
-        if not self.switch_log.get('port-name'):
+        if not self.saved_log.get('port-name'):
             return
         if not unit_removal_candidates_lst:
             return
 
         # current-value log section units
-        current_value_unit_entries = [SwitchLog.align_dct(dct, BaseToolbar.log_unit_keys) for dct in self.switch_log['current-value']]
+        current_value_unit_entries = [SwitchLog.align_dct(dct, BaseToolbar.log_unit_keys) for dct in self.saved_log['current-value']]
         # port-name log section units
-        port_name_unit_entries = [SwitchLog.align_dct(dct, BaseToolbar.log_unit_keys) for dct in self.switch_log['port-name']]
+        port_name_unit_entries = [SwitchLog.align_dct(dct, BaseToolbar.log_unit_keys) for dct in self.saved_log['port-name']]
 
         # check each cndidate unit for removal from unit_removal_candidates_lst
         for unit_removal_candidate in unit_removal_candidates_lst:
@@ -199,14 +199,14 @@ class SwitchLog:
                 remove_unit_index = port_name_unit_entries.index(unit_removal_candidate)
                 # port-name log section and port_name_unit_entries list elements indexes must match during loop iterations
                 # that's why element is not deleted from the port-name log section but reset to None value
-                self.switch_log['port-name'][remove_unit_index] = None
+                self.saved_log['port-name'][remove_unit_index] = None
         
         # remove None values from the port-name log section
-        self.switch_log['port-name'] = [port_name_entry for port_name_entry in self.switch_log['port-name'] if port_name_entry]
+        self.saved_log['port-name'] = [port_name_entry for port_name_entry in self.saved_log['port-name'] if port_name_entry]
 
         # if port-name log section is empty delete the section from the log
-        if not self.switch_log['port-name']:
-            del self.switch_log['port-name']
+        if not self.saved_log['port-name']:
+            del self.saved_log['port-name']
 
 
     def write_switch_log(self) -> None:
@@ -219,7 +219,7 @@ class SwitchLog:
         """
         
         if not self.current_log_empty:
-            db.save_object(self.switch_log, db.SWITCH_LOG_DIR, self.sw_log_filename)
+            db.save_object(self.saved_log, db.SWITCH_LOG_DIR, self.sw_log_filename)
 
 
     def import_current_log(self) -> None:
@@ -294,7 +294,7 @@ class SwitchLog:
     
 
     @property
-    def switch_log(self):
-        return self._switch_log
+    def saved_log(self):
+        return self._saved_log
 
     

@@ -144,7 +144,7 @@ class FCPortParametersParser(BaseParser):
                     # The Fibre Channel WWN of the neighbor port
                     # neighbor_port_wwn = ', '.join(fc_interface_container['neighbor']['wwn']) if fc_interface_container['neighbor'] else None
                     neighbor_port_wwn = fc_interface_container['neighbor']['wwn'] if fc_interface_container['neighbor'] else None
-                    neighbor_port_wwn_str = '\n'.join(sorted(neighbor_port_wwn, reverse=True)) if neighbor_port_wwn else ""
+                    neighbor_port_wwn_str = ' '.join(sorted(neighbor_port_wwn, reverse=True)) if neighbor_port_wwn else ""
                     # port owner (remove closing '.')
                     sw_details_dct = self._get_port_owner(slot_port_number, vf_id)
                     # dynamic or static portname

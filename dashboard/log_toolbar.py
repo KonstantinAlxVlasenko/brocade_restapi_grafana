@@ -31,11 +31,11 @@ class LogToolbar(BaseToolbar):
 
     
 
-    modified_parameter_key ='modified-parameter'
-    current_value_key = 'current-value'
-    previous_value_key = 'previous-value'
+    # modified_parameter_key ='modified-parameter'
+    # current_value_key = 'current-value'
+    # previous_value_key = 'previous-value'
 
-    log_unit_keys = BaseToolbar.switch_port_keys + [modified_parameter_key, 'time-generated-hrf']
+    # log_unit_keys = BaseToolbar.switch_port_keys + [modified_parameter_key, 'time-generated-hrf']
 
     def __init__(self, sw_telemetry: SwitchTelemetryRequest, initiator_filename: str):
         """
@@ -61,7 +61,6 @@ class LogToolbar(BaseToolbar):
         
         self._gauge_portname = BaseGauge(name='log_portname', description='Port name in the log output.',
                                              unit_keys=LogToolbar.log_unit_keys, parameter_key='port-name')
-
         # log switch VF ID gauge
         self._gauge_switch_vfid = BaseGauge(name='log_switch_vfid', description='Switch virtual fabric ID in the log output.', 
                                                unit_keys=LogToolbar.switch_wwn_key, metric_key='vf-id')
@@ -71,6 +70,35 @@ class LogToolbar(BaseToolbar):
         # log previous value gauge
         self._gauge_previous_value_str = BaseGauge(name='log_previous_value_str', description='The previous value of the parameter.',
                                                      unit_keys=LogToolbar.log_unit_keys, parameter_key='previous-value')
+        
+        # import saved log sections to the corresponding log toolbar gauges
+        self.import_saved_log()
+
+
+    def import_saved_log(self) -> None:
+        """Method adds saved log sections to the log toolbar gauges.
+        'port-name' -> gauge_portname, 
+        'current-value' -> gauge_current_value_str, 
+        'previous-value'-> gauge_previous_value_str.
+        
+        Args:
+            None
+
+        Returns:
+            None
+        """
+
+        if not self.switch_log.saved_log:
+            return
+        
+        for section_name, section_log in self.switch_log.saved_log.items():
+            match section_name:
+                case 'port-name':
+                    self.gauge_portname.fill_chassis_gauge_metrics(section_log)
+                case 'current-value':
+                    self.gauge_current_value_str.fill_chassis_gauge_metrics(section_log)
+                case 'previous-value':
+                    self.gauge_previous_value_str.fill_chassis_gauge_metrics(section_log)
         
 
     def fill_toolbar_gauge_metrics(self, 

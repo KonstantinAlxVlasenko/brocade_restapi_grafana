@@ -24,10 +24,12 @@ pickle_tlm_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-telemetry.p
 pickle_prs_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-parser.pickle')
 pickle_rs_file = db.load_object(db.ARCHIVE_DIR, 'n3-g620-118-stg-f2-request.pickle')
 
+pickle_swlog_file = db.load_object(db.SWITCH_LOG_DIR, 'n3-b6510-010-stg-f2_swlog.pickle')
+
 # requset status file
 
-print(dir(pickle_rs_file))
-print(pickle_rs_file.request_status)
+# print(dir(pickle_rs_file))
+# print(pickle_rs_file.request_status)
 
 
 
@@ -67,4 +69,6 @@ print(pickle_rs_file.request_status)
 
 
 # print(pickle_tlm_correct_file.fc_interface))
+
+print(pickle_swlog_file)
 

@@ -66,7 +66,7 @@ class BaseGauge:
                              "Gauge is initialized with either parameter_key or metric_key.")
 
 
-    def fill_chassis_gauge_metrics(self, gauge_data: Union[List[Dict], Dict]):
+    def fill_chassis_gauge_metrics(self, gauge_data: List[Dict]):
         """
         Method to unpack gauge_data to get chassis level dictionaries.
         Each unpacked dictionary contains key, value pairs to fill gauge labels and set gauge metric.

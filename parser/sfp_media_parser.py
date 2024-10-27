@@ -19,8 +19,6 @@ class SFPMediaParser(BaseParser):
     """
 
 
-
-
     MEDIA_RDP_LEAFS = ['connector', 'current', 'identifier', 'media-distance', 
                        'media-speed-capability', 'name', 'part-number', 'power-on-time',
                        'rx-power', 'serial-number', 'temperature', 
