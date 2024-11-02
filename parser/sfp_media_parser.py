@@ -232,8 +232,8 @@ class SFPMediaParser(BaseParser):
         days = (hours_input - (years * hours_in_year)) // hours_in_day
         hours = hours_input - years * hours_in_year - days * hours_in_day
 
-        hrf_str = f"{days} day{'' if hours == 1 else 's'} " +\
-                    f"{hours} hr{'' if hours == 1 else 's'}"        
+        hrf_str = f"{days} day{'' if days == 1 else 's'} " +\
+                    f"{0 if hours < 10 and hours > 0 else ''}{hours} hr{'' if hours == 1 else 's'}"        
         if years:
             hrf_str = f"{years} yr{'' if years == 1 else's'} " + hrf_str         
         return hrf_str

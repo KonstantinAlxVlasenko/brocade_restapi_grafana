@@ -40,6 +40,7 @@ class BaseParser:
         self._ch_name = self._get_chassis_name()
         self._telemetry_date = self._get_telemetry_datetime('date')
         self._telemetry_time = self._get_telemetry_datetime('time')
+        self._telemetry_datetime = self.telemetry_date + " " + self.telemetry_time
 
 
     def _get_chassis_wwn(self) -> str:
@@ -250,3 +251,8 @@ class BaseParser:
     @property
     def telemetry_time(self):
         return self._telemetry_time
+
+
+    @property
+    def telemetry_datetime(self):
+        return self._telemetry_datetime

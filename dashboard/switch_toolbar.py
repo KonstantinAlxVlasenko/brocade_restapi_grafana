@@ -78,6 +78,11 @@ class SwitchToolbar(BaseToolbar):
         self._gauge_uport_gport_enabled_quantity = BaseGauge(name='uport_gport_enabled_quantity', 
                                                                 description='Number of enabled ports with no device connected to', 
                                                                 unit_keys=SwitchToolbar.switch_wwn_key, metric_key='uport-gport-enabled-quantity')
+        # port-physical-state-status-id
+        port_physical_state_status_description = f'Switch port physical state status depending on port enable state {SwitchToolbar.STATUS_ID}.'
+        self._gauge_switch_port_physical_state_status = BaseGauge(name='switch_port_physical_state_status', 
+                                                                description=port_physical_state_status_description, 
+                                                                unit_keys=SwitchToolbar.switch_wwn_key, metric_key='port-physical-state-status-id')
         # base switch status gauge
         # 0 - Disabled, 1 - Enabled
         base_switch_status_description = f'Base switch status {SwitchToolbar.MODE_STATUS_ID}.'
@@ -105,7 +110,7 @@ class SwitchToolbar(BaseToolbar):
         gauge_lst = [self.gauge_swname, self.gauge_switch_ip, self.gauge_switch_fabricname, self.gauge_switch_uptime, 
                      self.gauge_switch_state, self.gauge_switch_mode, self.gauge_switch_role, self.gauge_switch_did, 
                      self.gauge_switch_fid, self.gauge_switch_vfid, self.gauge_switch_port_quantity, 
-                     self.gauge_online_port_quantity, self.gauge_uport_gport_enabled_quantity, 
+                     self.gauge_online_port_quantity, self.gauge_uport_gport_enabled_quantity, self.gauge_switch_port_physical_state_status,
                      self.gauge_base_switch_status, self.gauge_default_switch_status, self.gauge_logical_isl_status,
 ]
         for gauge in gauge_lst:
@@ -173,6 +178,11 @@ class SwitchToolbar(BaseToolbar):
     @property
     def gauge_uport_gport_enabled_quantity(self):
         return self._gauge_uport_gport_enabled_quantity
+
+
+    @property
+    def gauge_switch_port_physical_state_status(self):
+        return self._gauge_switch_port_physical_state_status
 
 
     @property

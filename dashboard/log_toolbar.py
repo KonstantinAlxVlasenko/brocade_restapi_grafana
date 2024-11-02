@@ -13,7 +13,7 @@ from parser.maps_parser import MAPSParser
 from parser.sfp_media_parser import SFPMediaParser
 from parser.switch_parser import SwitchParser
 
-from typing import Dict, List
+from typing import Dict, List, Union
 
 
 
@@ -71,6 +71,9 @@ class LogToolbar(BaseToolbar):
         self._gauge_previous_value_str = BaseGauge(name='log_previous_value_str', description='The previous value of the parameter.',
                                                      unit_keys=LogToolbar.log_unit_keys, parameter_key='previous-value')
         
+        self._gauge_log_id = BaseGauge(name='log_id', description='Switch log messages id.',
+                                                     unit_keys=LogToolbar.log_unit_keys, metric_key='log-id')
+        
         # import saved log sections to the corresponding log toolbar gauges
         self.import_saved_log()
 
@@ -99,6 +102,28 @@ class LogToolbar(BaseToolbar):
                     self.gauge_current_value_str.fill_chassis_gauge_metrics(section_log)
                 case 'previous-value':
                     self.gauge_previous_value_str.fill_chassis_gauge_metrics(section_log)
+
+        self._fill_log_id(self.switch_log.saved_log['current-value'])
+        
+
+    def _fill_log_id(self, current_value_section: List[Dict[str, Union[str, int, List[str]]]]):
+        """Method assigns a number to each message in the current_value log.
+
+        Args:
+            current_value_section (List[Dict[str, Union[str, int, List[str]]]]): list of log entries with current value
+
+        Returns:
+            None
+        """
+
+        current_value_section_logid = current_value_section.copy()
+        # add log id to each log entry in the current value log section
+        for log_entry in current_value_section_logid:
+            # assign next free log id
+            log_entry['log-id'] = self.switch_log._last_entry_id + 1
+            self.switch_log._last_entry_id += 1
+        # fill log_id gauge
+        self.gauge_log_id.fill_chassis_gauge_metrics(current_value_section_logid)
         
 
     def fill_toolbar_gauge_metrics(self, 
@@ -144,7 +169,8 @@ class LogToolbar(BaseToolbar):
         self._fill_system_resources_log(maps_parser, sw_parser, current_value_log, previous_value_log)
         # fill ssp report changed log
         self._fill_ssp_report_log(maps_parser, sw_parser, current_value_log, previous_value_log)
-
+        # number the entries in the log
+        self._fill_log_id(current_value_log)
         # import current log iteration to the switch log
         self.switch_log.import_current_log()
 
@@ -495,4 +521,11 @@ class LogToolbar(BaseToolbar):
     @property
     def gauge_previous_value_str(self):
         return self._gauge_previous_value_str
+
+
+    @property
+    def gauge_log_id(self):
+        return self._gauge_log_id
+
+
 

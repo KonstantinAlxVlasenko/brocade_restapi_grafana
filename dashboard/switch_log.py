@@ -23,6 +23,8 @@ class SwitchLog:
             initiator_filename (str): filename where collect_switch_metrics function is executed (switchname by default).
         """
 
+        # number of the last log entry in the log dashboard
+        self._last_entry_id = 0
         # filename where switch log is stored
         self._sw_log_filename = initiator_filename + db.SWITCH_LOG_FILENAME_EXT
 
@@ -282,6 +284,11 @@ class SwitchLog:
     def sw_log_filename(self):
         return self._sw_log_filename
     
+
+    @property
+    def last_entry_id(self):
+        return self._last_entry_id
+
 
     @property
     def current_log_empty(self):

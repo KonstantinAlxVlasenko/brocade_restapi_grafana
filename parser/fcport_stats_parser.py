@@ -37,8 +37,8 @@ class FCPortStatisticsParser(BaseParser):
                                     'frames-transmitter-unavailable-errors', 
                                     'multicast-timeouts', 'too-many-rdys', 
                                     'f-busy-frames', 'f-rjt-frames', 'p-busy-frames', 'p-rjt-frames', 
-                                    'primitive-sequence-protocol-error',
-                                    'remote-primitive-sequence-protocol-error', 'frames-processing-required',
+                                    'primitive-sequence-protocol-error', 'remote-primitive-sequence-protocol-error', 
+                                    'frames-processing-required',
                                     'invalid-transmission-words', 'remote-invalid-transmission-words']
     
     LOW_SEVERITY_ERROR_LEAFS = ['encoding-errors-outside-frame',  'invalid-ordered-sets']

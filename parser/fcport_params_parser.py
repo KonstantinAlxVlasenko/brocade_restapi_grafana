@@ -167,6 +167,13 @@ class FCPortParametersParser(BaseParser):
                     pod_license_status_id = FCPortParametersParser._get_pod_license_id(fc_interface_container)
                     physical_state_status_id =  FCPortParametersParser._get_physical_state_status_id(fc_interface_container)
 
+                    # global switch port physical state status (the worst case)
+                    switch_port_physical_state_status_id = self.sw_parser.fc_switch[vf_id]['port-physical-state-status-id']
+                    if switch_port_physical_state_status_id is None:
+                        self.sw_parser.fc_switch[vf_id]['port-physical-state-status-id'] = physical_state_status_id
+                    else:
+                        if physical_state_status_id > switch_port_physical_state_status_id:
+                            self.sw_parser.fc_switch[vf_id]['port-physical-state-status-id'] = physical_state_status_id
                     
                     # create dictionary with current port parameters 
                     fcport_params_current_dct = {
@@ -327,6 +334,9 @@ class FCPortParametersParser(BaseParser):
         
         if fc_interface_container['is-enabled-state']:
             return fc_interface_container['port-type']
+        else:
+            # prometheus gauge metric can't be set to None
+            return 0 - fc_interface_container['port-type']
 
 
     @staticmethod

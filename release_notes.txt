@@ -7,3 +7,4 @@
 11.10.2024 version 0.23 port name in log correction
 24.10.2024 version 0.3 switch log save and load, gauge port label contains 'port-name' value
 27.10.2024 version 0.31 port-index added to port path
+02.11.2024 version 0.32 log id added to the logtoolbar
