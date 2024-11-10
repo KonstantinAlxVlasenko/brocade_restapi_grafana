@@ -168,12 +168,15 @@ class FCPortParametersParser(BaseParser):
                     physical_state_status_id =  FCPortParametersParser._get_physical_state_status_id(fc_interface_container)
 
                     # global switch port physical state status (the worst case)
-                    switch_port_physical_state_status_id = self.sw_parser.fc_switch[vf_id]['port-physical-state-status-id']
-                    if switch_port_physical_state_status_id is None:
-                        self.sw_parser.fc_switch[vf_id]['port-physical-state-status-id'] = physical_state_status_id
-                    else:
-                        if physical_state_status_id > switch_port_physical_state_status_id:
-                            self.sw_parser.fc_switch[vf_id]['port-physical-state-status-id'] = physical_state_status_id
+
+                    # switch_port_physical_state_status_id = self.sw_parser.fc_switch[vf_id]['port-physical-state-status-id']
+                    # if switch_port_physical_state_status_id is None:
+                    #     self.sw_parser.fc_switch[vf_id]['port-physical-state-status-id'] = physical_state_status_id
+                    # else:
+                    #     if physical_state_status_id > switch_port_physical_state_status_id:
+                    #         self.sw_parser.fc_switch[vf_id]['port-physical-state-status-id'] = physical_state_status_id
+
+                    self.sw_parser.update_param_status(vf_id, param_status_name='port-physical-state-status-id', status_id=physical_state_status_id)
                     
                     # create dictionary with current port parameters 
                     fcport_params_current_dct = {

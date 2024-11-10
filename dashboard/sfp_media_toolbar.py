@@ -138,7 +138,7 @@ class SFPMediaToolbar(BaseToolbar):
                                                unit_keys=SFPMediaToolbar.switch_port_name_keys, metric_key='remote-media-temperature')
         # remote sfp media temperature status id gauge
         # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
-        temperature_remote_status_description = f'The rempote SFP temperature status {SFPMediaToolbar.STATUS_ID}.'
+        temperature_remote_status_description = f'The remote SFP temperature status {SFPMediaToolbar.STATUS_ID}.'
         self._gauge_remote_temperature_status = BaseGauge(name='remote_sfp_temperature_status', description=temperature_remote_status_description, 
                                                unit_keys=SFPMediaToolbar.switch_port_name_keys, metric_key='remote-media-temperature-status-id')
         # remote sfp media rx-power in uWatts gauge

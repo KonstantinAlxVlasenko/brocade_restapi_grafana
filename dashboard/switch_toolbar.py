@@ -4,6 +4,7 @@ from .base_gauge import BaseGauge
 from .base_toolbar import BaseToolbar
 
 from collection.switch_telemetry_request import SwitchTelemetryRequest
+from parser.fcport_stats_parser import FCPortStatisticsParser
 
 
 class SwitchToolbar(BaseToolbar):
@@ -79,6 +80,7 @@ class SwitchToolbar(BaseToolbar):
                                                                 description='Number of enabled ports with no device connected to', 
                                                                 unit_keys=SwitchToolbar.switch_wwn_key, metric_key='uport-gport-enabled-quantity')
         # port-physical-state-status-id
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
         port_physical_state_status_description = f'Switch port physical state status depending on port enable state {SwitchToolbar.STATUS_ID}.'
         self._gauge_switch_port_physical_state_status = BaseGauge(name='switch_port_physical_state_status', 
                                                                 description=port_physical_state_status_description, 
@@ -98,6 +100,53 @@ class SwitchToolbar(BaseToolbar):
         logiacal_isl_status_description = f'Logical isl status {SwitchToolbar.MODE_STATUS_ID}.'
         self._gauge_logical_isl_status = BaseGauge(name='logical_isl_status', description=logiacal_isl_status_description, 
                                                       unit_keys=SwitchToolbar.switch_wwn_key, metric_key='logical-isl-enabled')
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
+        # port in-throughput-status-id
+        description_in_throughput_status_id = f"Switch port receive throughput status id {SwitchToolbar.STATUS_ID}."
+        self._gauge_switch_in_throughput_status_id = BaseGauge(name='switch_port_in_throughput_status', 
+                                                                description=description_in_throughput_status_id, 
+                                                                unit_keys=SwitchToolbar.switch_wwn_key, metric_key='in-throughput-status-id')
+        # port out-throughput-status-id
+        description_out_throughput_status_id = f"Switch port transmit throughput status id {SwitchToolbar.STATUS_ID}."
+        self._gauge_switch_out_throughput_status_id = BaseGauge(name='switch_port_out_throughput_status', 
+                                                                description=description_out_throughput_status_id, 
+                                                                unit_keys=SwitchToolbar.switch_wwn_key, metric_key='out-throughput-status-id')
+        # low severiry errors port status id
+        description_low_severity_errors_status_id = f"Switch port error status ID {SwitchToolbar.STATUS_ID} for the LOW severity errors {FCPortStatisticsParser.LOW_SEVERITY_ERROR_LEAFS}."
+        self._gauge_low_severity_errors_status_id = BaseGauge(name="switch_low_severity_errors_port_status_id", description=description_low_severity_errors_status_id, 
+                                                                      unit_keys=SwitchToolbar.switch_wwn_key, metric_key="low-severity-errors_port-status-id")
+        # medium severiry errors port status id
+        description_medium_severity_errors_status_id = f"Switch port error status ID {SwitchToolbar.STATUS_ID} for the MEDIUM severity errors {FCPortStatisticsParser.MEDIUM_SEVERITY_ERROR_LEAFS}."
+        self._gauge_medium_severity_errors_status_id = BaseGauge(name="switch_medium_severity_errors_port_status_id", description=description_medium_severity_errors_status_id, 
+                                                                         unit_keys=SwitchToolbar.switch_wwn_key, metric_key="medium-severity-errors_port-status-id")
+        # high severiry errors port status id
+        description_high_severity_errors_status_id = f"Switch port error status ID {SwitchToolbar.STATUS_ID} for the HIGH severity errors {FCPortStatisticsParser.HIGH_SEVERITY_ERROR_LEAFS}."
+        self._gauge_high_severity_errors_status_id = BaseGauge(name="switch_high_severity_errors_port_status_id", description=description_high_severity_errors_status_id, 
+                                    unit_keys=SwitchToolbar.switch_wwn_key, metric_key="high-severity-errors_port-status-id")
+        # sfp media temperature status id gauge
+        temperature_status_description = f'Switch SFP temperature status {SwitchToolbar.STATUS_ID}.'
+        self._gauge_sfp_temperature_status = BaseGauge(name='switch_sfp_temperature_status', description=temperature_status_description, 
+                                               unit_keys=SwitchToolbar.switch_wwn_key, metric_key='temperature-status-id')
+        # remote sfp media temperature status id gauge
+        temperature_remote_status_description = f'Switch remote SFP temperature status {SwitchToolbar.STATUS_ID}.'
+        self._gauge_sfp_remote_temperature_status = BaseGauge(name='switch_remote_sfp_temperature_status', description=temperature_remote_status_description, 
+                                               unit_keys=SwitchToolbar.switch_wwn_key, metric_key='remote-media-temperature-status-id')
+        # sfp media rx-power status id gauge
+        rx_power_status_description = f'Switch SFP rx power status {SwitchToolbar.STATUS_ID}.'
+        self._gauge_sfp_rx_power_status = BaseGauge(name='switch_sfp_rx_power_status', description=rx_power_status_description, 
+                                               unit_keys=SwitchToolbar.switch_wwn_key, metric_key='rx-power-status-id')
+        # sfp media tx-power status id gauge
+        tx_power_status_description = f'Switch SFP tx power status {SwitchToolbar.STATUS_ID}.'
+        self._gauge_sfp_tx_power_status = BaseGauge(name='switch_sfp_tx_power_status', description=tx_power_status_description, 
+                                               unit_keys=SwitchToolbar.switch_wwn_key, metric_key='tx-power-status-id')
+        # remote sfp media rx-power status id gauge
+        rx_power_remote_status_description = f'Switch remote SFP rx power status {SwitchToolbar.STATUS_ID}.'
+        self._gauge_sfp_remote_rx_power_status = BaseGauge(name='switch_remote_sfp_rx_power_status', description=rx_power_remote_status_description, 
+                                               unit_keys=SwitchToolbar.switch_wwn_key, metric_key='remote-media-rx-power-status-id')
+        # remote sfp media tx-power status id gauge
+        tx_power_remote_status_description = f'Switch remote SFP tx power status {SwitchToolbar.STATUS_ID}.'
+        self._gauge_sfp_remote_tx_power_status = BaseGauge(name='switch_remote_sfp_tx_power_status', description=tx_power_remote_status_description, 
+                                               unit_keys=SwitchToolbar.switch_wwn_key, metric_key='remote-media-tx-power-status-id')
         
     
     def fill_toolbar_gauge_metrics(self, sw_parser: SwitchParser) -> None:
@@ -111,8 +160,12 @@ class SwitchToolbar(BaseToolbar):
                      self.gauge_switch_state, self.gauge_switch_mode, self.gauge_switch_role, self.gauge_switch_did, 
                      self.gauge_switch_fid, self.gauge_switch_vfid, self.gauge_switch_port_quantity, 
                      self.gauge_online_port_quantity, self.gauge_uport_gport_enabled_quantity, self.gauge_switch_port_physical_state_status,
-                     self.gauge_base_switch_status, self.gauge_default_switch_status, self.gauge_logical_isl_status,
-]
+                     self.gauge_base_switch_status, self.gauge_default_switch_status, self.gauge_logical_isl_status, 
+                     self.gauge_switch_in_throughput_status_id, self.gauge_switch_out_throughput_status_id,
+                     self.gauge_low_severity_errors_status_id, self.gauge_medium_severity_errors_status_id,
+                     self.gauge_high_severity_errors_status_id, self.gauge_sfp_temperature_status,
+                     self.gauge_sfp_remote_temperature_status, self.gauge_sfp_rx_power_status,
+                     self.gauge_sfp_tx_power_status, self.gauge_sfp_remote_rx_power_status, self.gauge_sfp_remote_tx_power_status]
         for gauge in gauge_lst:
             gauge.fill_switch_gauge_metrics(sw_parser.fc_switch)
         
@@ -203,6 +256,61 @@ class SwitchToolbar(BaseToolbar):
     @property
     def gauge_logical_isl_status(self):
         return self._gauge_logical_isl_status
+    
+
+    @property
+    def gauge_switch_in_throughput_status_id(self):
+        return self._gauge_switch_in_throughput_status_id
+    
+
+    @property
+    def gauge_switch_out_throughput_status_id(self):
+        return self._gauge_switch_out_throughput_status_id
+    
+
+    @property
+    def gauge_low_severity_errors_status_id(self):
+        return self._gauge_low_severity_errors_status_id
+    
+
+    @property
+    def gauge_medium_severity_errors_status_id(self):
+        return self._gauge_medium_severity_errors_status_id
+    
+
+    @property
+    def gauge_high_severity_errors_status_id(self):
+        return self._gauge_high_severity_errors_status_id
+    
+
+    @property
+    def gauge_sfp_temperature_status(self):
+        return self._gauge_sfp_temperature_status
+    
+
+    @property
+    def gauge_sfp_remote_temperature_status(self):
+        return self._gauge_sfp_remote_temperature_status
+    
+
+    @property
+    def gauge_sfp_rx_power_status(self):
+        return self._gauge_sfp_rx_power_status
+    
+
+    @property
+    def gauge_sfp_tx_power_status(self):
+        return self._gauge_sfp_tx_power_status
+    
+
+    @property
+    def gauge_sfp_remote_rx_power_status(self):
+        return self._gauge_sfp_remote_rx_power_status
+    
+
+    @property
+    def gauge_sfp_remote_tx_power_status(self):
+        return self._gauge_sfp_remote_tx_power_status
 
 
 

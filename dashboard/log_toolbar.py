@@ -29,8 +29,6 @@ class LogToolbar(BaseToolbar):
         sw_telemetry: set of switch telemetry retrieved from the switch.
     """
 
-    
-
     # modified_parameter_key ='modified-parameter'
     # current_value_key = 'current-value'
     # previous_value_key = 'previous-value'
@@ -70,7 +68,7 @@ class LogToolbar(BaseToolbar):
         # log previous value gauge
         self._gauge_previous_value_str = BaseGauge(name='log_previous_value_str', description='The previous value of the parameter.',
                                                      unit_keys=LogToolbar.log_unit_keys, parameter_key='previous-value')
-        
+        # number of each log entry
         self._gauge_log_id = BaseGauge(name='log_id', description='Switch log messages id.',
                                                      unit_keys=LogToolbar.log_unit_keys, metric_key='log-id')
         
@@ -102,8 +100,10 @@ class LogToolbar(BaseToolbar):
                     self.gauge_current_value_str.fill_chassis_gauge_metrics(section_log)
                 case 'previous-value':
                     self.gauge_previous_value_str.fill_chassis_gauge_metrics(section_log)
+                case 'log-id':
+                    self.gauge_log_id.fill_chassis_gauge_metrics(section_log)
 
-        self._fill_log_id(self.switch_log.saved_log['current-value'])
+        # self._fill_log_id(self.switch_log.saved_log['current-value'])
         
 
     def _fill_log_id(self, current_value_section: List[Dict[str, Union[str, int, List[str]]]]):
@@ -169,10 +169,15 @@ class LogToolbar(BaseToolbar):
         self._fill_system_resources_log(maps_parser, sw_parser, current_value_log, previous_value_log)
         # fill ssp report changed log
         self._fill_ssp_report_log(maps_parser, sw_parser, current_value_log, previous_value_log)
-        # number the entries in the log
-        self._fill_log_id(current_value_log)
-        # import current log iteration to the switch log
+        # # number the entries in the log
+        # self._fill_log_id(current_value_log)
+        # number the entries in the log and import current log iteration to the switch log
         self.switch_log.import_current_log()
+        # fill log id gauge
+        self.gauge_log_id.fill_chassis_gauge_metrics(self.switch_log.current_log['log-id'])
+        # currrent log sections are reset to empty lists and empty flag is set to True
+        self.switch_log._reset_current_log()
+
 
 
     def _fill_fcport_stats_log(self, fcport_stats_parser: FCPortStatisticsParser, 

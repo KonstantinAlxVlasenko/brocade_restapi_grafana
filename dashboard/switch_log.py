@@ -1,5 +1,5 @@
 import database as db
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from .base_toolbar import BaseToolbar
 
@@ -27,22 +27,74 @@ class SwitchLog:
         self._last_entry_id = 0
         # filename where switch log is stored
         self._sw_log_filename = initiator_filename + db.SWITCH_LOG_FILENAME_EXT
-
-        if db.file_exist(db.SWITCH_LOG_DIR, self.sw_log_filename):
-            print(f'Load switch log from {self.sw_log_filename=}')
-            self._saved_log = db.load_object(db.SWITCH_LOG_DIR, self.sw_log_filename)
-        else:
-            print("Create empty switch log")
-            self._saved_log = dict()
-
+        # load self.saved_log and extract self.last_entry_id
+        self.load_saved_log()
         # add current logs to the loaded switch_log
         self._current_log = {'port-name': list(), 
                              'current-value': list(),
-                             'previous-value': list()}
+                             'previous-value': list(),
+                             'log-id': list()}
         # log change flag
         # shows if on current iteration log need to be save to the file
         self._current_log_empty = True
 
+
+    def load_saved_log(self) -> None:
+        """Method loads saved log.
+        If log file doesn't exist or doesn't contain current-value section then saved log is an empty dictionary.
+        If saved log doesn't contain lod-id section then it's generated starting from 1 
+        otherwise last entry logid is extracted from the saved log.
+
+        Args:
+            None
+
+        Returns:
+            None
+        """
+
+        # check if log file exists in the database
+        if not db.file_exist(db.SWITCH_LOG_DIR, self.sw_log_filename):
+            print("Create empty switch log")
+            self._saved_log = dict()
+            return
+            
+        print(f'Load switch log from {self.sw_log_filename=}')
+        # load log file from the database
+        self._saved_log = db.load_object(db.SWITCH_LOG_DIR, self.sw_log_filename)
+
+
+        # If log file doesn't contain current-value section then saved log is an empty dictionary.
+        if not self.saved_log.get('current-value'):
+            print("Create empty switch log")
+            self._saved_log = dict()
+            return    
+        # If saved log doesn't contain lod-id section then it's generated starting from 1
+        if not self.saved_log.get('log-id'):
+            self.saved_log['log-id'] = self.generate_logid_section(self.saved_log['current-value'])        # otherwise last entry logid is extracted from the saved log
+        else:
+            self._last_entry_id = self.saved_log['log-id'][-1][BaseToolbar.log_id_key]
+
+
+    def generate_logid_section(self, current_value_section: List[Dict[str, Union[str, int, List[str]]]]) -> List[Dict[str, Union[str, int]]]:
+        """Method assigns a number to each message in the current_value log.
+
+        Args:
+            current_value_section (List[Dict[str, Union[str, int, List[str]]]]): list of log entries with current values
+
+        Returns:
+            log_id_secion (List[Dict[str, Union[str, int]]]): list of log ids
+        """
+
+        log_id_section = list()
+
+        # add log id to each log entry in the current value log section
+        for log_entry in current_value_section:
+            log_entry_aligned = SwitchLog.align_dct(log_entry, BaseToolbar.log_unit_keys)
+            log_entry_aligned[BaseToolbar.log_id_key] = self.last_entry_id + 1
+            self._last_entry_id += 1
+            log_id_section.append(log_entry_aligned)
+        return log_id_section
+        
 
     def _reset_current_log(self) -> None:
         """Method resets current_log dictionary.
@@ -78,8 +130,8 @@ class SwitchLog:
             log_section = self.current_log[section].copy() 
             # align each dictionary in log section with log_unit_keys and section_key 
             log_section = [SwitchLog.align_dct(dct, BaseToolbar.log_unit_keys + [section_keys[section]]) for dct in log_section]
-            # drop duplicate dictionaries in current log section
-            log_section = SwitchLog.remove_list_duplicates(log_section)
+            # # drop duplicate dictionaries in current log section
+            # log_section = SwitchLog.remove_list_duplicates(log_section)
             # assign new log section to current_log 
             self.current_log[section] = log_section.copy()
 
@@ -174,7 +226,6 @@ class SwitchLog:
                                                                 but still may be in the port-name log section. 
                                                                 As well as other entries in current-value log section may contain these port units.
                                                                 Than that units remain in port-name log section.
-        
         Returns: 
             None
         """
@@ -239,6 +290,10 @@ class SwitchLog:
 
         # align current log to switch log sections format
         self.align_current_log()
+        # number current value log entries
+        self.current_log['log-id'] = self.generate_logid_section(self.current_log['current-value'])
+
+
         # current-value log section units which should be removed if log size threshold exceeds  
         unit_removal_candidates_lst = self.get_unit_removal_candidates()
         # add current log entries to the switch log with remove oldest entries if log size threshold exceeds
@@ -247,8 +302,9 @@ class SwitchLog:
         self.clean_portname_section(unit_removal_candidates_lst)
         # write updated switch log to the file in the database folder if new entries were added
         self.write_switch_log()
-        # currrent log sections are reset to empty lists and empty flag is set to True
-        self._reset_current_log()
+        
+        # # currrent log sections are reset to empty lists and empty flag is set to True
+        # self._reset_current_log()
 
 
     @staticmethod

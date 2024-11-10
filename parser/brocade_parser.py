@@ -58,9 +58,9 @@ class BrocadeParser:
             # fc port parameters parser
             self._fcport_params_parser = FCPortParametersParser(self.sw_telemetry, self.sw_parser)
             # sfp media parser
-            self._sfp_media_parser = SFPMediaParser(self.sw_telemetry, self.fcport_params_parser)
+            self._sfp_media_parser = SFPMediaParser(self.sw_telemetry, self.sw_parser, self.fcport_params_parser)
             # fc port statistics parser
-            self._fcport_stats_parser = FCPortStatisticsParser(self.sw_telemetry, self.fcport_params_parser)
+            self._fcport_stats_parser = FCPortStatisticsParser(self.sw_telemetry, self.sw_parser, self.fcport_params_parser)
         else:
             # fan, ps, sensor parser
             self._fru_parser = FRUParser(self.sw_telemetry, self.brocade_parser_prev.fru_parser)
@@ -69,13 +69,13 @@ class BrocadeParser:
                                                   self.brocade_parser_prev.maps_parser)
             # fc port parameters parser
             self._fcport_params_parser = FCPortParametersParser(self.sw_telemetry, self.sw_parser, 
-                                                                       self.brocade_parser_prev.fcport_params_parser)
+                                                                self.brocade_parser_prev.fcport_params_parser)
             # sfp media parser
-            self._sfp_media_parser = SFPMediaParser(self.sw_telemetry, self.fcport_params_parser, 
-                                                           self.brocade_parser_prev.sfp_media_parser)
+            self._sfp_media_parser = SFPMediaParser(self.sw_telemetry, self.sw_parser, 
+                                                    self.fcport_params_parser, self.brocade_parser_prev.sfp_media_parser)
             # fc port statistics parser
-            self._fcport_stats_parser = FCPortStatisticsParser(self.sw_telemetry, self.fcport_params_parser, 
-                                                                      self.brocade_parser_prev.fcport_stats_parser)            
+            self._fcport_stats_parser = FCPortStatisticsParser(self.sw_telemetry, self.sw_parser, 
+                                                               self.fcport_params_parser, self.brocade_parser_prev.fcport_stats_parser)            
 
     
     def __repr__(self):

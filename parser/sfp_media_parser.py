@@ -2,6 +2,7 @@ import math
 from typing import Dict, List, Optional, Self, Tuple, Union
 
 from .base_parser import BaseParser
+from .switch_parser import SwitchParser
 from .fcport_params_parser import FCPortParametersParser
 
 from collection.switch_telemetry_request import SwitchTelemetryRequest
@@ -59,17 +60,19 @@ class SFPMediaParser(BaseParser):
     SFP_TEMPERATURE_ALERT = {'high-alarm': 75, 'low-alarm': -5, 'high-warning': 70, 'low-warning': 0}
     
 
-    def __init__(self, sw_telemetry: SwitchTelemetryRequest, 
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest, sw_parser: SwitchParser,
                  fcport_params_parser: FCPortParametersParser, 
                  sfp_media_parser_prev: Self = None):
         """
         Args:
-            sw_telemetry: set of switch telemetry retrieved from the switch
-            fcport_params_parser (BrocadeSwitchParser):
-            sfp_media_parser_prev (SFPMediaParser):
+            sw_telemetry: set of switch telemetry retrieved from the switch.
+            sw_parser (BrocadeSwitchParser): switch parameters retrieved from the sw_telemetry.
+            fcport_params_parser (BrocadeSwitchParser): fc port parameters class instance retrieved from the sw_telemetry.
+            sfp_media_parser_prev (SFPMediaParser): previous sfp media params retrieved from the switch.
         """
         
         super().__init__(sw_telemetry)
+        self._sw_parser: SwitchParser = sw_parser
         self._fcport_params_parser: FCPortParametersParser = fcport_params_parser
         self._sfp_media = self._get_sfp_media_values()
         if self.sfp_media:
@@ -123,9 +126,9 @@ class SFPMediaParser(BaseParser):
                     fcport_params_dct = self._get_port_params(vf_id, protocol, slot_port_number)
                     sfp_media_current_dct.update(fcport_params_dct)
                     # add power status ('ok', ''warning', 'critical) for the power parameters
-                    self._add_power_status(sfp_media_current_dct)
+                    self._add_power_status(vf_id, sfp_media_current_dct)
                     # add temperature status ('ok', ''warning', 'critical)
-                    self._add_temp_status(sfp_media_current_dct)
+                    self._add_temp_status(vf_id, sfp_media_current_dct)
                     # add current sfp media dictionary to the summary sfp media dictionary with vf_id and slot_port as consecutive keys
                     sfp_media_dct[vf_id][sfp_media_container['name']] = sfp_media_current_dct
         return sfp_media_dct
@@ -239,14 +242,15 @@ class SFPMediaParser(BaseParser):
         return hrf_str
 
 
-    def _add_power_status(self, sfp_media_dct) -> None:
+    def _add_power_status(self, vf_id: int, sfp_media_dct: dict) -> None:
         """
         Method adds power status id and power status ('ok', 'unknown', 'warning', 'critical') to the sfp media dictionary for the 
         'rx-power', 'tx-power', 'remote-media-rx-power', 'remote-media-tx-power'
         depending on power value for Online ports.
                 
-        Args: 
-            sfp_media_dct (dict): sfp parameters dictionary for a single port
+        Args:
+            vf_id (int): virtual fabric id. 
+            sfp_media_dct (dict): sfp parameters dictionary for a single port.
         
         Returns:
             None
@@ -274,6 +278,8 @@ class SFPMediaParser(BaseParser):
                 
                 sfp_media_dct['rx-power-status-id'] = rx_power_status_id
                 sfp_media_dct['rx-power-status'] = SFPMediaParser.STATUS_ID.get(rx_power_status_id)
+                # set global switch sfp rx power status id
+                self.sw_parser.update_param_status(vf_id, param_status_name='rx-power-status-id', status_id=rx_power_status_id) 
             else:
                 sfp_media_dct['rx-power-status-id'] = None
                 sfp_media_dct['rx-power-status'] = None
@@ -288,6 +294,8 @@ class SFPMediaParser(BaseParser):
                         sfp_media_dct['tx-power'], SFPMediaParser.SFP_POWER_ALERT['lw_tx'])
                 sfp_media_dct['tx-power-status-id'] = tx_power_status_id
                 sfp_media_dct['tx-power-status'] = SFPMediaParser.STATUS_ID.get(tx_power_status_id)
+                # set global switch sfp tx power status id
+                self.sw_parser.update_param_status(vf_id, param_status_name='tx-power-status-id', status_id=tx_power_status_id) 
             else:
                 sfp_media_dct['tx-power-status-id'] = None
                 sfp_media_dct['tx-power-status'] = None
@@ -298,6 +306,8 @@ class SFPMediaParser(BaseParser):
                         sfp_media_dct['remote-media-rx-power'], SFPMediaParser.SFP_POWER_ALERT['sw_rx'])
                 sfp_media_dct['remote-media-rx-power-status-id'] = remote_rx_power_status_id
                 sfp_media_dct['remote-media-rx-power-status'] = SFPMediaParser.STATUS_ID.get(remote_rx_power_status_id)
+                # set global switch remote sfp rx power status id
+                self.sw_parser.update_param_status(vf_id, param_status_name='remote-media-rx-power-status-id', status_id=remote_rx_power_status_id)
             else:
                 sfp_media_dct['remote-media-rx-power-status-id'] = None
                 sfp_media_dct['remote-media-rx-power-status'] = None
@@ -308,6 +318,8 @@ class SFPMediaParser(BaseParser):
                         sfp_media_dct['remote-media-tx-power'], SFPMediaParser.SFP_POWER_ALERT['sw_tx'])
                 sfp_media_dct['remote-media-tx-power-status-id'] = remote_tx_power_status_id
                 sfp_media_dct['remote-media-tx-power-status'] = SFPMediaParser.STATUS_ID.get(remote_tx_power_status_id)
+                # set global switch remote sfp tx power status id
+                self.sw_parser.update_param_status(vf_id, param_status_name='remote-media-tx-power-status-id', status_id=remote_tx_power_status_id)
             else:
                 sfp_media_dct['remote-media-tx-power-status-id'] = None
                 sfp_media_dct['remote-media-tx-power-status'] = None
@@ -320,12 +332,13 @@ class SFPMediaParser(BaseParser):
             sfp_media_dct.update(empty_stutus_id_dct)
                 
 
-    def _add_temp_status(self, sfp_media_dct) -> None:
+    def _add_temp_status(self, vf_id: int, sfp_media_dct: dict) -> None:
         """
         Method adds temperature status id ('ok', 'unknown', 'warning', 'critical') to the sfp media dictionary
                 
-        Args: 
-            sfp_media_dct (dict): sfp parameters dictionary for a single port
+        Args:
+            vf_id (int): virtual fabric id. 
+            sfp_media_dct (dict): sfp parameters dictionary for a single port.
         
         Returns:
             None
@@ -336,6 +349,8 @@ class SFPMediaParser(BaseParser):
                 temp_status_id = SFPMediaParser.get_alert_status_id(sfp_media_dct[temp_key], SFPMediaParser.SFP_TEMPERATURE_ALERT)
                 sfp_media_dct[temp_key + '-status-id'] = temp_status_id
                 sfp_media_dct[temp_key + '-status'] = SFPMediaParser.STATUS_ID.get(temp_status_id)
+                # set global switch sfp temp status id
+                self.sw_parser.update_param_status(vf_id, param_status_name=temp_key + '-status-id', status_id=temp_status_id) 
             else:
                 sfp_media_dct[temp_key + '-status-id'] = None
                 sfp_media_dct[temp_key + '-status'] = None
@@ -467,9 +482,9 @@ class SFPMediaParser(BaseParser):
         return sfp_media_changed_dct
 
 
-    # @property
-    # def sw_telemetry(self):
-    #     return self._sw_telemetry
+    @property
+    def sw_parser(self):
+        return self._sw_parser
     
     
     @property

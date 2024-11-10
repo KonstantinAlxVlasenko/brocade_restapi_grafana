@@ -20,6 +20,8 @@ class BaseToolbar:
     modified_parameter_key ='modified-parameter'
     current_value_key = 'current-value'
     previous_value_key = 'previous-value'
+    log_id_key = 'log-id'
+    
     log_unit_keys = switch_port_keys + [modified_parameter_key, 'time-generated-hrf']
     
 

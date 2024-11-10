@@ -54,7 +54,7 @@ def collect_switch_metrics(sw_ipaddress: ip_address, initiator_filename: str) ->
     request_status_parser_now = get_request_status(sw_telemetry, initiator_filename)
     # create switch dashboard (set of toolbars which are set of gauges)
     dashboard = BrocadeDashboard(sw_telemetry, initiator_filename)
-    
+
     if sw_telemetry.corrupted_request:
         while sw_telemetry.corrupted_request:
             # if any request is corrupted parser is not initialized
@@ -128,8 +128,12 @@ def get_sw_telemetry(sw_ipaddress: ip_address,
     sw_username, sw_password = get_credentials(sw_ipaddress)
     # get switch access protocol (http or https) from the configuration file
     secure_access = SWITCH_ACCESS[sw_ipaddress]["secure_access"]
+    
+    st = time.time()
     # collect new telemetry
     sw_telemetry = SwitchTelemetryRequest(sw_ipaddress, sw_username, sw_password, secure_access)
+    elapsed_time = time.time() - st
+    print('\nCollection time:', time.strftime("%H:%M:%S", time.gmtime(elapsed_time)))
     # save current switch telemetry to the database
     db.save_object(sw_telemetry, db.ARCHIVE_DIR, filename=initiator_filename + TELEMETRY_TAG)
     return sw_telemetry

@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Self, Tuple, Union
 
 from .base_parser import BaseParser
+from .switch_parser import SwitchParser
 from .fcport_params_parser import FCPortParametersParser
 from quantiphy import Quantity
 
@@ -100,15 +101,18 @@ class FCPortStatisticsParser(BaseParser):
     # FC_PORT_PATH = ['fabric-user-friendly-name', 'vf-id', 'switch-name', 'switch-wwn', 'port-name', 'name', 'slot-number', 'port-number']
 
 
-    def __init__(self, sw_telemetry: SwitchTelemetryRequest, fcport_params_parser: FCPortParametersParser, fcport_stats_prev: Self = None):
+    def __init__(self, sw_telemetry: SwitchTelemetryRequest, sw_parser: SwitchParser, 
+                 fcport_params_parser: FCPortParametersParser, fcport_stats_prev: Self = None):
         """
         Args:
             sw_telemetry {BrocadeSwitchTelemetry}: set of switch telemetry retrieved from the switch.
+            sw_parser (BrocadeSwitchParser): switch parameters retrieved from the sw_telemetry.
             fcport_params_parser (BrocadeSwitchParser): fc port parameters class instance retrieved from the sw_telemetry.
             fcport_stats_prev (FCPortStatisticsParser): previous fc port statistics retrieved from the switch.
         """
         
         super().__init__(sw_telemetry)
+        self._sw_parser: SwitchParser = sw_parser
         self._fcport_params_parser: FCPortParametersParser = fcport_params_parser
         self._fcport_stats = self._get_port_stats_values()
         if self.fcport_stats:
@@ -185,6 +189,7 @@ class FCPortStatisticsParser(BaseParser):
     def _add_io_troughput_status(self, fcport_stats_current_dct) -> None:
         """
         Method to add io troughput status to the fc port statistics dictionary (based in 'in-rate', 'out-rate').
+        OBSOLETE
         
         Args:
             fcport_stats_current_dct {dict}: fc statistics dictionary for the current slot_port.
@@ -233,10 +238,10 @@ class FCPortStatisticsParser(BaseParser):
         # other's fcport_stats atrribute is empty
         # add empty delta keys to the each port stats dictionary
         if other is None or str(type(self)) != str(type(other)) or not other.fcport_stats:
-            for fcport_stats_vfid_now_dct in self.fcport_stats.values():
+            for vf_id, fcport_stats_vfid_now_dct in self.fcport_stats.items():
                 for fc_statistics_port_now_dct in fcport_stats_vfid_now_dct.values():
                     force_ok_status = True if other is None else False
-                    self._add_empty_fields(fc_statistics_port_now_dct, force_ok_status)
+                    self._add_empty_fields(vf_id, fc_statistics_port_now_dct, force_ok_status)
         
         # check if other is for the same switch
         elif self.same_chassis(other):
@@ -247,30 +252,30 @@ class FCPortStatisticsParser(BaseParser):
                 # if there is no vf_id in other add empty delta keys to the each port stats dictionary 
                 if vf_id not in other.fcport_stats:
                     for fc_statistics_port_now_dct in fcport_stats_vfid_now_dct.values():
-                        self._add_empty_fields(fc_statistics_port_now_dct)
+                        self._add_empty_fields(vf_id, fc_statistics_port_now_dct)
                     continue
                     
                 fcport_stats_vfid_prev_dct = other.fcport_stats[vf_id]
                 for slot_port, fc_statistics_port_now_dct in fcport_stats_vfid_now_dct.items():
                     # if there is no port number in other add empty delta keys to this port stats dictionary
                     if slot_port not in fcport_stats_vfid_prev_dct:
-                        self._add_empty_fields(fc_statistics_port_now_dct)
+                        self._add_empty_fields(vf_id, fc_statistics_port_now_dct)
                         continue
                     
                     # current fc port statistics from the other
                     fc_statistics_port_prev_dct = fcport_stats_vfid_prev_dct[slot_port]
                     # find delta for each fc port counter
-                    fcport_stats_growth_port_dct = self._get_port_counters_delta(fc_statistics_port_now_dct, fc_statistics_port_prev_dct)
+                    fcport_stats_growth_port_dct = self._get_port_counters_delta(vf_id, fc_statistics_port_now_dct, fc_statistics_port_prev_dct)
                     # add io troughput MB, percentage, status, status id based on io octets values
-                    self._add_io_octets_throughput_values(fc_statistics_port_now_dct)
+                    self._add_io_octets_throughput_values(vf_id, fc_statistics_port_now_dct)
                     # if switch operates normally LR_OUT and OLS_IN values must be equal
-                    self._detect_lr_ols_inconsistency(fc_statistics_port_now_dct, fcport_stats_growth_port_dct, lr_type='lr_out')
+                    self._detect_lr_ols_inconsistency(vf_id, fc_statistics_port_now_dct, fcport_stats_growth_port_dct, lr_type='lr_out')
                     # if switch operates normally LR_IN and OLS_OUT values must be equal
-                    self._detect_lr_ols_inconsistency(fc_statistics_port_now_dct, fcport_stats_growth_port_dct, lr_type='lr_in')
+                    self._detect_lr_ols_inconsistency(vf_id, fc_statistics_port_now_dct, fcport_stats_growth_port_dct, lr_type='lr_in')
                     # add timestamp from the other to the current port statistics to see time period for which delta in counted for
                     fc_statistics_port_now_dct['time-generated-prev-hrf'] = fc_statistics_port_prev_dct['time-generated-hrf']
                     # add 'unknown' port error status for high, medium and low severity counters if it doesn't exist 
-                    self._add_unknown_port_error_status_fields(fc_statistics_port_now_dct)
+                    self._add_unknown_port_error_status_fields(vf_id, fc_statistics_port_now_dct)
                     # add None for list of errors for all severities and critical, warning and ok statuses if doesn't exist 
                     self._add_empty_error_category_fields(fc_statistics_port_now_dct)
                     # if stat counters (transmitted and received frames etc, see FC_STATISTICS_STAT_LEAFS) 
@@ -280,10 +285,12 @@ class FCPortStatisticsParser(BaseParser):
         return fcport_stats_growth_dct    
 
 
-    def _add_io_octets_throughput_values(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
+    def _add_io_octets_throughput_values(self, vf_id: int, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
         """Method adds io troughput MB, percentage, status, status id based on io octets values (based on io octets values).
+        USED INSTEAD OF _add_io_troughput_status.
 
         Args:
+            vf_id (int): virtual switch ID.
             fc_statistics_port_now_dct (_type_): _description_
             force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'.
         """
@@ -301,23 +308,16 @@ class FCPortStatisticsParser(BaseParser):
                 fc_statistics_port_now_dct[octet_delta_key] / fc_statistics_port_now_dct[time_delta_key] / 1024 / 1024, 2)
             
             fc_statistics_port_now_dct[throughput_mbytes_key] = throughput_mbytes
-            self._add_io_troughput_status_(fc_statistics_port_now_dct, throughput_base_key, throughput_mbytes, force_ok_status)
-            
-            # if fc_statistics_port_now_dct['port-number'] == 44:
-            #     print(fc_statistics_port_now_dct['port-number'], 
-            #           throughput_mbytes_key, 
-            #           fc_statistics_port_now_dct['time-generated-hrf'], 
-            #           fc_statistics_port_now_dct[time_delta_key], 
-            #           throughput_mbytes, 
-            #           fc_statistics_port_now_dct[throughput_base_key + '-percentage'],
-            #           fc_statistics_port_now_dct[throughput_base_key + '-status'])
-     
+            self._add_io_troughput_status_(vf_id, fc_statistics_port_now_dct, throughput_base_key, throughput_mbytes, force_ok_status)
 
-    def _add_io_troughput_status_(self, fc_statistics_port_now_dct: dict, throughput_base_key: str, throughput_mbytes_value: float, force_ok_status: bool = False) -> None:
+
+    def _add_io_troughput_status_(self, vf_id: int, fc_statistics_port_now_dct: dict, throughput_base_key: str, 
+                                  throughput_mbytes_value: float, force_ok_status: bool = False) -> None:
         """
         Method to add io troughput status and status id to the fc port statistics dictionary (based on io octets values).
         
         Args:
+            vf_id (int): virtual switch ID.
             fc_statistics_port_now_dct {dict}: fc statistics dictionary for the current slot_port.
             throughput_base_key (str): 'in-throughput' or 'out-throughput'
             throughput_mbytes_value (str): current in or out throughput in MB.
@@ -334,17 +334,20 @@ class FCPortStatisticsParser(BaseParser):
         fc_statistics_port_now_dct[throughput_percantage_key] = FCPortStatisticsParser.get_percentage(
                 throughput_mbytes_value, fc_statistics_port_now_dct['port-throughput-megabytes'])
         # find if throughput threshold is exceeded and get corresponding status id
-        fc_statistics_port_now_dct[throughput_status_id_key] = FCPortStatisticsParser.get_rate_status(
-            fc_statistics_port_now_dct[throughput_percantage_key], force_ok_status)
+        throughput_status_id = FCPortStatisticsParser.get_rate_status(fc_statistics_port_now_dct[throughput_percantage_key], force_ok_status)
+        fc_statistics_port_now_dct[throughput_status_id_key] = throughput_status_id
+        # set global switch throughput status id
+        self.sw_parser.update_param_status(vf_id, param_status_name=throughput_status_id_key, status_id=throughput_status_id)
         # corresponding status
-        fc_statistics_port_now_dct[throughput_status_key] = FCPortStatisticsParser.STATUS_ID[fc_statistics_port_now_dct[throughput_status_id_key]]  
+        fc_statistics_port_now_dct[throughput_status_key] = FCPortStatisticsParser.STATUS_ID[throughput_status_id]  
 
 
-    def _get_port_counters_delta(self, fc_statistics_port_now_dct: dict, fc_statistics_port_prev_dct: dict) -> dict:
+    def _get_port_counters_delta(self, vf_id: int, fc_statistics_port_now_dct: dict, fc_statistics_port_prev_dct: dict) -> dict:
         """
         Method calculates delta between same counters of the curren port statistics and previous port statistics.
         
         Args:
+            vf_id (int): virtual switch ID.
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
             fc_statistics_port_prev_dct {dict}: previous fc port statistics dictionary to calculate delate with. 
         
@@ -367,16 +370,16 @@ class FCPortStatisticsParser(BaseParser):
                 fc_statistics_port_now_dct[counter_delta] = delta
                 # add counter name to the corresponding category list depending from counter severity and counter status and assign port error status
                 if counter in FCPortStatisticsParser.HIGH_SEVERITY_ERROR_LEAFS:
-                    self._add_error_status_and_categorize_error(fc_statistics_port_now_dct, delta, 
+                    self._add_error_status_and_categorize_error(vf_id, fc_statistics_port_now_dct, delta, 
                                                                 counter_thresholds_key='high_severity', counter_name=counter, severity='high')
                 elif counter in FCPortStatisticsParser.MEDIUM_SEVERITY_ERROR_LEAFS:
-                    self._add_error_status_and_categorize_error(fc_statistics_port_now_dct, delta, 
+                    self._add_error_status_and_categorize_error(vf_id, fc_statistics_port_now_dct, delta, 
                                                                 counter_thresholds_key='medium_severity', counter_name=counter, severity='medium')
                 elif counter in FCPortStatisticsParser.LOW_SEVERITY_ERROR_LEAFS:
-                    self._add_error_status_and_categorize_error(fc_statistics_port_now_dct, delta, 
+                    self._add_error_status_and_categorize_error(vf_id, fc_statistics_port_now_dct, delta, 
                                                                 counter_thresholds_key='low_severity', counter_name=counter, severity='low')
                 elif counter in FCPortStatisticsParser.LINK_ERROR_LEAFS:
-                    self._add_error_status_and_categorize_error(fc_statistics_port_now_dct, delta, 
+                    self._add_error_status_and_categorize_error(vf_id, fc_statistics_port_now_dct, delta, 
                                                                 counter_thresholds_key='link_error', counter_name=counter, severity='high')
 
                 # save the delta to the fc port statistics dictionary
@@ -384,12 +387,13 @@ class FCPortStatisticsParser(BaseParser):
         return fcport_stats_growth_port_dct
 
 
-    def _add_error_status_and_categorize_error(self, fc_statistics_port_now_dct: dict, counter_delta, 
+    def _add_error_status_and_categorize_error(self, vf_id: int, fc_statistics_port_now_dct: dict, counter_delta, 
                                                counter_thresholds_key: str, counter_name: str, severity: str) -> None:
         """
         Method assingns port error status and categorizes error (adds counter title to the corresponding list).
         
         Args:
+            vf_id (int): virtual switch ID.
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
             counter_name {str}: name of the counter.
             counter_status {str}: status of the counter.
@@ -398,23 +402,33 @@ class FCPortStatisticsParser(BaseParser):
                 
         counter_status_id = FCPortStatisticsParser.get_error_status(counter_delta, FCPortStatisticsParser.COUNTER_THRESHOLDS[counter_thresholds_key])
         # update port error status if counter_status is greater than the port error status
-        self._update_port_error_status(fc_statistics_port_now_dct, counter_status_id, severity)
+        self._update_port_error_status(vf_id, fc_statistics_port_now_dct, counter_status_id, severity)
         # add counter title to the corresponding list depending from counter severity and counter status.
         self._categorize_error(fc_statistics_port_now_dct, counter_name, counter_status_id, severity)
                 
 
-    def _update_port_error_status(self, fc_statistics_port_now_dct: dict,  counter_status_id, severity: str) -> None:
+    def _update_port_error_status(self, vf_id: int, fc_statistics_port_now_dct: dict,  counter_status_id, severity: str) -> None:
         """
         Method updates port error status ('critical', 'warning', 'ok') for the current severity level ('high','medium', 'low').
         If existing port error status has greater port error status id than the current port error status is not updated.
         So worse error status is assigned to the port error status.
 
-        Port error status types:
+        Port error status keys:
             'high-severity-errors_port-status',
             'medium-severity-errors_port-status',
             'low-severity-errors_port-status']
         
+        Port error status id keys:
+            'high-severity-errors_port-status-id',
+            'medium-severity-errors_port-status-id',
+            'low-severity-errors_port-status-id',
+            'link-errors_port-status'
+        
+        Port error statuses:
+            ['critical', 'warning', 'ok']
+
         Args:
+            vf_id (int): virtual switch ID.
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
             counter_status {str}: status of the counter threshold ('critical', 'warning', 'ok').
             severity {str}: error severity ('high','medium', 'low').
@@ -436,10 +450,14 @@ class FCPortStatisticsParser(BaseParser):
             if counter_status_id > fc_statistics_port_now_dct[counter_status_id_key]:
                 fc_statistics_port_now_dct[counter_status_key] = counter_status
                 fc_statistics_port_now_dct[counter_status_id_key] = counter_status_id
+                # set global switch port error status id
+                self.sw_parser.update_param_status(vf_id, param_status_name=counter_status_id_key, status_id=counter_status_id)
         # if port error status is not exist assign it as current error status
         else:
             fc_statistics_port_now_dct[counter_status_key] = counter_status
             fc_statistics_port_now_dct[counter_status_id_key] = counter_status_id
+            # set global switch port error status id
+            self.sw_parser.update_param_status(vf_id, param_status_name=counter_status_id_key, status_id=counter_status_id)
 
 
     def _categorize_error(self, fc_statistics_port_now_dct, counter_name, counter_status_id: int, severity: str) -> None:
@@ -485,7 +503,7 @@ class FCPortStatisticsParser(BaseParser):
                 counter_name: fc_statistics_port_now_dct[counter_delta_name]}
 
 
-    def _detect_lr_ols_inconsistency(self, fcport_stats_dct: dict, fcport_stats_growth_dct: dict, lr_type: str) -> None:
+    def _detect_lr_ols_inconsistency(self, vf_id: int, fcport_stats_dct: dict, fcport_stats_growth_dct: dict, lr_type: str) -> None:
         """
         Method detects inconsistency between Link reset and Offline state counters deltas.
         Lr_in and Ols_out values must be equal.
@@ -493,6 +511,7 @@ class FCPortStatisticsParser(BaseParser):
         Inconsistency indicates link errors.
         
         Args:
+            vf_id (int): virtual switch ID.
             fc_statistics_port_now_dct {dict}: fc port statistics dictionary for the current sw telemetry.
             fcport_stats_growth_port_dct {dict}: fc port statistics dictionary for ports with increased counters.
         
@@ -519,7 +538,7 @@ class FCPortStatisticsParser(BaseParser):
         # save diffrerence to fc port statistics dictionaries
         fcport_stats_dct[lr_substract_ols_leaf] = lr_substract_ols_delta 
         # add counter name to the corresponding category list depending from counter severity and counter status and assign port error status
-        self._add_error_status_and_categorize_error(fcport_stats_dct, lr_substract_ols_delta, counter_thresholds_key='lr_substract_ols', 
+        self._add_error_status_and_categorize_error(vf_id, fcport_stats_dct, lr_substract_ols_delta, counter_thresholds_key='lr_substract_ols', 
                                                     counter_name=lr_substract_ols_leaf, severity='medium')
         FCPortStatisticsParser.save_positive_value(fcport_stats_growth_dct, lr_substract_ols_leaf, lr_substract_ols_delta) 
 
@@ -559,12 +578,13 @@ class FCPortStatisticsParser(BaseParser):
             fcport_stats_growth_dct[vf_id][slot_port] = fcport_stats_growth_port_dct
                                    
 
-    def _add_empty_fields(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
+    def _add_empty_fields(self, vf_id: int, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
         """
         Method adds empty fields from the BrocadeFCPortStatisticsParser list,
         empty port error status fields and empty error category fields to the fcport statistics dictionary.
 
         Args:
+            vf_id (int): virtual fabric id.
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
             force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'. 
         
@@ -574,16 +594,16 @@ class FCPortStatisticsParser(BaseParser):
 
         empty_delta_dct = {counter + FCPortStatisticsParser.DELTA_TAG: None for counter in FCPortStatisticsParser.FC_STATISTICS_COUNTER_LEAFS}
         fc_statistics_port_now_dct.update(empty_delta_dct)
-        self._add_unknown_port_error_status_fields(fc_statistics_port_now_dct, force_ok_status)
+        self._add_unknown_port_error_status_fields(vf_id, fc_statistics_port_now_dct, force_ok_status)
         self._add_empty_error_category_fields(fc_statistics_port_now_dct)
         fc_statistics_port_now_dct['time-generated-prev-hrf'] = None
         fc_statistics_port_now_dct[FCPortStatisticsParser.LROUT_SUBTRACT_OLSIN_LEAF] = None
         fc_statistics_port_now_dct[FCPortStatisticsParser.LRIN_SUBTRACT_OLSOUT_LEAF] = None
         # add io troughput MB, percentage, status, status id based on io octets values
-        self._add_io_octets_throughput_values(fc_statistics_port_now_dct, force_ok_status)
+        self._add_io_octets_throughput_values(vf_id, fc_statistics_port_now_dct, force_ok_status)
 
 
-    def _add_unknown_port_error_status_fields(self, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
+    def _add_unknown_port_error_status_fields(self, vf_id: int, fc_statistics_port_now_dct: dict, force_ok_status: bool = False) -> None:
         """
         Method adds port error status fields to the fcport statistics dictionary 
         with 'unknown' value if this port error status doesn't exist or 'ok' value if it's forced.
@@ -594,6 +614,7 @@ class FCPortStatisticsParser(BaseParser):
             'low-severity-errors_port-status'
         
         Args:
+            vf_id (int): virtual fabric id.
             fc_statistics_port_now_dct {dict}: current fc port statistics dictionary.
             force_ok_status {bool}: forces to fill empty error status with 'ok' instead 'unknown'. 
         
@@ -610,8 +631,13 @@ class FCPortStatisticsParser(BaseParser):
         # non-exisnet port error status
         unknown_port_error_status_dct = {port_error_severity: FCPortStatisticsParser.STATUS_ID[status_id] 
                                          for  port_error_severity in FCPortStatisticsParser.PORT_ERROR_STATUS_KEYS 
-                                         if not port_error_severity in fc_statistics_port_now_dct}        
-        
+                                         if not port_error_severity in fc_statistics_port_now_dct}
+
+
+        for  port_error_severity in FCPortStatisticsParser.PORT_ERROR_STATUS_KEYS:
+            if not port_error_severity in fc_statistics_port_now_dct:
+                # set global switch port error status id
+                self.sw_parser.update_param_status(vf_id, param_status_name=port_error_severity + '-id', status_id=status_id)        
         
         fc_statistics_port_now_dct.update(unknown_port_error_status_dct)
         fc_statistics_port_now_dct.update(unknown_port_error_status_id_dct)
@@ -868,6 +894,11 @@ class FCPortStatisticsParser(BaseParser):
 
         return datetime.fromtimestamp(seconds).strftime('%Y-%m-%d %H:%M:%S')
     
+
+    @property
+    def sw_parser(self):
+        return self._sw_parser
+
 
     @property
     def fcport_params_parser(self):

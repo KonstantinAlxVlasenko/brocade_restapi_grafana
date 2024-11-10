@@ -31,6 +31,9 @@ class SwitchParser(BaseParser):
                            'path-count', 'firmware-version']
 
     # 'chassis-wwn', 'switch-user-friendly-name', 'chassis-user-friendly-name', 
+
+
+
     
     def __init__(self, sw_telemetry: SwitchTelemetryRequest):
         """
@@ -41,6 +44,7 @@ class SwitchParser(BaseParser):
         self._fc_switch: dict = self._get_fc_switch_value()
         self._vf_details: dict = self._get_vf_details()
         if self.fc_switch:
+            self._set_default_counters()
             self._set_switch_role()
             self._set_switch_mode()
             self._set_switch_state()
@@ -88,10 +92,10 @@ class SwitchParser(BaseParser):
                     current_sw_dct = {key: fc_sw[key] for key in SwitchParser.FC_SWITCH_LEAFS}
                     current_sw_dct['switch-wwn'] = fc_sw['name']
                     current_sw_dct['switch-name'] = fc_sw['user-friendly-name']
-                    current_sw_dct['uport-gport-enabled-quantity'] = 0
-                    current_sw_dct['enabled-port-quantity'] = 0
-                    current_sw_dct['online-port-quantity'] = 0
-                    current_sw_dct['port-physical-state-status-id'] = None
+                    # current_sw_dct['uport-gport-enabled-quantity'] = 0
+                    # current_sw_dct['enabled-port-quantity'] = 0
+                    # current_sw_dct['online-port-quantity'] = 0
+                    # current_sw_dct['port-physical-state-status-id'] = None
                     if fc_logical_sw_container_lst:
                         # find logical switch dictionary with the same switch wwn
                         for fc_logical_sw in fc_logical_sw_container_lst:
@@ -202,6 +206,38 @@ class SwitchParser(BaseParser):
                     sw_params_dct[sw_mode_hrf] = None
                 else:
                     sw_params_dct[sw_mode_hrf] = state_dct.get(sw_params_dct[sw_mode_bin], 'Unknown')
+
+
+    def _set_default_counters(self):
+        """
+        Method adds counters with default values to each switch parameters dictionary.
+        Port quantity counters are set to 0, port status id values are set to None.
+        
+        Returns:
+            None
+        """
+
+        sw_default_counters = {'uport-gport-enabled-quantity': 0,
+                                'enabled-port-quantity': 0,
+                                'online-port-quantity': 0,
+                                'port-physical-state-status-id': None,
+                                'in-throughput-status-id': None,
+                                'out-throughput-status-id': None,
+                                'high-severity-errors_port-status-id': None,
+                                'medium-severity-errors_port-status-id': None, 
+                                'low-severity-errors_port-status-id': None,
+                                'temperature-status-id': None, 
+                                'remote-media-temperature-status-id': None,
+                                'rx-power-status-id': None,
+                                'tx-power-status-id': None,
+                                'remote-media-rx-power-status-id': None,
+                                'remote-media-tx-power-status-id': None
+                                }
+
+        for sw_params_dct in self.fc_switch.values():
+            if not sw_params_dct:
+                continue
+            sw_params_dct.update(sw_default_counters)
 
 
     def _set_switch_state(self) -> None:
@@ -321,7 +357,8 @@ class SwitchParser(BaseParser):
 
     def get_switch_details(self, vf_id: int, keys=['switch-name', 'switch-wwn', 'vf-id', 'fabric-user-friendly-name']) -> Dict[str, Optional[str]]:
         """
-        Method to get switch details.
+        Method to get switch details. 
+        
         
         Args:
             vf_id {int}: switch vf_id.
@@ -336,6 +373,31 @@ class SwitchParser(BaseParser):
             return {key: sw_details[key] for key in keys}
         else:
             return {key: None for key in keys}
+
+
+    def update_param_status(self, vf_id: int, param_status_name: str, status_id: int) -> None:
+        """
+        Method to set port parameter global status. 
+        Method takes the value of the highest port parameter status id (worst case).
+        
+        Args:
+            vf_id {int}: switch vf_id.
+            param_status_name {str}: parameter status name.
+            status_id {int}: parameter status id. 1 - OK, 2 - Unknown, 3 - Warning, 4 - Critical.
+        
+        Returns:
+            Dict[str, Optional[str]]: Dictionary with switchparameters values.
+        """
+
+        # current status id
+        param_status_id = self.fc_switch[vf_id][param_status_name]
+        # if global status id is not defined (method was not called before), set it to status_id
+        if param_status_id is None:
+            self.fc_switch[vf_id][param_status_name] = status_id
+        else:
+            # if currect status id is higher than global status id, set it to currect status id
+            if status_id > param_status_id:
+                self.fc_switch[vf_id][param_status_name] = status_id
 
 
     @staticmethod
