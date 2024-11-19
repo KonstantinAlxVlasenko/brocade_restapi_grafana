@@ -10,3 +10,4 @@
 02.11.2024 version 0.32 log id added to the log toolbar
 07.11.2024 version 0.33 log id is saved permanently to the log file
 11.11.2024 version 0.34 global switch port status ids
+19.11.2024 version 0.35 uptime seconds to days, hours, minutes

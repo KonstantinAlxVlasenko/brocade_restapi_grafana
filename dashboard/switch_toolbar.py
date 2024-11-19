@@ -45,6 +45,21 @@ class SwitchToolbar(BaseToolbar):
         # switch uptime gauge
         self._gauge_switch_uptime = BaseGauge(name='switch_uptime', description='Switch uptime', 
                                            unit_keys=SwitchToolbar.switch_wwn_key, parameter_key='up-time-hrf')
+        # switch uptime days gauge
+        self._gauge_switch_uptime_days = BaseGauge(name='switch_uptime_days', description='Switch uptime_days', 
+                                           unit_keys=SwitchToolbar.switch_wwn_key, metric_key='up-time-d')
+        # switch uptime hours gauge
+        self._gauge_switch_uptime_hours = BaseGauge(name='switch_uptime_hours', description='Switch uptime_hours', 
+                                           unit_keys=SwitchToolbar.switch_wwn_key, metric_key='up-time-hr')
+        # switch uptime mins gauge
+        self._gauge_switch_uptime_mins = BaseGauge(name='switch_uptime_minutes', description='Switch uptime_minutes', 
+                                           unit_keys=SwitchToolbar.switch_wwn_key, metric_key='up-time-min')
+        # switch uptime status gauge
+        # 1 - 'OK', 2 - 'Unknown', 3 - 'Warning', 4 - 'Critical'
+        switch_uptime_status_description  = f'Switch uptime status id {SwitchToolbar.STATUS_ID}.'
+        self._gauge_switch_uptime_status = BaseGauge(name='switch_uptime_status', 
+                                                     description=switch_uptime_status_description, 
+                                                     unit_keys=SwitchToolbar.switch_wwn_key, metric_key='up-time-status-id')        
         # switch state gauge
         #  0 - Undefined, 2 - Online. 3 = Offline, 7 - Testing
         switch_state_description = f'The current state of the switch {SwitchToolbar.SWITCH_STATE_ID}.'
@@ -156,7 +171,9 @@ class SwitchToolbar(BaseToolbar):
             sw_parser (BrocadeSwitchParser): object contains required data to fill the gauge metrics.
         """
 
-        gauge_lst = [self.gauge_swname, self.gauge_switch_ip, self.gauge_switch_fabricname, self.gauge_switch_uptime, 
+        gauge_lst = [self.gauge_swname, self.gauge_switch_ip, self.gauge_switch_fabricname, 
+                     self.gauge_switch_uptime, self.gauge_switch_uptime_status,
+                     self.gauge_switch_uptime_days, self.gauge_switch_uptime_hours, self.gauge_switch_uptime_mins,
                      self.gauge_switch_state, self.gauge_switch_mode, self.gauge_switch_role, self.gauge_switch_did, 
                      self.gauge_switch_fid, self.gauge_switch_vfid, self.gauge_switch_port_quantity, 
                      self.gauge_online_port_quantity, self.gauge_uport_gport_enabled_quantity, self.gauge_switch_port_physical_state_status,
@@ -192,6 +209,26 @@ class SwitchToolbar(BaseToolbar):
     @property
     def gauge_switch_uptime(self):
         return self._gauge_switch_uptime
+    
+
+    @property
+    def gauge_switch_uptime_days(self):
+        return self._gauge_switch_uptime_days
+    
+
+    @property
+    def gauge_switch_uptime_hours(self):
+        return self._gauge_switch_uptime_hours
+    
+
+    @property
+    def gauge_switch_uptime_mins(self):
+        return self._gauge_switch_uptime_mins
+
+
+    @property
+    def gauge_switch_uptime_status(self):
+        return self._gauge_switch_uptime_status
 
 
     @property

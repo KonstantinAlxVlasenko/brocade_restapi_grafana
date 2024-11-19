@@ -50,6 +50,7 @@ class SwitchParser(BaseParser):
             self._set_switch_state()
             self._set_mode_status()
             self._set_uptime_hrf()
+            self._set_uptime_status()
             self._set_ipaddress_str()
         self._fabric: dict = self._get_fabric_switch_value()
 
@@ -179,10 +180,51 @@ class SwitchParser(BaseParser):
         for sw_params_dct in self.fc_switch.values():
             if sw_params_dct['up-time'] is not None:
                 up_time_str = SwitchParser.seconds_to_hrf(sw_params_dct['up-time'])
+                up_time_days, up_time_hours, up_time_mins = SwitchParser.seconds_to_dhm(sw_params_dct['up-time'])
             else:
-                up_time_str = None
+                up_time_str, up_time_days, up_time_hours, up_time_mins = (None,)* 4
             sw_params_dct['up-time-hrf'] = up_time_str
+            sw_params_dct['up-time-d'] = up_time_days
+            sw_params_dct['up-time-hr'] = up_time_hours
+            sw_params_dct['up-time-min'] = up_time_mins
+
+
+    def _set_uptime_status(self, min_uptime: int=10, max_uptime: int=525600) -> None:
+        """"
+        Method sets switch uptime status.
+        Uptime is less than 10 min -> switch uptime status is 'Critical' (switch reboot occured).
+        Uptime is more than 10 min and less than 1 year -> switch uptime status is 'OK' (switch is up and running).
+        Uptime is more than 1 year -> switch uptime status is 'Warning' (switch should be rebooted).
+        Otherwise switch uptime status is 'Unknown'.
         
+        Args:
+            min_uptime (int): switch in critial status until timer is expired (10 minutes by default).
+            max_uptime (int): switch in warning status after timer is expired (1 year by default).
+        
+        Returns:
+            None
+        """
+
+        for sw_params_dct in self.fc_switch.values():
+            uptime_seconds = sw_params_dct['up-time']
+            if uptime_seconds is None:
+                uptime_status_id = 2
+            # switch uptime is less than 10 minutes. Critical status
+            elif uptime_seconds < min_uptime * 60:
+                uptime_status_id = 4
+            # switch uptime is more then 10 mins and less than 1 year.  Normal operation. OK status.
+            elif uptime_seconds >= min_uptime * 60 and uptime_seconds < max_uptime * 60:
+                uptime_status_id = 1
+            # switch uptime is more then 1 year. Switch should be rebooted. Warning status.
+            elif uptime_seconds >= max_uptime * 60:
+                uptime_status_id = 3
+            # othewise switch uptime status is Unknown.
+            else:
+                uptime_status_id = 2
+            
+            sw_params_dct['up-time-status-id'] = uptime_status_id
+            sw_params_dct['up-time-status'] = SwitchParser.STATUS_ID[uptime_status_id]
+
 
     def _set_mode_status(self) -> None:
         """
@@ -425,6 +467,28 @@ class SwitchParser(BaseParser):
                 f"{minutes} min{'' if minutes == 1 else 's'}"
     
     
+    @staticmethod
+    def seconds_to_dhm(seconds: int) -> str:
+        """
+        Method returns seconds to days, hours, minutes.
+        
+        Args:
+            seconds: seconds number to convert
+        
+        Returns:
+            Tuple of days, hours, minutes
+        """
+        
+        seconds_in_day = 60 * 60 * 24
+        seconds_in_hour = 60 * 60
+        seconds_in_minute = 60
+        
+        days = seconds // seconds_in_day
+        hours = (seconds - (days * seconds_in_day)) // seconds_in_hour
+        minutes = (seconds - (days * seconds_in_day) - (hours * seconds_in_hour)) // seconds_in_minute
+        return days, hours, minutes
+
+
     @property
     def fc_switch(self):
         return self._fc_switch
